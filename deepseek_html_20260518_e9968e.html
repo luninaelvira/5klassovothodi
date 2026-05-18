@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>5 классов опасности отходов | Эко-карусель</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(145deg, #fef7ec 0%, #fffaf3 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', 'Roboto', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            padding: 12px;
+        }
+
+        .eco-widget {
+            width: 560px;
+            height: 560px;
+            background: rgba(255, 252, 245, 0.96);
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(90, 70, 40, 0.2), inset 0 1px 0 rgba(255,255,240,0.8);
+            backdrop-filter: blur(2px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .carousel-header {
+            padding: 14px 20px 8px 20px;
+            border-bottom: 1px solid #f0e7db;
+            flex-shrink: 0;
+        }
+
+        .carousel-header h2 {
+            font-size: 1.45rem;
+            font-weight: 600;
+            color: #476c4d;
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .carousel-header h2 span {
+            background: #e3efdb;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #3f6044;
+        }
+
+        .carousel-header p {
+            font-size: 0.8rem;
+            color: #9e8f78;
+            margin-top: 6px;
+        }
+
+        .carousel-viewport {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            margin: 12px 16px 8px 16px;
+            min-height: 0;
+        }
+
+        .cards-container {
+            display: flex;
+            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            height: 100%;
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .card-slide {
+            flex: 0 0 100%;
+            background: #ffffffea;
+            border-radius: 1.8rem;
+            padding: 18px 22px;
+            box-shadow: 0 8px 18px rgba(103, 78, 45, 0.08);
+            border: 1px solid #fffaef;
+            backdrop-filter: blur(2px);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.2s;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        .card-slide::-webkit-scrollbar {
+            width: 4px;
+            background: #f1e8dd;
+            border-radius: 10px;
+        }
+
+        .card-slide::-webkit-scrollbar-thumb {
+            background: #ccdbbc;
+            border-radius: 10px;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .danger-class {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: #ecf3e6;
+            padding: 0 16px;
+            border-radius: 60px;
+            color: #325a38;
+            letter-spacing: -0.3px;
+        }
+
+        .harm-tag {
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: #f7efe3;
+            padding: 6px 14px;
+            border-radius: 60px;
+            color: #826e52;
+        }
+
+        .class-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 10px 0 8px;
+            color: #2a5431;
+            line-height: 1.3;
+        }
+
+        .harm-detail {
+            font-size: 0.9rem;
+            background: #faf5ea;
+            padding: 8px 12px;
+            border-radius: 24px;
+            margin: 8px 0;
+            color: #6e5e48;
+            border-left: 4px solid #bfd9aa;
+        }
+
+        .examples-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #8f9e7c;
+            margin: 14px 0 10px 0;
+            letter-spacing: 0.5px;
+        }
+
+        .examples-list {
+            list-style: none;
+            margin: 0 0 8px 0;
+        }
+
+        .examples-list li {
+            font-size: 0.88rem;
+            padding: 6px 0 4px 24px;
+            position: relative;
+            color: #3f5743;
+            line-height: 1.4;
+            border-bottom: 0.5px dashed #ece0d0;
+        }
+
+        .examples-list li::before {
+            content: "🌱";
+            position: absolute;
+            left: 0;
+            top: 5px;
+            font-size: 0.85rem;
+        }
+
+        .carousel-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 24px 18px 24px;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+
+        .nav-btn {
+            background: #f3ede4;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 60px;
+            font-size: 1.7rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6f8f66;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+
+        .nav-btn:hover {
+            background: #e8dfd1;
+            color: #476e44;
+            transform: scale(0.96);
+        }
+
+        .dots {
+            display: flex;
+            gap: 10px;
+            background: #faf3e9;
+            padding: 6px 18px;
+            border-radius: 60px;
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            background: #cfc3b0;
+            border-radius: 10px;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            width: 26px;
+            background: #6e9a66;
+        }
+
+        .eco-widget, .carousel-viewport {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<div class="eco-widget">
+    <div class="carousel-header">
+        <h2>♻️ Классы опасности <span>интерактив</span></h2>
+        <p>Чрезвычайно опасные → практически неопасные | листай →</p>
+    </div>
+
+    <div class="carousel-viewport" id="viewport">
+        <div class="cards-container" id="cardsContainer">
+            <!-- Карточки рендерятся JS -->
+        </div>
+    </div>
+
+    <div class="carousel-nav">
+        <button class="nav-btn" id="prevBtn" aria-label="Назад">◀</button>
+        <div class="dots" id="dotsContainer"></div>
+        <button class="nav-btn" id="nextBtn" aria-label="Вперед">▶</button>
+    </div>
+</div>
+
+<script>
+    // Финальная версия: все классы опасности с корректными примерами отходов
+    const classes = [
+        {
+            id: 1,
+            shortName: "I класс",
+            fullName: "Чрезвычайно опасные",
+            dangerLevel: "Очень высокая",
+            harmDesc: "Экосистема необратимо нарушается, восстановление отсутствует.",
+            examples: ["Ртутные лампы, градусники", "Трансформаторы с полихлорированными дифенилами", "Отходы с мышьяком, сильные кислоты/щёлочи"]
+        },
+        {
+            id: 2,
+            shortName: "II класс",
+            fullName: "Высокоопасные",
+            dangerLevel: "Высокая",
+            harmDesc: "Сильное нарушение экосистемы, восстановление ≥30 лет.",
+            examples: ["Автоаккумуляторы свинцовые", "Смесь жидких пестицидов, семена зерновых, протравленные фунгицидами", "Кислотные и щелочные электролиты"]
+        },
+        {
+            id: 3,
+            shortName: "III класс",
+            fullName: "Умеренно опасные",
+            dangerLevel: "Средняя",
+            harmDesc: "Экосистема нарушена, восстановление ≥10 лет.",
+            examples: ["Нефтешламы", "Табачная пыль / отходы моющих средств", "Куриный свежий помет, свежий свиной навоз"]
+        },
+        {
+            id: 4,
+            shortName: "IV класс",
+            fullName: "Малоопасные",
+            dangerLevel: "Низкая",
+            harmDesc: "Незначительное нарушение, восстановление ≥3 лет.",
+            examples: ["Компьютерное оборудование (системники, мониторы)", "Пищевые отходы кухонь", "Шлам нейтрализации сточных вод"]
+        },
+        {
+            id: 5,
+            shortName: "V класс",
+            fullName: "Практически неопасные",
+            dangerLevel: "Очень низкая",
+            harmDesc: "Экосистема практически не нарушена.",
+            examples: ["Стеклянная тара, офисная бумага", "Опилки, древесная стружка", "Семена с истёкшим сроком годности, силос, скорлупа яиц"]
+        }
+    ];
+
+    let currentIndex = 0;
+    let container = document.getElementById('cardsContainer');
+    let dotsContainer = document.getElementById('dotsContainer');
+    let viewport = document.getElementById('viewport');
+
+    // Функция рендера карточек
+    function buildCards() {
+        container.innerHTML = '';
+        classes.forEach((cls, idx) => {
+            const slide = document.createElement('div');
+            slide.className = 'card-slide';
+            const pastelBg = ["#fef2ea", "#fef4e2", "#f3f7ec", "#eef3ea", "#eef9e8"];
+            slide.style.backgroundColor = pastelBg[idx % pastelBg.length];
+            
+            slide.innerHTML = `
+                <div class="card-top">
+                    <span class="danger-class">${cls.shortName}</span>
+                    <span class="harm-tag">Опасность: ${cls.dangerLevel}</span>
+                </div>
+                <div class="class-title">${cls.fullName}</div>
+                <div class="harm-detail">${cls.harmDesc}</div>
+                <div class="examples-title">📌 примеры отходов</div>
+                <ul class="examples-list">
+                    ${cls.examples.map(ex => `<li>${ex}</li>`).join('')}
+                </ul>
+            `;
+            
+            container.appendChild(slide);
+        });
+    }
+
+    function buildDots() {
+        dotsContainer.innerHTML = '';
+        for (let i = 0; i < classes.length; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if (i === currentIndex) dot.classList.add('active');
+            dot.addEventListener('click', () => {
+                goToSlide(i);
+            });
+            dotsContainer.appendChild(dot);
+        }
+    }
+
+    function updateSlidesWidthAndPosition() {
+        if (!viewport || !container) return;
+        const viewportWidth = viewport.clientWidth;
+        if (viewportWidth <= 0) return;
+        
+        const slides = document.querySelectorAll('.card-slide');
+        slides.forEach(slide => {
+            slide.style.flex = `0 0 ${viewportWidth}px`;
+        });
+        
+        const offset = -currentIndex * (viewportWidth + 20);
+        container.style.transform = `translateX(${offset}px)`;
+    }
+
+    function goToSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= classes.length) index = classes.length - 1;
+        currentIndex = index;
+        
+        if (!viewport) return;
+        const viewportWidth = viewport.clientWidth;
+        if (viewportWidth <= 0) return;
+        
+        const slides = document.querySelectorAll('.card-slide');
+        slides.forEach(slide => {
+            slide.style.flex = `0 0 ${viewportWidth}px`;
+        });
+        
+        const offset = -currentIndex * (viewportWidth + 20);
+        container.style.transform = `translateX(${offset}px)`;
+        
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((dot, i) => {
+            if (i === currentIndex) dot.classList.add('active');
+            else dot.classList.remove('active');
+        });
+    }
+    
+    let resizeTimeout = null;
+    function handleResize() {
+        if (resizeTimeout) clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (!viewport || !container) return;
+            const viewportWidth = viewport.clientWidth;
+            if (viewportWidth <= 0) return;
+            
+            const slides = document.querySelectorAll('.card-slide');
+            slides.forEach(slide => {
+                slide.style.flex = `0 0 ${viewportWidth}px`;
+            });
+            const offset = -currentIndex * (viewportWidth + 20);
+            container.style.transform = `translateX(${offset}px)`;
+        }, 30);
+    }
+
+    function initCarousel() {
+        buildCards();
+        buildDots();
+        
+        setTimeout(() => {
+            if (viewport) {
+                const initialWidth = viewport.clientWidth;
+                const slides = document.querySelectorAll('.card-slide');
+                slides.forEach(slide => {
+                    slide.style.flex = `0 0 ${initialWidth}px`;
+                });
+                goToSlide(0);
+            }
+        }, 10);
+        
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        
+        prevBtn.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                goToSlide(currentIndex - 1);
+            } else {
+                container.style.transform += ' translateX(3px)';
+                setTimeout(() => { goToSlide(currentIndex); }, 100);
+            }
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex < classes.length - 1) {
+                goToSlide(currentIndex + 1);
+            } else {
+                container.style.transform += ' translateX(-3px)';
+                setTimeout(() => { goToSlide(currentIndex); }, 100);
+            }
+        });
+        
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('load', () => {
+            handleResize();
+        });
+    }
+    
+    window.addEventListener('DOMContentLoaded', initCarousel);
+</script>
+</body>
+</html>
