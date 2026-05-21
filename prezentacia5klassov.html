@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Интерактив: Классы опасности отходов | Полноэкранный режим</title>
+    <title>Интерактив: Классы опасности отходов | Навигация + Fullscreen</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none; /* Убираем выделение текста при быстрых свайпах/кликах */
+            user-select: none;
         }
 
         body {
-            background: #fffff;  /* Пастельный фон страницы (единый, нейтральный) */
+            background: #fffff;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -22,37 +22,34 @@
             padding: 20px;
         }
 
-        /* Контейнер интерактива — размер под средний размер картинок (ширина ~1000px, высота ~660px) */
+        /* Обёртка интерактива */
         .interactive-wrapper {
             max-width: 1100px;
             width: 100%;
             transition: all 0.3s ease;
         }
 
-        /* Основной блок интерактива */
+        /* Основной блок */
         .interactive-container {
             width: 100%;
-            background: #fef9ef;   /* Пастельный кремовый фон всей области (единый для всех слайдов) */
+            background: #fef9ef;
             border-radius: 32px;
             box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
             overflow: hidden;
             position: relative;
-            transition: all 0.2s;
         }
 
-        /* Карусель: flex-лента, растягивается на всю ширину контейнера */
+        /* Карусель */
         .carousel {
             display: flex;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;          /* Тонкий скроллбар для Firefox */
-            background: #fef9ef;            /* Единый пастельный фон под слайдами */
-            border-radius: 32px 32px 0 0;
+            scrollbar-width: thin;
+            background: #fef9ef;
         }
 
-        /* Скрываем стандартный скроллбар в Chrome/Safari, но оставляем возможность скроллить */
         .carousel::-webkit-scrollbar {
             height: 6px;
             background-color: #e9e0d4;
@@ -63,28 +60,26 @@
             border-radius: 8px;
         }
 
-        /* Каждый слайд — занимает 100% ширины карусели и фиксируется скролл-снапом */
+        /* Слайд */
         .slide {
             flex: 0 0 100%;
             scroll-snap-align: start;
-            background: #fef9ef;   /* Единый пастельный фон для каждого слайда */
+            background: #fef9ef;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
         }
 
-        /* Изображения занимают всю доступную ширину/высоту слайда, сохраняя пропорции */
         .slide img {
             width: 100%;
             height: auto;
             display: block;
-            object-fit: contain;    /* Вписывает картинку целиком в область слайда, без обрезания */
-            background: #fef9ef;    /* Фон под картинкой — единый пастельный */
-            pointer-events: none;   /* Клики сквозь картинку не мешают навигации */
+            object-fit: contain;
+            background: #fef9ef;
+            pointer-events: none;
         }
 
-        /* Панель навигации (кнопки и индикаторы) в пастельных тонах */
+        /* Панель навигации — здесь есть обе кнопки: "Назад" и "Вперёд" */
         .nav-controls {
             display: flex;
             align-items: center;
@@ -96,14 +91,28 @@
             flex-wrap: wrap;
         }
 
+        /* Группа левых кнопок (только "Назад") */
+        .left-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Группа правых кнопок (Fullscreen + счётчик) */
+        .right-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Стиль для кнопок навигации и полноэкранного режима */
         .nav-btn {
             background: #e8dfd3;
             border: none;
             font-size: 1.4rem;
             font-weight: 600;
             color: #5c4b37;
-            width: 44px;
-            height: 44px;
+            width: 48px;
+            height: 48px;
             border-radius: 60px;
             cursor: pointer;
             transition: 0.2s;
@@ -114,16 +123,33 @@
             font-family: monospace;
         }
 
-        .nav-btn:hover {
+        .fullscreen-btn {
+            background: #e8dfd3;
+            border: none;
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #5c4b37;
+            width: 48px;
+            height: 48px;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-btn:hover, .fullscreen-btn:hover {
             background: #d6cbbc;
             transform: scale(0.96);
         }
 
-        .nav-btn:active {
+        .nav-btn:active, .fullscreen-btn:active {
             transform: scale(0.92);
         }
 
-        /* индикаторы (пагинация) */
+        /* Индикаторы (точки) */
         .indicators {
             display: flex;
             gap: 12px;
@@ -146,6 +172,7 @@
             width: 26px;
         }
 
+        /* Счётчик слайдов */
         .counter {
             font-size: 0.9rem;
             font-weight: 500;
@@ -156,56 +183,23 @@
             letter-spacing: 0.5px;
         }
 
-        /* Кнопка полноэкранного режима */
-        .fullscreen-btn {
-            background: #e8dfd3;
-            border: none;
-            font-size: 1.2rem;
-            font-weight: 500;
-            color: #5c4b37;
-            width: 44px;
-            height: 44px;
-            border-radius: 60px;
-            cursor: pointer;
-            transition: 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            font-family: monospace;
-        }
-
-        .fullscreen-btn:hover {
-            background: #d6cbbc;
-            transform: scale(0.96);
-        }
-
-        .fullscreen-btn:active {
-            transform: scale(0.92);
-        }
-
-        /* Группа правых кнопок (fullscreen + счётчик) */
-        .right-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        /* Для touch-устройств делаем чуть больше кнопки */
+        /* Мобильная адаптация */
         @media (max-width: 680px) {
             .nav-btn, .fullscreen-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 1.7rem;
-            }
-            .fullscreen-btn {
+                width: 48px;
+                height: 48px;
                 font-size: 1.5rem;
             }
             .nav-controls {
                 padding: 12px 18px;
+                gap: 10px;
             }
             .counter {
                 font-size: 0.8rem;
+                padding: 5px 12px;
+            }
+            .indicators {
+                gap: 8px;
             }
         }
 
@@ -223,7 +217,7 @@
         .interactive-container:fullscreen .carousel {
             flex: 1;
             border-radius: 0;
-            height: calc(100% - 80px);
+            height: calc(100% - 85px);
         }
 
         .interactive-container:fullscreen .slide {
@@ -240,10 +234,9 @@
 
         .interactive-container:fullscreen .nav-controls {
             border-radius: 0;
-            padding: 16px 24px;
         }
 
-        /* Поддержка для WebKit полноэкранного режима */
+        /* WebKit fullscreen */
         .interactive-container:-webkit-full-screen {
             width: 100vw;
             height: 100vh;
@@ -256,8 +249,7 @@
 
         .interactive-container:-webkit-full-screen .carousel {
             flex: 1;
-            border-radius: 0;
-            height: calc(100% - 80px);
+            height: calc(100% - 85px);
         }
 
         .interactive-container:-webkit-full-screen .slide img {
@@ -268,16 +260,11 @@
             margin: 0 auto;
         }
 
-        /* Адаптация под очень широкие экраны */
+        /* Предельная ширина для больших экранов */
         @media (min-width: 1200px) {
             .interactive-wrapper {
                 max-width: 1050px;
             }
-        }
-
-        /* Декоративные элементы */
-        .interactive-container {
-            transition: box-shadow 0.2s;
         }
     </style>
 </head>
@@ -286,34 +273,37 @@
     <div class="interactive-container" id="interactiveContainer">
         <!-- Карусель (листалка) -->
         <div class="carousel" id="carousel">
-            <!-- слайд 1 - чрезвычайно опасные отходы -->
             <div class="slide" data-index="0">
                 <img src="слайд 1.png" alt="I класс – чрезвычайно опасные отходы, Минамата">
             </div>
-            <!-- слайд 2 - высокоопасные отходы -->
             <div class="slide" data-index="1">
                 <img src="слайд 2.png" alt="II класс – высокоопасные отходы, Венгрия 2010">
             </div>
-            <!-- слайд 3 - умеренно опасные отходы -->
             <div class="slide" data-index="2">
                 <img src="слайд 3.png" alt="III класс – умеренно опасные отходы, Россия 2024">
             </div>
-            <!-- слайд 4 - малоопасные отходы -->
             <div class="slide" data-index="3">
                 <img src="слайд 4.png" alt="IV класс – малоопасные отходы, Калужская область 2021">
             </div>
-            <!-- слайд 5 - практически неопасные отходы -->
             <div class="slide" data-index="4">
                 <img src="слайд 5.png" alt="V класс – практически неопасные отходы, Большое тихоокеанское пятно">
             </div>
         </div>
 
-        <!-- Панель с навигацией, полноэкранным режимом и единым стилем -->
+        <!-- Панель управления: слева кнопка НАЗАД, центр — индикаторы, справа — кнопка ВПЕРЁД + FULLSCREEN + счётчик -->
         <div class="nav-controls">
-            <button class="nav-btn" id="prevBtn" aria-label="Предыдущий слайд">←</button>
+            <!-- Кнопка "Предыдущий слайд" -->
+            <div class="left-group">
+                <button class="nav-btn" id="prevBtn" aria-label="Предыдущий слайд" title="Назад (←)">←</button>
+            </div>
+
+            <!-- Индикаторы (точки) -->
             <div class="indicators" id="indicators"></div>
+
+            <!-- Правая группа: кнопка "Следующий слайд", полноэкранный режим и счётчик -->
             <div class="right-group">
-                <button class="fullscreen-btn" id="fullscreenBtn" aria-label="Полноэкранный режим">⛶</button>
+                <button class="nav-btn" id="nextBtn" aria-label="Следующий слайд" title="Вперёд (→)">→</button>
+                <button class="fullscreen-btn" id="fullscreenBtn" aria-label="Полноэкранный режим" title="Полноэкранный режим (F)">⛶</button>
                 <div class="counter" id="slideCounter">1 / 5</div>
             </div>
         </div>
@@ -322,7 +312,7 @@
 
 <script>
     (function() {
-        // Получаем элементы
+        // DOM элементы
         const container = document.getElementById('interactiveContainer');
         const carousel = document.getElementById('carousel');
         const slides = document.querySelectorAll('.slide');
@@ -335,9 +325,8 @@
         const totalSlides = slides.length;
         let currentIndex = 0;
         let scrollTimeout = null;
-        let isFullscreen = false;
 
-        // Функция обновления активного индикатора и счётчика
+        // Обновление UI (точки + счётчик)
         function updateUI(index) {
             const dots = document.querySelectorAll('.dot');
             dots.forEach((dot, i) => {
@@ -350,7 +339,7 @@
             counterSpan.innerText = `${index + 1} / ${totalSlides}`;
         }
 
-        // Плавный скролл к нужному слайду
+        // Плавная прокрутка к слайду
         function scrollToSlide(index) {
             if (index < 0) index = 0;
             if (index >= totalSlides) index = totalSlides - 1;
@@ -366,7 +355,7 @@
             }
         }
 
-        // Определение текущего видимого слайда на основе позиции прокрутки
+        // Определение текущего видимого слайда по центру вьюпорта карусели
         function getCurrentSlideIndex() {
             const carouselRect = carousel.getBoundingClientRect();
             if (!carouselRect.width) return 0;
@@ -385,7 +374,7 @@
             return closestIndex;
         }
 
-        // Обработчик прокрутки для синхронизации
+        // Синхронизация индекса при прокрутке
         function handleScroll() {
             if (scrollTimeout) clearTimeout(scrollTimeout);
             scrollTimeout = setTimeout(() => {
@@ -397,12 +386,11 @@
             }, 60);
         }
 
-        // Добавляем обработчик прокрутки
         carousel.addEventListener('scroll', handleScroll);
 
-        // Обработка изменения размера окна (для корректировки индекса)
+        // Пересчёт при изменении размера окна
         let resizeTimer;
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', () => {
             if (resizeTimer) clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
                 const newIdx = getCurrentSlideIndex();
@@ -413,10 +401,17 @@
             }, 100);
         });
 
-        // Кнопки навигации
+        // КНОПКИ НАВИГАЦИИ — ВПЕРЁД И НАЗАД (явно присутствуют)
         function nextSlide() {
             if (currentIndex < totalSlides - 1) {
                 scrollToSlide(currentIndex + 1);
+            } else {
+                // Опционально: можно сделать зацикленную карусель, но по ТЗ просто перелистывание до конца
+                // Легкая визуальная подсказка, что слайд последний (необязательно)
+                if (currentIndex === totalSlides - 1) {
+                    // Просто ничего не делаем
+                    return;
+                }
             }
         }
 
@@ -426,10 +421,11 @@
             }
         }
 
+        // Назначаем обработчики на кнопки
         prevBtn.addEventListener('click', prevSlide);
         nextBtn.addEventListener('click', nextSlide);
 
-        // Создание индикаторов (пагинация)
+        // Создание точек-индикаторов
         function createIndicators() {
             indicatorsContainer.innerHTML = '';
             for (let i = 0; i < totalSlides; i++) {
@@ -443,10 +439,9 @@
                 indicatorsContainer.appendChild(dot);
             }
         }
-
         createIndicators();
 
-        // Инициализация позиции: первый слайд
+        // Инициализация: первый слайд активен
         setTimeout(() => {
             if (carousel.scrollLeft !== 0) {
                 scrollToSlide(0);
@@ -461,17 +456,15 @@
             }
         }, 20);
 
-        // Поддержка клавиш (стрелки влево/вправо)
+        // Горячие клавиши: стрелки влево/вправо
         window.addEventListener('keydown', (e) => {
-            // Игнорируем, если активен полноэкранный режим, но стрелки работают в любом случае
             if (e.key === 'ArrowLeft') {
                 prevSlide();
                 e.preventDefault();
             } else if (e.key === 'ArrowRight') {
                 nextSlide();
                 e.preventDefault();
-            } else if (e.key === 'f' || e.key === 'F' || (e.key === 'Enter' && (e.ctrlKey || e.metaKey))) {
-                // Дополнительный хоткей для удобства: F или Ctrl+Enter
+            } else if (e.key === 'f' || e.key === 'F') {
                 toggleFullscreen();
                 e.preventDefault();
             }
@@ -480,16 +473,14 @@
         // ==================== ПОЛНОЭКРАННЫЙ РЕЖИМ ====================
         function toggleFullscreen() {
             if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                // Входим в полноэкранный режим
                 const elem = container;
                 const requestMethod = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.msRequestFullscreen;
                 if (requestMethod) {
                     requestMethod.call(elem).catch(err => {
-                        console.warn(`Ошибка полноэкранного режима: ${err.message}`);
+                        console.warn(`Ошибка fullscreen: ${err.message}`);
                     });
                 }
             } else {
-                // Выходим из полноэкранного режима
                 const exitMethod = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
                 if (exitMethod) {
                     exitMethod.call(document);
@@ -497,31 +488,28 @@
             }
         }
 
-        // Обработчик кнопки полноэкранного режима
         fullscreenBtn.addEventListener('click', toggleFullscreen);
 
-        // Отслеживаем изменение полноэкранного режима, чтобы обновить иконку и стили при необходимости
+        // Обработчик изменения полноэкранного режима
         function onFullscreenChange() {
-            const isCurrentlyFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-            isFullscreen = isCurrentlyFullscreen;
-            // Меняем иконку кнопки в зависимости от режима
+            const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
             if (isFullscreen) {
                 fullscreenBtn.textContent = '✖';
                 fullscreenBtn.setAttribute('aria-label', 'Выйти из полноэкранного режима');
-                fullscreenBtn.title = 'Выйти из полноэкранного режима (Esc)';
+                fullscreenBtn.title = 'Выйти (Esc)';
             } else {
                 fullscreenBtn.textContent = '⛶';
                 fullscreenBtn.setAttribute('aria-label', 'Полноэкранный режим');
                 fullscreenBtn.title = 'Полноэкранный режим (F)';
             }
-            // При изменении полноэкранного режима обновляем позицию скролла, чтобы слайд оставался корректным
+            // Обновляем позицию слайда после смены режима
             setTimeout(() => {
                 const newIdx = getCurrentSlideIndex();
                 if (newIdx !== currentIndex) {
                     currentIndex = newIdx;
                     updateUI(currentIndex);
                 }
-                // Принудительно пересчитываем скролл для корректного отображения текущего слайда
+                // Дополнительно подкручиваем к текущему слайду
                 if (slides[currentIndex]) {
                     slides[currentIndex].scrollIntoView({
                         behavior: 'auto',
@@ -532,31 +520,10 @@
             }, 50);
         }
 
-        // Подписываемся на события полноэкранного режима (для разных браузеров)
         document.addEventListener('fullscreenchange', onFullscreenChange);
         document.addEventListener('webkitfullscreenchange', onFullscreenChange);
-        document.addEventListener('msfullscreenchange', onFullscreenChange);
 
-        // Дополнительная настройка для корректной работы при выходе по ESC
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && (document.fullscreenElement || document.webkitFullscreenElement)) {
-                // Выход будет обработан системой, но обновим состояние UI после события
-                setTimeout(() => {
-                    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                        fullscreenBtn.textContent = '⛶';
-                        fullscreenBtn.setAttribute('aria-label', 'Полноэкранный режим');
-                        // Также обновляем позицию слайда
-                        const idx = getCurrentSlideIndex();
-                        if (idx !== currentIndex) {
-                            currentIndex = idx;
-                            updateUI(currentIndex);
-                        }
-                    }
-                }, 100);
-            }
-        });
-
-        // Фикс для скролл-снапа в полноэкранном режиме
+        // Доп. стили для полноэкранного режима
         const style = document.createElement('style');
         style.textContent = `
             .carousel {
@@ -566,11 +533,6 @@
             .slide {
                 scroll-snap-align: start;
             }
-            /* Дополнительный стиль для полноэкранного режима: улучшаем отображение картинок */
-            .interactive-container:fullscreen .slide img,
-            .interactive-container:-webkit-full-screen .slide img {
-                cursor: default;
-            }
             .interactive-container:fullscreen .carousel,
             .interactive-container:-webkit-full-screen .carousel {
                 overflow-x: auto;
@@ -578,11 +540,7 @@
         `;
         document.head.appendChild(style);
 
-        // Добавляем поддержку жестов и touch-событий (уже есть через scroll)
-        // Чтобы при перевороте экрана или изменении размера карусель не теряла индекс
-        
-        // Дополнительно: если пользователь кликает на кнопку fullscreen во время скролла, ничего не ломается.
-        // Обновляем UI при любых изменениях карусели через MutationObserver (на всякий случай)
+        // Наблюдатель за изменением размера карусели (на случай поворотов экрана)
         const observer = new ResizeObserver(() => {
             const idx = getCurrentSlideIndex();
             if (idx !== currentIndex) {
