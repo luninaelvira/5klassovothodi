@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Интерактив: Классы опасности отходов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* Убираем выделение текста при быстрых свайпах/кликах */
+        }
+
+        body {
+            background: #f4f1ea;  /* Пастельный фон страницы (единый, нейтральный) */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            padding: 20px;
+        }
+
+        /* Контейнер интерактива — размер под средний размер картинок (ширина ~1000px, высота ~660px) */
+        .interactive-container {
+            max-width: 1100px;
+            width: 100%;
+            background: #fef9ef;   /* Пастельный кремовый фон всей области (единый для всех слайдов) */
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        /* Карусель: flex-лента, растягивается на всю ширину контейнера */
+        .carousel {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;          /* Тонкий скроллбар для Firefox */
+            background: #fef9ef;            /* Единый пастельный фон под слайдами */
+            border-radius: 32px;
+        }
+
+        /* Скрываем стандартный скроллбар в Chrome/Safari, но оставляем возможность скроллить */
+        .carousel::-webkit-scrollbar {
+            height: 6px;
+            background-color: #e9e0d4;
+            border-radius: 8px;
+        }
+        .carousel::-webkit-scrollbar-thumb {
+            background-color: #c4b6a4;
+            border-radius: 8px;
+        }
+
+        /* Каждый слайд — занимает 100% ширины карусели и фиксируется скролл-снапом */
+        .slide {
+            flex: 0 0 100%;
+            scroll-snap-align: start;
+            background: #fef9ef;   /* Единый пастельный фон для каждого слайда (без белых полей) */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Изображения занимают всю доступную ширину/высоту слайда, сохраняя пропорции.
+           При этом картинка полностью заполняет интерактив, не выходя за границы с сохранением качества */
+        .slide img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;    /* Вписывает картинку целиком в область слайда, без обрезания */
+            background: #fef9ef;    /* Фон под картинкой, на случай прозрачности — единый пастельный */
+            pointer-events: none;   /* Чтобы клики сквозь картинку не мешали навигации (по желанию) */
+        }
+
+        /* Панель навигации (кнопки и индикаторы) в пастельных тонах */
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px 20px 24px;
+            background: #fef9ef;
+            border-top: 1px solid #f0e7db;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: #e8dfd3;
+            border: none;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #5c4b37;
+            width: 44px;
+            height: 44px;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            font-family: monospace;
+        }
+
+        .nav-btn:hover {
+            background: #d6cbbc;
+            transform: scale(0.96);
+        }
+
+        .nav-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* индикаторы (пагинация) */
+        .indicators {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #d7ccbe;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dot.active {
+            background: #8b7a66;
+            width: 26px;
+        }
+
+        .counter {
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: #f5efe7;
+            padding: 6px 14px;
+            border-radius: 40px;
+            color: #5c4b37;
+            letter-spacing: 0.5px;
+        }
+
+        /* Для touch-устройств делаем чуть больше кнопки */
+        @media (max-width: 680px) {
+            .nav-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.7rem;
+            }
+            .nav-controls {
+                padding: 12px 18px;
+            }
+            .counter {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Делаем так, чтобы интерактив визуально был цельным, и картинки занимали весь доступный размер.
+           При очень широких экранах контейнер не раздувается — ограничиваем max-width.
+           Высота адаптируется под соотношение картинок. */
+        @media (min-width: 1200px) {
+            .interactive-container {
+                max-width: 1050px;
+            }
+        }
+
+        /* Доп. декоративная единая текстура — лёгкий акцент, но без отвлечения */
+        .interactive-container {
+            transition: box-shadow 0.2s;
+        }
+    </style>
+</head>
+<body>
+<div class="interactive-container">
+    <!-- Карусель (листалка) -->
+    <div class="carousel" id="carousel">
+        <!-- слайд 1 - чрезвычайно опасные отходы -->
+        <div class="slide" data-index="0">
+            <img src="слайд 1.png" alt="I класс – чрезвычайно опасные отходы, Минамата">
+        </div>
+        <!-- слайд 2 - высокоопасные отходы -->
+        <div class="slide" data-index="1">
+            <img src="слайд 2.png" alt="II класс – высокоопасные отходы, Венгрия 2010">
+        </div>
+        <!-- слайд 3 - умеренно опасные отходы -->
+        <div class="slide" data-index="2">
+            <img src="слайд 3.png" alt="III класс – умеренно опасные отходы, Россия 2024">
+        </div>
+        <!-- слайд 4 - малоопасные отходы -->
+        <div class="slide" data-index="3">
+            <img src="слайд 4.png" alt="IV класс – малоопасные отходы, Калужская область 2021">
+        </div>
+        <!-- слайд 5 - практически неопасные отходы -->
+        <div class="slide" data-index="4">
+            <img src="слайд 5.png" alt="V класс – практически неопасные отходы, Большое тихоокеанское пятно">
+        </div>
+    </div>
+
+    <!-- Панель с навигацией и единым стилем (пастельный) -->
+    <div class="nav-controls">
+        <button class="nav-btn" id="prevBtn" aria-label="Предыдущий слайд">←</button>
+        <div class="indicators" id="indicators"></div>
+        <button class="nav-btn" id="nextBtn" aria-label="Следующий слайд">→</button>
+        <div class="counter" id="slideCounter">1 / 5</div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Получаем элементы карусели
+        const carousel = document.getElementById('carousel');
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const indicatorsContainer = document.getElementById('indicators');
+        const counterSpan = document.getElementById('slideCounter');
+
+        const totalSlides = slides.length;
+        let currentIndex = 0;
+        let isScrolling = false;     // небольшой флаг для синхронизации по прокрутке
+        let scrollTimeout = null;
+
+        // Функция обновления активного индикатора и счётчика
+        function updateUI(index) {
+            // Обновляем точки
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+            // обновляем текстовый счетчик
+            counterSpan.innerText = `${index + 1} / ${totalSlides}`;
+        }
+
+        // Плавный скролл к нужному слайду с помощью scrollTo (более надёжно для синхронизации)
+        function scrollToSlide(index) {
+            if (index < 0) index = 0;
+            if (index >= totalSlides) index = totalSlides - 1;
+            const slideElement = slides[index];
+            if (slideElement) {
+                // аккуратно скроллим элемент в поле зрения карусели
+                slideElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'start'
+                });
+                currentIndex = index;
+                updateUI(currentIndex);
+            }
+        }
+
+        // Функция определения текущего видимого слайда на основе позиции прокрутки (с учётом 0.5)
+        function getCurrentSlideIndex() {
+            const carouselRect = carousel.getBoundingClientRect();
+            if (!carouselRect.width) return 0;
+            let closestIndex = 0;
+            let minDistance = Infinity;
+            slides.forEach((slide, idx) => {
+                const rect = slide.getBoundingClientRect();
+                const slideCenter = rect.left + rect.width / 2;
+                const viewportCenter = carouselRect.left + carouselRect.width / 2;
+                const distance = Math.abs(slideCenter - viewportCenter);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestIndex = idx;
+                }
+            });
+            return closestIndex;
+        }
+
+        // Обработчик окончания прокрутки — синхронизация индикаторов и текущего индекса
+        function onScrollEnd() {
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const newIndex = getCurrentSlideIndex();
+                if (newIndex !== currentIndex) {
+                    currentIndex = newIndex;
+                    updateUI(currentIndex);
+                }
+                isScrolling = false;
+            }, 80);
+        }
+
+        // Слушаем событие прокрутки карусели для обновления активной точки в реальном времени
+        function handleScroll() {
+            if (!isScrolling) isScrolling = true;
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const newIndex = getCurrentSlideIndex();
+                if (newIndex !== currentIndex) {
+                    currentIndex = newIndex;
+                    updateUI(currentIndex);
+                }
+                isScrolling = false;
+            }, 60);
+        }
+
+        // Добавляем обработчики прокрутки
+        carousel.addEventListener('scroll', handleScroll);
+        // дополнительно при любом завершении скролла (touch / mouse)
+        window.addEventListener('resize', () => {
+            // при изменении окна обновляем позицию
+            const idx = getCurrentSlideIndex();
+            if (idx !== currentIndex) {
+                currentIndex = idx;
+                updateUI(currentIndex);
+            }
+        });
+
+        // Кнопки навигации
+        function nextSlide() {
+            if (currentIndex < totalSlides - 1) {
+                scrollToSlide(currentIndex + 1);
+            } else {
+                // циклический эффект по желанию? но по UX листалка до последнего, можно на первый не зацикливать, оставим как есть
+                // либо если хотим бесконечную карусель - раскомментить: scrollToSlide(0);
+                // следуем логике: дойти до 5 и остановиться, соответствует презентации
+                if (currentIndex === totalSlides - 1) {
+                    // можно легкую вибрацию (игнорируем)
+                    return;
+                }
+            }
+        }
+
+        function prevSlide() {
+            if (currentIndex > 0) {
+                scrollToSlide(currentIndex - 1);
+            }
+        }
+
+        prevBtn.addEventListener('click', prevSlide);
+        nextBtn.addEventListener('click', nextSlide);
+
+        // Создание индикаторов (пагинация)
+        function createIndicators() {
+            indicatorsContainer.innerHTML = '';
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    scrollToSlide(i);
+                });
+                indicatorsContainer.appendChild(dot);
+            }
+        }
+
+        createIndicators();
+        // Инициализация позиции: убедимся что показан первый слайд
+        // (иногда браузер может подхватить предыдущую позицию, явно скроллим к началу)
+        setTimeout(() => {
+            // Принудительно ставим первый слайд, если по какой-то причине карусель не в начале
+            if (carousel.scrollLeft !== 0) {
+                scrollToSlide(0);
+            } else {
+                // Проверяем, что индекс соответствует первому слайду
+                const firstIndex = getCurrentSlideIndex();
+                if (firstIndex !== 0) {
+                    scrollToSlide(0);
+                } else {
+                    currentIndex = 0;
+                    updateUI(0);
+                }
+            }
+        }, 20);
+
+        // Добавляем поддержку клавиш (стрелки влево/вправо) для удобства
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                prevSlide();
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                nextSlide();
+                e.preventDefault();
+            }
+        });
+
+        // Для того чтобы при клике на пустое поле карусели ничего не ломалось
+        // Также обеспечиваем, чтобы картинки были четко видны на любом экране — размер интерактива динамический под картинки.
+        // Поскольку в слайдах стоит object-fit: contain, картинки масштабируются без искажений и занимают всю ширину.
+        // Фон слайдов и контейнера — кремово-пастельный #fef9ef, который является единым для всех слайдов.
+        // Дополнительная настройка: если размер картинок окажется меньше, чем ожидалось, фон заполнит пространство тем же пастельным.
+        // Адаптация под touch: скролл панели остаётся рабочим и естественным.
+        // Исправление для возможного Safari: подгонка скролл-снапа.
+        const style = document.createElement('style');
+        style.textContent = `
+            .carousel {
+                scroll-snap-type: x mandatory;
+                scroll-padding: 0;
+            }
+            .slide {
+                scroll-snap-align: start;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Дополнительная проверка: чтобы изображения не имели серых фонов, зададим фон именно #fef9ef для img родителя.
+        // Все контейнеры едины. И если картинка содержит прозрачный фон, то он сольется с пастельным фоном.
+        // Дополнительно никто не использует сторонние цвета.
+        // Также можно обеспечить легкую анимацию перехода для кнопок.
+        
+        // для аккуратной работы при ориентации на мобильных, пересчёт при изменении размера экрана
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                const newIdx = getCurrentSlideIndex();
+                if (newIdx !== currentIndex) {
+                    currentIndex = newIdx;
+                    updateUI(currentIndex);
+                }
+                // исправляем возможное смещение после скролла
+                if (carousel.scrollLeft !== undefined) {
+                    // ничего лишнего
+                }
+            }, 100);
+        });
+    })();
+</script>
+</body>
+</html>
