@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Интерактив: Классы опасности отходов — Ретро-телевизор (10 слайдов)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #2a241f;  /* тёмный винтажный фон, как в старом телезале */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', 'Courier', 'VT323', monospace;
+            padding: 30px 20px;
+        }
+
+        /* Обёртка, чтобы телевизор смотрелся органично */
+        .tv-wrapper {
+            max-width: 1150px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        /* ========== РЕТРО-ТЕЛЕВИЗОР ========== */
+        .retro-tv {
+            background: #5a3e2b;  /* корпус — тёплое дерево/коричневый ретро */
+            border-radius: 60px 60px 80px 80px;
+            padding: 25px 30px 40px 30px;
+            box-shadow: 0 30px 35px -12px rgba(0, 0, 0, 0.5), inset 0 1px 4px rgba(255, 255, 200, 0.2);
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        /* Декоративные элементы "ретро-телевизора" */
+        .retro-tv::before {
+            content: "";
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 18px;
+            background: #b87c4f;
+            border-radius: 30px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 1px 0 rgba(255,245,200,0.6);
+            z-index: 3;
+        }
+
+        /* Старые "ножки" или динамик снизу (декор) */
+        .retro-tv::after {
+            content: "";
+            position: absolute;
+            bottom: -12px;
+            left: 20%;
+            width: 60%;
+            height: 14px;
+            background: #3e2a1c;
+            border-radius: 20px;
+            filter: blur(2px);
+            opacity: 0.7;
+            z-index: 0;
+        }
+
+        /* Экран телевизора (внутренний блок) */
+        .tv-screen {
+            background: #fef3e0;   /* пастельный кремовый фон экрана */
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: inset 0 0 0 6px #d8b182, inset 0 0 0 12px #aa794c, 0 10px 25px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        /* Эффект "кинескопа" — лёгкое затемнение по краям и блики */
+        .tv-screen::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 40%, rgba(255,245,220,0.1) 0%, rgba(0,0,0,0.2) 90%);
+            pointer-events: none;
+            z-index: 2;
+            border-radius: 28px;
+        }
+
+        /* Добавим имитацию старого ТВ-излучения (горизонтальные полосы) — но очень деликатно */
+        .tv-screen::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 2px, transparent 2px, transparent 6px);
+            pointer-events: none;
+            z-index: 2;
+            border-radius: 28px;
+        }
+
+        /* Контейнер карусели (внутри экрана) */
+        .carousel {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            background: #fef3e0;   /* пастельный фон экрана */
+            border-radius: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .carousel::-webkit-scrollbar {
+            height: 5px;
+            background-color: #e2cfb5;
+            border-radius: 8px;
+        }
+        .carousel::-webkit-scrollbar-thumb {
+            background-color: #b48b5a;
+            border-radius: 8px;
+        }
+
+        /* Слайд полностью занимает ширину, изображения не обрезаются */
+        .slide {
+            flex: 0 0 100%;
+            scroll-snap-align: start;
+            background: #fef3e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;   /* гарантирует, что картинка видна целиком, без обрезки */
+            background: #fef3e0;
+            pointer-events: none;
+            max-height: 70vh;      /* адаптация, но не обрезает — сохраняет пропорции + полностью видна */
+        }
+
+        /* Панель управления стилизована под ретро-пульт/кнопки */
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 28px 12px 28px;
+            background: transparent;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        /* Стиль кнопок "как у старого телевизора" */
+        .nav-btn, .fullscreen-btn {
+            background: #3d2c1d;
+            border: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fbeccd;
+            width: 52px;
+            height: 52px;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.15s linear;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 0 #1f140a, inset 0 1px 2px rgba(255,245,180,0.3);
+            font-family: monospace;
+        }
+
+        .nav-btn:active, .fullscreen-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #1f140a;
+        }
+
+        .nav-btn:hover, .fullscreen-btn:hover {
+            background: #5b4230;
+            color: #fff1d6;
+        }
+
+        /* Индикаторы (как старые лампочки / тюнер) */
+        .indicators {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            max-width: 400px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #cfa776;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 0 2px #4f2e12;
+        }
+
+        .dot.active {
+            background: #f5bc70;
+            width: 24px;
+            box-shadow: 0 0 5px #ffcf8a;
+        }
+
+        /* Счётчик с «электронно-лучевым» оттенком */
+        .counter {
+            font-size: 1rem;
+            font-weight: bold;
+            background: #2f241b;
+            padding: 6px 16px;
+            border-radius: 40px;
+            color: #f8e2b0;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            box-shadow: inset 0 0 4px #1a1008, 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .right-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .left-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Мобильная адаптация — телевизор не ломается */
+        @media (max-width: 680px) {
+            .retro-tv {
+                padding: 18px 20px 30px 20px;
+                border-radius: 40px 40px 55px 55px;
+            }
+            .nav-btn, .fullscreen-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 1.4rem;
+            }
+            .nav-controls {
+                padding: 14px 12px 6px 12px;
+                gap: 10px;
+            }
+            .counter {
+                font-size: 0.8rem;
+                padding: 4px 12px;
+            }
+            .dot {
+                width: 8px;
+                height: 8px;
+            }
+            .dot.active {
+                width: 18px;
+            }
+            .slide img {
+                max-height: 55vh;
+            }
+            .indicators {
+                gap: 8px;
+                max-width: 250px;
+            }
+        }
+
+        /* для больших экранов — сохраняем пропорции */
+        @media (min-width: 1200px) {
+            .tv-wrapper {
+                max-width: 1100px;
+            }
+            .slide img {
+                max-height: 68vh;
+            }
+        }
+
+        /* Полноэкранный режим внутри телевизора — превращаем весь экран в телевизор */
+        .retro-tv:fullscreen {
+            background: #5a3e2b;
+            border-radius: 45px;
+            padding: 30px 35px 45px 35px;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .retro-tv:fullscreen .tv-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .retro-tv:fullscreen .carousel {
+            flex: 1;
+            height: auto;
+        }
+
+        .retro-tv:fullscreen .slide img {
+            max-height: 78vh;
+            width: auto;
+            margin: 0 auto;
+        }
+
+        .retro-tv:-webkit-full-screen {
+            background: #5a3e2b;
+            border-radius: 45px;
+            padding: 30px 35px 45px 35px;
+            width: 100vw;
+            height: 100vh;
+        }
+        .retro-tv:-webkit-full-screen .slide img {
+            max-height: 78vh;
+            width: auto;
+            margin: 0 auto;
+        }
+
+        /* Добавим небольшую лампочку индикатора питания (ретро-стиль) */
+        .power-led {
+            position: absolute;
+            bottom: 20px;
+            right: 35px;
+            width: 12px;
+            height: 12px;
+            background: #61d96b;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #83fc8e;
+            opacity: 0.8;
+            z-index: 4;
+        }
+
+        /* тень для объёма */
+        .retro-tv {
+            transition: all 0.2s;
+        }
+    </style>
+</head>
+<body>
+<div class="tv-wrapper">
+    <div class="retro-tv" id="retroTVContainer">
+        <!-- Декоративный светодиод питания (стиль) -->
+        <div class="power-led"></div>
+        
+        <!-- Экран телевизора -->
+        <div class="tv-screen">
+            <div class="carousel" id="carousel">
+                <!-- 10 слайдов, строго по порядку: слайд 1 - слайд 10 -->
+                <div class="slide" data-index="0">
+                    <img src="слайд 1.png" alt="I класс – чрезвычайно опасные отходы, Минамата">
+                </div>
+                <div class="slide" data-index="1">
+                    <img src="слайд 2.png" alt="II класс – высокоопасные отходы, Венгрия 2010">
+                </div>
+                <div class="slide" data-index="2">
+                    <img src="слайд 3.png" alt="III класс – умеренно опасные отходы, Россия 2024">
+                </div>
+                <div class="slide" data-index="3">
+                    <img src="слайд 4.png" alt="IV класс – малоопасные отходы, Калужская область 2021">
+                </div>
+                <div class="slide" data-index="4">
+                    <img src="слайд 5.png" alt="V класс – практически неопасные отходы, Большое тихоокеанское пятно">
+                </div>
+                <div class="slide" data-index="5">
+                    <img src="слайд 6.png" alt="Дополнительный слайд 6">
+                </div>
+                <div class="slide" data-index="6">
+                    <img src="слайд 7.png" alt="Дополнительный слайд 7">
+                </div>
+                <div class="slide" data-index="7">
+                    <img src="слайд 8.png" alt="Дополнительный слайд 8">
+                </div>
+                <div class="slide" data-index="8">
+                    <img src="слайд 9.png" alt="Дополнительный слайд 9">
+                </div>
+                <div class="slide" data-index="9">
+                    <img src="слайд 10.png" alt="Дополнительный слайд 10">
+                </div>
+            </div>
+        </div>
+
+        <!-- Панель управления (кнопки переключения) -->
+        <div class="nav-controls">
+            <div class="left-group">
+                <button class="nav-btn" id="prevBtn" aria-label="Предыдущий слайд" title="Назад (←)">◀</button>
+            </div>
+            <div class="indicators" id="indicators"></div>
+            <div class="right-group">
+                <button class="nav-btn" id="nextBtn" aria-label="Следующий слайд" title="Вперёд (→)">▶</button>
+                <button class="fullscreen-btn" id="fullscreenBtn" aria-label="Полноэкранный режим" title="На весь экран">⛶</button>
+                <div class="counter" id="slideCounter">1 / 10</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Элементы
+        const retroContainer = document.getElementById('retroTVContainer');
+        const carousel = document.getElementById('carousel');
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const indicatorsContainer = document.getElementById('indicators');
+        const counterSpan = document.getElementById('slideCounter');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+        const totalSlides = slides.length;  // теперь 10 слайдов
+        let currentIndex = 0;
+        let scrollTimeout = null;
+
+        // Обновление индикаторов и счётчика
+        function updateUI(index) {
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+            counterSpan.innerText = `${index + 1} / ${totalSlides}`;
+        }
+
+        // Прокрутка к слайду
+        function scrollToSlide(index) {
+            if (index < 0) index = 0;
+            if (index >= totalSlides) index = totalSlides - 1;
+            const slideElement = slides[index];
+            if (slideElement) {
+                slideElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'start'
+                });
+                currentIndex = index;
+                updateUI(currentIndex);
+            }
+        }
+
+        // Определение активного слайда по центру
+        function getCurrentSlideIndex() {
+            const carouselRect = carousel.getBoundingClientRect();
+            if (!carouselRect.width) return 0;
+            let closestIndex = 0;
+            let minDistance = Infinity;
+            slides.forEach((slide, idx) => {
+                const rect = slide.getBoundingClientRect();
+                const slideCenter = rect.left + rect.width / 2;
+                const viewCenter = carouselRect.left + carouselRect.width / 2;
+                const distance = Math.abs(slideCenter - viewCenter);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestIndex = idx;
+                }
+            });
+            return closestIndex;
+        }
+
+        // Обработчик скролла карусели
+        function handleScroll() {
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const newIndex = getCurrentSlideIndex();
+                if (newIndex !== currentIndex) {
+                    currentIndex = newIndex;
+                    updateUI(currentIndex);
+                }
+            }, 60);
+        }
+
+        carousel.addEventListener('scroll', handleScroll);
+
+        // изменение размеров окна
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                const newIdx = getCurrentSlideIndex();
+                if (newIdx !== currentIndex) {
+                    currentIndex = newIdx;
+                    updateUI(currentIndex);
+                }
+            }, 100);
+        });
+
+        // Кнопки навигации (листалка)
+        function nextSlide() {
+            if (currentIndex < totalSlides - 1) {
+                scrollToSlide(currentIndex + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentIndex > 0) {
+                scrollToSlide(currentIndex - 1);
+            }
+        }
+
+        prevBtn.addEventListener('click', prevSlide);
+        nextBtn.addEventListener('click', nextSlide);
+
+        // Индикаторы-точки (для 10 слайдов)
+        function createIndicators() {
+            indicatorsContainer.innerHTML = '';
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    scrollToSlide(i);
+                });
+                indicatorsContainer.appendChild(dot);
+            }
+        }
+        createIndicators();
+
+        // Инициализация позиции
+        setTimeout(() => {
+            if (carousel.scrollLeft !== 0) {
+                scrollToSlide(0);
+            } else {
+                const firstIdx = getCurrentSlideIndex();
+                if (firstIdx !== 0) {
+                    scrollToSlide(0);
+                } else {
+                    currentIndex = 0;
+                    updateUI(0);
+                }
+            }
+        }, 20);
+
+        // Горячие клавиши (стрелки и F)
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                prevSlide();
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                nextSlide();
+                e.preventDefault();
+            } else if (e.key === 'f' || e.key === 'F') {
+                toggleFullscreen();
+                e.preventDefault();
+            }
+        });
+
+        // ========== ПОЛНОЭКРАННЫЙ РЕЖИМ (весь телевизор) ==========
+        function toggleFullscreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                const elem = retroContainer;
+                const requestMethod = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.msRequestFullscreen;
+                if (requestMethod) {
+                    requestMethod.call(elem).catch(err => console.warn(err));
+                }
+            } else {
+                const exitMethod = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+                if (exitMethod) {
+                    exitMethod.call(document);
+                }
+            }
+        }
+
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+        function onFullscreenChange() {
+            const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+            if (isFullscreen) {
+                fullscreenBtn.textContent = '✖';
+                fullscreenBtn.setAttribute('aria-label', 'Выйти из полноэкранного режима');
+                fullscreenBtn.title = 'Выйти (Esc)';
+            } else {
+                fullscreenBtn.textContent = '⛶';
+                fullscreenBtn.setAttribute('aria-label', 'Полноэкранный режим');
+                fullscreenBtn.title = 'На весь экран (F)';
+            }
+            setTimeout(() => {
+                const newIdx = getCurrentSlideIndex();
+                if (newIdx !== currentIndex) {
+                    currentIndex = newIdx;
+                    updateUI(currentIndex);
+                }
+                if (slides[currentIndex]) {
+                    slides[currentIndex].scrollIntoView({
+                        behavior: 'auto',
+                        block: 'nearest',
+                        inline: 'start'
+                    });
+                }
+            }, 60);
+        }
+
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+
+        // Дополнительно — чтобы изображения точно не обрезались при любых обстоятельствах
+        const style = document.createElement('style');
+        style.textContent = `
+            .carousel {
+                scroll-snap-type: x mandatory;
+                scroll-padding: 0;
+            }
+            .slide {
+                scroll-snap-align: start;
+            }
+            .retro-tv:fullscreen .tv-screen,
+            .retro-tv:-webkit-full-screen .tv-screen {
+                flex: 1;
+                display: flex;
+                align-items: center;
+            }
+            .retro-tv:fullscreen .carousel,
+            .retro-tv:-webkit-full-screen .carousel {
+                height: auto;
+                max-height: 85vh;
+            }
+            .retro-tv:fullscreen .slide img,
+            .retro-tv:-webkit-full-screen .slide img {
+                max-height: 78vh;
+                width: auto;
+                object-fit: contain;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Наблюдатель для Resize (поворот экрана)
+        const resizeObs = new ResizeObserver(() => {
+            const idx = getCurrentSlideIndex();
+            if (idx !== currentIndex) {
+                currentIndex = idx;
+                updateUI(currentIndex);
+            }
+        });
+        resizeObs.observe(carousel);
+    })();
+</script>
+</body>
+</html>
