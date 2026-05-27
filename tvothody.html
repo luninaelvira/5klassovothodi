@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Интерактив: Классы опасности отходов — Ретро-телевизор</title>
+    <title>Интерактив: Классы опасности отходов — Ретро-телевизор (10 слайдов)</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
 
         body {
-            background: #fffff;  /* тёмный винтажный фон, как в старом телезале */
+            background: #2a241f;  /* тёмный винтажный фон, как в старом телезале */
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -194,15 +194,16 @@
         /* Индикаторы (как старые лампочки / тюнер) */
         .indicators {
             display: flex;
-            gap: 14px;
+            gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
+            max-width: 400px;
         }
 
         .dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             background: #cfa776;
             border-radius: 20px;
             cursor: pointer;
@@ -212,7 +213,7 @@
 
         .dot.active {
             background: #f5bc70;
-            width: 28px;
+            width: 24px;
             box-shadow: 0 0 5px #ffcf8a;
         }
 
@@ -260,14 +261,18 @@
                 padding: 4px 12px;
             }
             .dot {
-                width: 10px;
-                height: 10px;
+                width: 8px;
+                height: 8px;
             }
             .dot.active {
-                width: 22px;
+                width: 18px;
             }
             .slide img {
                 max-height: 55vh;
+            }
+            .indicators {
+                gap: 8px;
+                max-width: 250px;
             }
         }
 
@@ -352,11 +357,12 @@
         <!-- Экран телевизора -->
         <div class="tv-screen">
             <div class="carousel" id="carousel">
+                <!-- 10 слайдов, строго по порядку: слайд 1 - слайд 10 -->
                 <div class="slide" data-index="0">
-                    <img src="слайд 1.png">
+                    <img src="слайд 1.png" alt="I класс – чрезвычайно опасные отходы, Минамата">
                 </div>
                 <div class="slide" data-index="1">
-                    <img src="слайд 2.png">
+                    <img src="слайд 2.png" alt="II класс – высокоопасные отходы, Венгрия 2010">
                 </div>
                 <div class="slide" data-index="2">
                     <img src="слайд 3.png" alt="III класс – умеренно опасные отходы, Россия 2024">
@@ -366,6 +372,21 @@
                 </div>
                 <div class="slide" data-index="4">
                     <img src="слайд 5.png" alt="V класс – практически неопасные отходы, Большое тихоокеанское пятно">
+                </div>
+                <div class="slide" data-index="5">
+                    <img src="слайд 6.png" alt="Дополнительный слайд 6">
+                </div>
+                <div class="slide" data-index="6">
+                    <img src="слайд 7.png" alt="Дополнительный слайд 7">
+                </div>
+                <div class="slide" data-index="7">
+                    <img src="слайд 8.png" alt="Дополнительный слайд 8">
+                </div>
+                <div class="slide" data-index="8">
+                    <img src="слайд 9.png" alt="Дополнительный слайд 9">
+                </div>
+                <div class="slide" data-index="9">
+                    <img src="слайд 10.png" alt="Дополнительный слайд 10">
                 </div>
             </div>
         </div>
@@ -379,7 +400,7 @@
             <div class="right-group">
                 <button class="nav-btn" id="nextBtn" aria-label="Следующий слайд" title="Вперёд (→)">▶</button>
                 <button class="fullscreen-btn" id="fullscreenBtn" aria-label="Полноэкранный режим" title="На весь экран">⛶</button>
-                <div class="counter" id="slideCounter">1 / 5</div>
+                <div class="counter" id="slideCounter">1 / 10</div>
             </div>
         </div>
     </div>
@@ -397,7 +418,7 @@
         const counterSpan = document.getElementById('slideCounter');
         const fullscreenBtn = document.getElementById('fullscreenBtn');
 
-        const totalSlides = slides.length;
+        const totalSlides = slides.length;  // теперь 10 слайдов
         let currentIndex = 0;
         let scrollTimeout = null;
 
@@ -492,7 +513,7 @@
         prevBtn.addEventListener('click', prevSlide);
         nextBtn.addEventListener('click', nextSlide);
 
-        // Индикаторы-точки
+        // Индикаторы-точки (для 10 слайдов)
         function createIndicators() {
             indicatorsContainer.innerHTML = '';
             for (let i = 0; i < totalSlides; i++) {
