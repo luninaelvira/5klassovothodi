@@ -36,7 +36,6 @@
             position: relative;
         }
 
-        /* Верхняя панель — теперь оба блока одинаковые по высоте и стилю */
         .top-panel {
             display: flex;
             justify-content: space-between;
@@ -48,7 +47,6 @@
             z-index: 20;
         }
 
-        /* Единый стиль для обоих блоков — одинаковые размеры и фон */
         .reward-area, .penalty-area {
             background: #fef3e2;
             border-radius: 60px;
@@ -62,7 +60,6 @@
             min-height: 56px;
         }
 
-        /* Уравниваем ширину блоков на больших экранах, но не жестко */
         @media (min-width: 550px) {
             .reward-area, .penalty-area {
                 min-width: 170px;
@@ -123,7 +120,6 @@
             line-height: 1.3;
         }
 
-        /* Зона карточек */
         .cards-zone {
             flex: 1.8;
             background: #f7efdc;
@@ -132,7 +128,7 @@
             position: relative;
             min-height: 280px;
             box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03), 0 3px 8px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
+            overflow: visible;
         }
 
         .stack {
@@ -142,15 +138,14 @@
             min-height: 260px;
         }
 
-        /* Карточка */
         .card {
             position: absolute;
-            width: 145px;
+            width: 140px;
             background: #fffef7;
             border-radius: 28px;
             box-shadow: 0 12px 22px -8px rgba(0, 0, 0, 0.15), 0 2px 5px rgba(0, 0, 0, 0.05);
             cursor: grab;
-            transition: transform 0.1s ease, box-shadow 0.15s;
+            transition: transform 0.1s ease, box-shadow 0.15s, left 0.2s ease, top 0.2s ease;
             border: 1px solid #ece1ca;
             display: flex;
             flex-direction: column;
@@ -158,6 +153,7 @@
             padding: 10px 6px 8px 6px;
             will-change: left, top;
             touch-action: none;
+            backdrop-filter: blur(0px);
         }
 
         .card:active { cursor: grabbing; }
@@ -167,6 +163,7 @@
             box-shadow: 0 18px 28px -8px rgba(0, 0, 0, 0.25);
             transform: scale(1.02);
             z-index: 999;
+            transition: none;
         }
 
         .card-icon { font-size: 44px; margin-bottom: 6px; }
@@ -181,14 +178,13 @@
             width: 100%;
         }
 
-        /* Сообщение-заставка при завершении (центральный блок) */
         .completion-message {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(247, 239, 220, 0.95);
+            background: rgba(247, 239, 220, 0.96);
             backdrop-filter: blur(6px);
             border-radius: 36px;
             display: flex;
@@ -228,7 +224,6 @@
             font-weight: 500;
         }
 
-        /* Нижняя зона */
         .bins-zone {
             flex: 1;
             background: #f5ebd4;
@@ -280,7 +275,6 @@
             color: #3d3322;
         }
 
-        /* Всплывающие сообщения */
         .toast-msg {
             position: absolute;
             bottom: 85px;
@@ -307,12 +301,11 @@
         }
 
         .card-return-anim {
-            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1) !important;
         }
 
-        /* Адаптивность */
         @media (max-width: 650px) {
-            .card { width: 125px; padding: 8px 5px; }
+            .card { width: 120px; padding: 8px 5px; }
             .card-icon { font-size: 38px; }
             .card-title { font-size: 9px; }
             .reward-count { font-size: 20px; min-width: 44px; }
@@ -322,17 +315,18 @@
 
         @media (max-width: 550px) {
             .cards-zone { margin: 12px 12px 8px 12px; }
-            .card { width: 110px; }
-            .card-icon { font-size: 34px; }
+            .card { width: 105px; }
+            .card-icon { font-size: 32px; }
             .bin-icon { font-size: 24px; }
             .bins-zone { gap: 5px; padding: 8px 6px; }
-            .bin { min-width: 58px; }
+            .bin { min-width: 55px; }
             .reward-area, .penalty-area { padding: 4px 12px; min-height: 48px; }
             .penalty-value { font-size: 16px; }
         }
 
         @media (max-width: 480px) {
-            .card { width: 100px; }
+            .card { width: 95px; }
+            .card-title { font-size: 8px; }
             .toast-msg, .rabbit-toast { white-space: normal; text-align: center; font-size: 10px; max-width: 85%; }
             .completion-title { font-size: 18px; }
             .completion-text { font-size: 13px; }
@@ -362,7 +356,6 @@
 </div>
 
 <script>
-    // ----- ДАННЫЕ ОТХОДОВ -----
     const wasteItems = [
         { name: "ртутная лампа", icon: "💡", classLevel: "I" },
         { name: "градусник", icon: "🌡️", classLevel: "I" },
@@ -387,7 +380,7 @@
     let activeCardElements = new Map();
     let rabbitsEarned = 0;
     const rewardedCardIds = new Set();
-    let gameCompleted = false;     // флаг, чтобы не показывать сообщение повторно
+    let gameCompleted = false;
 
     const rabbitCountSpan = document.getElementById('rabbitCount');
     const cardsZoneDiv = document.getElementById('cardsZone');
@@ -454,34 +447,26 @@
         }, 1300);
     }
 
-    // --- ПОЗДРАВЛЕНИЕ ПРИ ЗАВЕРШЕНИИ ---
     function showCompletionMessage() {
         if (gameCompleted) return;
         gameCompleted = true;
-        // Удаляем все карточки, если вдруг что-то осталось (чистим)
         const stackDiv = document.getElementById('cardStack');
         if (stackDiv) stackDiv.innerHTML = '';
         activeCardElements.clear();
         
-        // Создаем плашку поверх cardsZone
         const existingMsg = cardsZoneDiv.querySelector('.completion-message');
         if (existingMsg) existingMsg.remove();
         
         const messageDiv = document.createElement('div');
         messageDiv.className = 'completion-message';
-        // Нежный текст без пафоса
         messageDiv.innerHTML = `
             <div class="completion-emoji">🌸♻️🐇</div>
             <div class="completion-title">Отлично получилось!</div>
             <div class="completion-text">Вы рассортировали все отходы.<br>Спасибо, что заботитесь о природе 🌿</div>
         `;
         cardsZoneDiv.appendChild(messageDiv);
-        
-        // Небольшая анимация и автоматическое скрытие не требуется — пусть висит, но можно убрать через 6 секунд? 
-        // Лучше оставить до следующей инициации, но игра закончена. Оставляем.
     }
 
-    // Проверка, не закончилась ли игра
     function checkGameCompletion() {
         if (currentCardsData.length === 0 && !gameCompleted) {
             showCompletionMessage();
@@ -496,24 +481,26 @@
         return arr;
     }
 
-    function getRandomPositionWithinZone(cardWidth, cardHeight, zoneRect, existingPositions, margin = 12) {
+    function getRandomPosition(cardWidth, cardHeight, zoneRect, existingPositions) {
+        const margin = 12;
         const maxAttempts = 60;
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
             const left = margin + Math.random() * (zoneRect.width - cardWidth - margin * 1.5);
             const top = margin + Math.random() * (zoneRect.height - cardHeight - margin * 1.5);
             let overlapping = false;
             for (let pos of existingPositions) {
-                if (Math.abs(pos.left - left) < (cardWidth + 12) && Math.abs(pos.top - top) < (cardHeight + 12)) {
+                if (Math.abs(pos.left - left) < (cardWidth + 15) && Math.abs(pos.top - top) < (cardHeight + 15)) {
                     overlapping = true;
                     break;
                 }
             }
             if (!overlapping) return { left, top };
         }
-        return { left: margin + 10, top: margin + 10 };
+        return { left: margin + Math.random() * (zoneRect.width - cardWidth - margin * 2), 
+                 top: margin + Math.random() * (zoneRect.height - cardHeight - margin * 2) };
     }
 
-    function renderCards() {
+    function renderAllCards() {
         const stackContainer = document.getElementById('cardStack');
         if (!stackContainer) return;
         stackContainer.innerHTML = '';
@@ -523,11 +510,12 @@
         if (!cardsZone) return;
         const zoneRect = cardsZone.getBoundingClientRect();
         if (zoneRect.width === 0) {
-            setTimeout(() => renderCards(), 50);
+            setTimeout(() => renderAllCards(), 50);
             return;
         }
 
-        const existingPositions = [];
+        const positions = [];
+        
         currentCardsData.forEach((card, idx) => {
             const cardDiv = document.createElement('div');
             cardDiv.className = 'card';
@@ -544,30 +532,27 @@
             titleSpan.innerText = card.name;
             cardDiv.appendChild(iconSpan);
             cardDiv.appendChild(titleSpan);
-
+            
             cardDiv.style.position = 'absolute';
-            cardDiv.style.visibility = 'hidden';
-            cardDiv.style.left = '0';
-            cardDiv.style.top = '0';
             stackContainer.appendChild(cardDiv);
-            const realWidth = cardDiv.offsetWidth;
-            const realHeight = cardDiv.offsetHeight;
-            const { left, top } = getRandomPositionWithinZone(realWidth, realHeight, zoneRect, existingPositions, 10);
-            existingPositions.push({ left, top });
-
-            cardDiv.style.visibility = 'visible';
+            
+            const width = cardDiv.offsetWidth;
+            const height = cardDiv.offsetHeight;
+            const { left, top } = getRandomPosition(width, height, zoneRect, positions);
+            positions.push({ left, top });
+            
+            const rotation = (Math.random() - 0.5) * 7;
             cardDiv.style.left = `${left}px`;
             cardDiv.style.top = `${top}px`;
-            const rotation = (Math.random() - 0.5) * 5;
             cardDiv.style.transform = `rotate(${rotation}deg)`;
             cardDiv.style.zIndex = 10 + idx;
-
+            
             cardDiv.addEventListener('dragstart', handleDragStart);
             cardDiv.addEventListener('dragend', handleDragEnd);
             cardDiv.addEventListener('touchstart', handleTouchStart, { passive: false });
             cardDiv.addEventListener('touchmove', handleTouchMove, { passive: false });
             cardDiv.addEventListener('touchend', handleTouchEnd);
-
+            
             activeCardElements.set(card.id, cardDiv);
         });
     }
@@ -581,42 +566,26 @@
         const zoneRect = cardsZone.getBoundingClientRect();
         if (zoneRect.width === 0) return;
 
-        const existingPositions = [];
-        const cardsArray = [];
+        const positions = [];
+        const remainingCards = [];
         for (let i = 0; i < currentCardsData.length; i++) {
             const cid = currentCardsData[i].id;
             const el = activeCardElements.get(cid);
-            if (el) cardsArray.push(el);
+            if (el) remainingCards.push(el);
         }
-        cardsArray.forEach((cardEl, idx) => {
-            const realWidth = cardEl.offsetWidth;
-            const realHeight = cardEl.offsetHeight;
-            let bestPos = { left: 15, top: 15 };
-            let placed = false;
-            for (let attempt = 0; attempt < 40; attempt++) {
-                const left = 10 + Math.random() * (zoneRect.width - realWidth - 20);
-                const top = 10 + Math.random() * (zoneRect.height - realHeight - 20);
-                let overlapping = false;
-                for (let p of existingPositions) {
-                    if (Math.abs(p.left - left) < (realWidth + 12) && Math.abs(p.top - top) < (realHeight + 12)) {
-                        overlapping = true;
-                        break;
-                    }
-                }
-                if (!overlapping) {
-                    bestPos = { left, top };
-                    placed = true;
-                    break;
-                }
-            }
-            if (!placed) bestPos = { left: 15 + (idx * 7) % (zoneRect.width - realWidth - 20), top: 15 + (idx * 11) % (zoneRect.height - realHeight - 20) };
-            existingPositions.push(bestPos);
-            const rotation = (Math.random() - 0.5) * 5;
-            cardEl.style.left = `${bestPos.left}px`;
-            cardEl.style.top = `${bestPos.top}px`;
+        
+        remainingCards.forEach((cardEl, idx) => {
+            const width = cardEl.offsetWidth;
+            const height = cardEl.offsetHeight;
+            const { left, top } = getRandomPosition(width, height, zoneRect, positions);
+            positions.push({ left, top });
+            const rotation = (Math.random() - 0.5) * 7;
+            cardEl.style.left = `${left}px`;
+            cardEl.style.top = `${top}px`;
             cardEl.style.transform = `rotate(${rotation}deg)`;
             cardEl.style.zIndex = 10 + idx;
         });
+        
         if (currentCardsData.length === 0) checkGameCompletion();
     }
 
@@ -668,7 +637,6 @@
         }
     }
 
-    // Drag & Drop мыши
     let draggedCardId = null;
     function handleDragStart(e) {
         if (gameCompleted) { e.preventDefault(); return false; }
@@ -685,7 +653,6 @@
         draggedCardId = null;
     }
 
-    // Touch handling
     let touchTargetCard = null;
     let touchStartPos = { x: 0, y: 0 };
     let isDraggingTouch = false;
@@ -798,8 +765,10 @@
         rabbitsEarned = 0;
         updateRabbitDisplay();
         updatePenaltyDisplay();
-        renderCards();
-        window.addEventListener('resize', () => { if (currentCardsData.length > 0 && !gameCompleted) repositionRemainingCards(); });
+        renderAllCards();
+        window.addEventListener('resize', () => { 
+            if (currentCardsData.length > 0 && !gameCompleted) repositionRemainingCards(); 
+        });
     }
 
     window.addEventListener('load', initGame);
