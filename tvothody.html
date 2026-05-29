@@ -2,20 +2,19 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Интерактив: Классы опасности отходов — Ретро-телевизор</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none;
+            user-select: none; /* отключаем выделение, но не трогаем прокрутку */
         }
 
-        /* Убираем прокрутку на уровне body и html */
+        /* На десктопе — без прокрутки страницы, контент центрируется */
         html, body {
             height: 100%;
-            overflow: hidden;
         }
 
         body {
@@ -25,9 +24,18 @@
             justify-content: center;
             font-family: 'Courier New', 'Courier', 'VT323', monospace;
             padding: 16px;
+            overflow-y: auto; /* на мобильных устройствах прокрутка будет работать */
         }
 
-        /* Обёртка — автоматически подстраивается под высоту контента, без прокрутки */
+        /* Для экранов, где контент не помещается по вертикали — включаем прокрутку */
+        @media (max-width: 700px) and (max-height: 700px) {
+            body {
+                align-items: flex-start;
+                padding: 16px;
+            }
+        }
+
+        /* Обёртка — гибкая, подстраивается под контент */
         .tv-wrapper {
             width: 100%;
             max-width: 1100px;
@@ -35,8 +43,6 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            height: auto;
-            max-height: 100%;
         }
 
         /* ========== РЕТРО-ТЕЛЕВИЗОР С АНТЕННОЙ ========== */
@@ -197,7 +203,7 @@
             border-radius: inherit;
         }
 
-        /* Карусель — высота автоматическая, подстраивается под картинки */
+        /* Карусель — горизонтальный скролл, без вертикальной прокрутки внутри */
         .carousel {
             display: flex;
             overflow-x: auto;
@@ -238,8 +244,6 @@
             object-fit: contain;
             background: #fef3e0;
             pointer-events: none;
-            /* Высота автоматическая, без ограничений — подстраивается под картинку */
-            max-height: none;
         }
 
         /* Панель управления */
@@ -329,11 +333,28 @@
             gap: 8px;
         }
 
-        /* Планшеты и десктопы — тоже без прокрутки */
+        /* Планшеты и десктопы */
         @media (min-width: 768px) {
-            body { padding: 20px; }
-            .nav-controls { gap: 20px; }
-            .indicators { max-width: 400px; }
+            body {
+                padding: 24px;
+            }
+            .nav-controls {
+                gap: 20px;
+            }
+            .indicators {
+                max-width: 400px;
+            }
+        }
+
+        /* На маленьких экранах (смартфоны) если телевизор не влезает по высоте — появляется прокрутка страницы */
+        @media (max-width: 700px) {
+            body {
+                display: block;
+                padding: 20px 16px;
+            }
+            .tv-wrapper {
+                max-width: 100%;
+            }
         }
 
         /* Полноэкранный режим */
