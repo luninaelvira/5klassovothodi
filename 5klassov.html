@@ -67,10 +67,18 @@
             }
         }
 
+        /* Единый размер для иконок — и кролик, и весы теперь одинаковые */
         .reward-icon {
-            font-size: 28px;
+            font-size: 32px;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
             transition: transform 0.1s ease;
+            line-height: 1;
+        }
+
+        .penalty-icon {
+            font-size: 32px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            line-height: 1;
         }
 
         .reward-count {
@@ -90,10 +98,11 @@
             font-size: 12px;
             font-weight: 600;
             color: #9b7e5c;
+            white-space: nowrap;
         }
 
         .penalty-area {
-            gap: 8px;
+            gap: 10px;
         }
 
         .penalty-pulse {
@@ -107,6 +116,7 @@
             font-size: 13px;
             font-weight: 600;
             color: #9b8e74;
+            white-space: nowrap;
         }
 
         .penalty-value {
@@ -311,6 +321,7 @@
             .reward-count { font-size: 20px; min-width: 44px; }
             .penalty-value { font-size: 18px; }
             .reward-label, .penalty-label { font-size: 11px; }
+            .reward-icon, .penalty-icon { font-size: 28px; }
         }
 
         @media (max-width: 550px) {
@@ -322,6 +333,7 @@
             .bin { min-width: 55px; }
             .reward-area, .penalty-area { padding: 4px 12px; min-height: 48px; }
             .penalty-value { font-size: 16px; }
+            .reward-icon, .penalty-icon { font-size: 26px; }
         }
 
         @media (max-width: 480px) {
@@ -330,6 +342,8 @@
             .toast-msg, .rabbit-toast { white-space: normal; text-align: center; font-size: 10px; max-width: 85%; }
             .completion-title { font-size: 18px; }
             .completion-text { font-size: 13px; }
+            .reward-icon, .penalty-icon { font-size: 24px; }
+            .reward-label, .penalty-label { font-size: 10px; }
         }
     </style>
 </head>
@@ -342,7 +356,7 @@
             <span class="reward-label">точных попаданий</span>
         </div>
         <div class="penalty-area" id="penaltyBox">
-            <span class="penalty-label">⚖️ Штраф</span>
+            <span class="penalty-icon">⚖️</span>
             <span class="penalty-value" id="penaltyAmount">0</span>
             <span class="penalty-label">₽</span>
         </div>
