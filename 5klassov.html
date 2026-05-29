@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Эко-сортировка: классы опасности отходов</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Эко-сортировка: классы опасности отходов + Кролики</title>
     <style>
         * {
             user-select: none;
@@ -12,112 +12,151 @@
         }
 
         body {
-            background: #fffff; 
+            background: #fffff;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding: 16px;
             font-family: 'Segoe UI', 'Roboto', 'Nunito', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
         }
 
-        /* главный контейнер интерактива — фиксированный размер */
         .interactive {
-            width: 670px;
-            height: 400px;
-            background: #fef9e6; 
-            border-radius: 32px;
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.02);
-            position: relative;
-            overflow: hidden;
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            min-height: 600px;
+            background: #fef9e6;
+            border-radius: 40px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            transition: all 0.2s;
+            overflow: hidden;
+            position: relative;
         }
 
-        /* верхняя панель: штраф в правом углу */
-        .penalty-area {
-            position: absolute;
-            top: 12px;
-            right: 18px;
-            z-index: 15;
+        /* Верхняя панель */
+        .top-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: #fff6ea;
+            border-bottom: 1px solid #f0e3cf;
+            flex-wrap: wrap;
+            gap: 12px;
+            z-index: 20;
+        }
+
+        .reward-area {
+            background: #fef3e2;
+            border-radius: 60px;
+            padding: 6px 18px 6px 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            border: 1px solid #ecdcaa;
+        }
+
+        .reward-icon {
+            font-size: 28px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            transition: transform 0.1s ease;
+        }
+
+        .reward-count {
+            font-size: 24px;
+            font-weight: 800;
+            color: #c27e4a;
             background: #fff6e8;
-            backdrop-filter: blur(2px);
-            padding: 6px 14px;
+            padding: 0 10px;
+            border-radius: 40px;
+            line-height: 1.2;
+            min-width: 52px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        .reward-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9b7e5c;
+        }
+
+        .penalty-area {
+            background: #fff2e2;
             border-radius: 50px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            padding: 6px 18px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
             border: 1px solid #e7dbbc;
             font-family: monospace;
             font-weight: 600;
-            font-size: 13px;
-            letter-spacing: 0.3px;
+            font-size: 14px;
             color: #6a5c45;
             transition: all 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
-            transform-origin: right center;
+            display: inline-flex;
+            align-items: baseline;
+            gap: 8px;
         }
 
-        /* анимация увеличения штрафной плашки */
         .penalty-pulse {
-            transform: scale(1.08);
+            transform: scale(1.05);
             background: #fff0df;
-            box-shadow: 0 4px 12px rgba(160, 100, 40, 0.15);
+            box-shadow: 0 4px 12px rgba(160, 100, 40, 0.2);
             border-color: #dbbb8a;
         }
 
         .penalty-label {
             font-size: 12px;
             font-weight: 500;
-            margin-right: 6px;
             color: #9b8e74;
         }
 
         .penalty-value {
             font-weight: 800;
-            font-size: 14px;
+            font-size: 15px;
             color: #a47250;
         }
 
-        /* Зона карточек (верхняя часть) */
+        /* Зона карточек — строго ограниченная область */
         .cards-zone {
             flex: 1.8;
             background: #f7efdc;
-            margin: 12px 16px 8px 16px;
-            border-radius: 28px;
+            margin: 16px 18px 10px 18px;
+            border-radius: 36px;
             position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.02), 0 2px 6px rgba(0, 0, 0, 0.02);
+            min-height: 280px;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03), 0 3px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;   /* Скрываем части карточек, которые могли бы вылезти за пределы */
         }
 
-        /* стопка с абсолютным позиционированием карточек */
+        /* Контейнер стопки — относительное позиционирование, карточки не выходят за границы родителя */
         .stack {
             position: relative;
             width: 100%;
             height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            min-height: 260px;
         }
 
-        /* карточка — перетаскиваемая, эластичная по размеру */
+        /* Карточка — теперь позиционируется с привязкой к родителю (.stack), но не вылезает за границы .cards-zone */
         .card {
             position: absolute;
-            width: 160px;
+            width: 145px;
             background: #fffef7;
-            border-radius: 24px;
-            box-shadow: 0 12px 22px -8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.02);
+            border-radius: 28px;
+            box-shadow: 0 12px 22px -8px rgba(0, 0, 0, 0.15), 0 2px 5px rgba(0, 0, 0, 0.05);
             cursor: grab;
             transition: transform 0.1s ease, box-shadow 0.15s;
-            backdrop-filter: blur(0px);
             border: 1px solid #ece1ca;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 12px 8px 10px 8px;
-            will-change: transform;
-            z-index: 10;
+            padding: 10px 6px 8px 6px;
+            will-change: left, top;
+            touch-action: none;
+            backdrop-filter: blur(0px);
         }
 
         .card:active {
@@ -125,64 +164,61 @@
         }
 
         .card.dragging {
-            opacity: 0.85;
+            opacity: 0.9;
             cursor: grabbing;
-            box-shadow: 0 18px 28px -10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 18px 28px -8px rgba(0, 0, 0, 0.25);
             transform: scale(1.02);
             z-index: 999;
         }
 
         .card-icon {
-            font-size: 52px;
-            margin-bottom: 8px;
+            font-size: 44px;
+            margin-bottom: 6px;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
         }
 
         .card-title {
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 600;
             text-align: center;
             color: #7f6e52;
             background: #fbf5e6;
-            padding: 5px 8px;
-            border-radius: 40px;
+            padding: 5px 6px;
+            border-radius: 32px;
             width: 100%;
             letter-spacing: 0.2px;
             line-height: 1.3;
         }
 
-        /* нижняя зона с 5 урнами */
+        /* Нижняя зона с урнами */
         .bins-zone {
-            flex: 1.2;
+            flex: 1;
             background: #f5ebd4;
-            margin: 4px 14px 14px 14px;
-            border-radius: 28px;
+            margin: 6px 16px 18px 16px;
+            border-radius: 32px;
             display: flex;
             gap: 8px;
-            padding: 12px 10px;
+            padding: 12px 12px;
             justify-content: space-between;
             align-items: stretch;
-            box-shadow: inset 0 0 0 1px #fffcf0, 0 2px 6px rgba(0, 0, 0, 0.02);
+            flex-wrap: wrap;
         }
 
-        /* каждая урна — градиентный фон от красноватого (I) до голубоватого (V) */
         .bin {
             flex: 1;
-            border-radius: 24px;
+            min-width: 70px;
+            border-radius: 28px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 6px 4px;
+            padding: 8px 5px;
             transition: all 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
-            border: 1px solid rgba(255, 245, 220, 0.7);
+            border: 1px solid rgba(255, 245, 220, 0.8);
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
             cursor: pointer;
-            position: relative;
-            background-size: cover;
         }
 
-        /* Анимация расширения урны при правильном попадании */
         .bin-expand {
             transform: scale(1.05);
             box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
@@ -192,66 +228,138 @@
 
         .bin:hover {
             filter: brightness(0.98);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
         }
 
         .bin-icon {
-            font-size: 32px;
+            font-size: 28px;
             margin-bottom: 6px;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
         }
 
         .bin-class {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 800;
             text-align: center;
-            background: rgba(250, 245, 235, 0.75);
+            background: rgba(250, 245, 235, 0.85);
             backdrop-filter: blur(2px);
-            padding: 5px 6px;
+            padding: 5px 5px;
             border-radius: 36px;
-            width: 90%;
+            width: 95%;
             color: #3d3322;
             line-height: 1.2;
-            letter-spacing: 0.3px;
-            font-weight: 800;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
 
-        /* сообщение при ошибке/успехе */
+        /* Сообщения */
         .toast-msg {
             position: absolute;
-            bottom: 80px;
+            bottom: 85px;
             left: 50%;
             transform: translateX(-50%);
             background: #e9e0ce;
             color: #5b4e38;
-            padding: 6px 14px;
+            padding: 6px 16px;
             border-radius: 60px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             z-index: 200;
             pointer-events: none;
             white-space: nowrap;
             backdrop-filter: blur(4px);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
             font-family: monospace;
         }
 
-        .card-return-anim {
-            transition: all 0.18s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        .rabbit-toast {
+            background: #fbefdb;
+            color: #b46f34;
+            font-weight: bold;
+            border-left: 4px solid #f3bc6c;
+            white-space: nowrap;
         }
 
-        .hidden {
-            display: none;
+        .card-return-anim {
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 650px) {
+            .card {
+                width: 125px;
+                padding: 8px 5px;
+            }
+            .card-icon {
+                font-size: 38px;
+            }
+            .card-title {
+                font-size: 9px;
+            }
+            .reward-count {
+                font-size: 20px;
+                min-width: 44px;
+            }
+            .reward-icon {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .cards-zone {
+                margin: 12px 12px 8px 12px;
+            }
+            .card {
+                width: 110px;
+            }
+            .card-icon {
+                font-size: 34px;
+            }
+            .bin-icon {
+                font-size: 24px;
+            }
+            .bin-class {
+                font-size: 8px;
+            }
+            .bins-zone {
+                gap: 5px;
+                padding: 8px 6px;
+            }
+            .bin {
+                min-width: 58px;
+            }
+            .penalty-area, .reward-area {
+                padding: 4px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                width: 100px;
+            }
+            .card-icon {
+                font-size: 30px;
+            }
+            .toast-msg, .rabbit-toast {
+                white-space: normal;
+                text-align: center;
+                font-size: 10px;
+                max-width: 85%;
+                padding: 5px 12px;
+            }
         }
     </style>
 </head>
 <body>
 <div class="interactive" id="ecoGame">
-    <div class="penalty-area" id="penaltyBox">
-        <span class="penalty-label">⚖️ Штраф:</span>
-        <span class="penalty-value" id="penaltyAmount">0</span>
-        <span class="penalty-label">₽</span>
+    <div class="top-panel">
+        <div class="reward-area" id="rewardArea">
+            <span class="reward-icon">🐇</span>
+            <span class="reward-count" id="rabbitCount">0</span>
+            <span class="reward-label">точных попаданий</span>
+        </div>
+        <div class="penalty-area" id="penaltyBox">
+            <span class="penalty-label">⚖️ Штраф:</span>
+            <span class="penalty-value" id="penaltyAmount">0</span>
+            <span class="penalty-label">₽</span>
+        </div>
     </div>
 
     <div class="cards-zone" id="cardsZone">
@@ -262,7 +370,7 @@
 </div>
 
 <script>
-    // ----- ДАННЫЕ ОТХОДОВ (карточки) -----
+    // ----- ДАННЫЕ ОТХОДОВ -----
     const wasteItems = [
         { name: "ртутная лампа", icon: "💡", classLevel: "I" },
         { name: "градусник", icon: "🌡️", classLevel: "I" },
@@ -282,18 +390,39 @@
         { name: "скорлупа яиц", icon: "🥚", classLevel: "V" }
     ];
 
-    const correctMap = {
-        "I": ["ртутная лампа", "градусник", "мышьяк"],
-        "II": ["свинцовый автоаккумулятор", "смесь жидких пестицидов", "кислотный электролит"],
-        "III": ["мазут", "табачная пыль", "свежий куриный помёт"],
-        "IV": ["компьютерный монитор", "пищевые отходы кухонь", "перепревший куриный помёт"],
-        "V": ["чистая стеклянная тара", "офисная бумага", "опилки", "скорлупа яиц"]
-    };
-
-    // Штраф: счетчик ошибок -> сумма = количество ошибок * 100000
     let errorCount = 0;
-    let currentCardsData = [];   
-    let activeCardElements = new Map(); 
+    let currentCardsData = [];
+    let activeCardElements = new Map();
+    let rabbitsEarned = 0;
+    const rewardedCardIds = new Set();
+
+    const rabbitCountSpan = document.getElementById('rabbitCount');
+    function updateRabbitDisplay() {
+        if (rabbitCountSpan) {
+            rabbitCountSpan.innerText = rabbitsEarned;
+            const rewardIcon = document.querySelector('.reward-icon');
+            if (rewardIcon) {
+                rewardIcon.style.transform = 'scale(1.15)';
+                setTimeout(() => {
+                    if (rewardIcon) rewardIcon.style.transform = '';
+                }, 180);
+            }
+        }
+    }
+
+    function showRabbitCongrats(cardName) {
+        const container = document.getElementById('ecoGame');
+        const oldRabbitMsg = container.querySelector('.rabbit-toast');
+        if (oldRabbitMsg) oldRabbitMsg.remove();
+        const toastDiv = document.createElement('div');
+        toastDiv.className = 'toast-msg rabbit-toast';
+        toastDiv.innerText = `🐇✨ Вы сразу верно определили «${cardName}», один кролик счастлив! ✨🐇`;
+        container.appendChild(toastDiv);
+        if (window.rabbitToastTimer) clearTimeout(window.rabbitToastTimer);
+        window.rabbitToastTimer = setTimeout(() => {
+            if (toastDiv && toastDiv.parentNode) toastDiv.remove();
+        }, 2800);
+    }
 
     function updatePenaltyDisplay() {
         const penaltySpan = document.getElementById('penaltyAmount');
@@ -303,20 +432,17 @@
         }
     }
 
-    // Анимация "пульсации" блока штрафа
     function animatePenaltyBump() {
         const penaltyDiv = document.getElementById('penaltyBox');
         if (!penaltyDiv) return;
         penaltyDiv.classList.add('penalty-pulse');
-        setTimeout(() => {
-            penaltyDiv.classList.remove('penalty-pulse');
-        }, 220);
+        setTimeout(() => penaltyDiv.classList.remove('penalty-pulse'), 220);
     }
 
-    let toastTimer = null;
+    let commonToastTimer = null;
     function showMessage(text, isError = false) {
         const container = document.getElementById('ecoGame');
-        let toast = container.querySelector('.toast-msg');
+        let toast = container.querySelector('.toast-msg:not(.rabbit-toast)');
         if (!toast) {
             toast = document.createElement('div');
             toast.className = 'toast-msg';
@@ -326,13 +452,13 @@
         toast.style.color = '#5a4c34';
         toast.innerText = text;
         toast.style.opacity = '1';
-        if (toastTimer) clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => {
-            toast.style.opacity = '0';
+        if (commonToastTimer) clearTimeout(commonToastTimer);
+        commonToastTimer = setTimeout(() => {
+            if (toast) toast.style.opacity = '0';
             setTimeout(() => {
-                if (toast.parentNode) toast.remove();
+                if (toast && toast.parentNode && !toast.classList.contains('rabbit-toast')) toast.remove();
             }, 300);
-        }, 1200);
+        }, 1300);
     }
 
     function shuffleArray(arr) {
@@ -343,10 +469,30 @@
         return arr;
     }
 
-    function initCardStack() {
-        currentCardsData = wasteItems.map(item => ({ ...item, id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36) }));
-        currentCardsData = shuffleArray(currentCardsData);
-        renderCards();
+    // ---- РАСПРЕДЕЛЕНИЕ КАРТОЧЕК ВНУТРИ ОБЛАСТИ (случайное, но с контролем границ) ----
+    function getRandomPositionWithinZone(cardWidth, cardHeight, zoneRect, existingPositions, margin = 12) {
+        // zoneRect - размеры родительского контейнера (.cards-zone)
+        // гарантируем, что карточка полностью видна и не выходит за края
+        const maxAttempts = 80;
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            const left = margin + Math.random() * (zoneRect.width - cardWidth - margin * 1.5);
+            const top = margin + Math.random() * (zoneRect.height - cardHeight - margin * 1.5);
+            // проверка на пересечение с другими карточками? (не обязательно, но для эстетики добавим легкую)
+            let overlapping = false;
+            for (let pos of existingPositions) {
+                const dx = Math.abs(pos.left - left);
+                const dy = Math.abs(pos.top - top);
+                if (dx < (cardWidth + 15) && dy < (cardHeight + 15)) {
+                    overlapping = true;
+                    break;
+                }
+            }
+            if (!overlapping) {
+                return { left, top };
+            }
+        }
+        // fallback: размещаем чуть отступ от края
+        return { left: margin + 10, top: margin + 10 };
     }
 
     function renderCards() {
@@ -354,6 +500,26 @@
         if (!stackContainer) return;
         stackContainer.innerHTML = '';
         activeCardElements.clear();
+
+        // Получаем размеры зоны карточек (родительский .cards-zone)
+        const cardsZone = document.getElementById('cardsZone');
+        if (!cardsZone) return;
+        const zoneRect = cardsZone.getBoundingClientRect();
+        // Подождать, если rect ещё не стабилен, но в load всё готово
+        if (zoneRect.width === 0) {
+            setTimeout(() => renderCards(), 50);
+            return;
+        }
+
+        const cardWidth = 145;   // ширина карточки (в пикселях, примерно)
+        const cardHeight = 115;  // примерная высота (зависит от содержимого, но мы будем динамически измерять?)
+        // Лучше измерить первую карточку после рендера? Но карточки ещё нет. Используем приблизительную высоту с запасом.
+        // Для более точного позиционирования измеряем позже после добавления, но можно и так — адаптируем.
+        // Используем примерную высоту 105-115px под контент.
+        const approxHeight = 110;
+        const margin = 10;
+
+        const existingPositions = [];
 
         currentCardsData.forEach((card, idx) => {
             const cardDiv = document.createElement('div');
@@ -369,46 +535,88 @@
             const titleSpan = document.createElement('div');
             titleSpan.className = 'card-title';
             titleSpan.innerText = card.name;
-
             cardDiv.appendChild(iconSpan);
             cardDiv.appendChild(titleSpan);
 
-            const angle = (idx % 3 - 1) * 1.2;
-            const offsetX = (idx % 5 - 2) * 2.5;
-            const offsetY = idx * 2.5;
-            cardDiv.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg)`;
-            cardDiv.style.zIndex = 100 + idx;
-            cardDiv.style.left = `calc(50% - 80px)`;
-            cardDiv.style.top = `${12 + idx * 3}px`;
+            // Добавляем в DOM временно для получения точных размеров (но скрыто)
+            cardDiv.style.position = 'absolute';
+            cardDiv.style.visibility = 'hidden';
+            cardDiv.style.left = '0';
+            cardDiv.style.top = '0';
+            stackContainer.appendChild(cardDiv);
+            const realWidth = cardDiv.offsetWidth;
+            const realHeight = cardDiv.offsetHeight;
+            // Теперь вычисляем позицию в пределах cardsZone, учитывая реальные размеры
+            const { left, top } = getRandomPositionWithinZone(realWidth, realHeight, zoneRect, existingPositions, margin);
+            existingPositions.push({ left, top });
+
+            cardDiv.style.visibility = 'visible';
+            cardDiv.style.left = `${left}px`;
+            cardDiv.style.top = `${top}px`;
+            // Добавляем легкий наклон для разнообразия (от -3 до 3 градусов)
+            const rotation = (Math.random() - 0.5) * 4;
+            cardDiv.style.transform = `rotate(${rotation}deg)`;
+            cardDiv.style.zIndex = 10 + idx;
             cardDiv.style.position = 'absolute';
 
-            // Drag & Drop handlers
+            // События
             cardDiv.addEventListener('dragstart', handleDragStart);
             cardDiv.addEventListener('dragend', handleDragEnd);
-            cardDiv.addEventListener('touchstart', handleTouchStart, {passive: false});
-            cardDiv.addEventListener('touchmove', handleTouchMove, {passive: false});
+            cardDiv.addEventListener('touchstart', handleTouchStart, { passive: false });
+            cardDiv.addEventListener('touchmove', handleTouchMove, { passive: false });
             cardDiv.addEventListener('touchend', handleTouchEnd);
 
-            stackContainer.appendChild(cardDiv);
             activeCardElements.set(card.id, cardDiv);
         });
+
+        // Небольшой фикс: повторно убедимся, что все карточки лежат внутри, если окно изменилось — пересчитаем при ресайзе?
+        // Добавим слушатель resize для перепозиционирования оставшихся карточек
     }
 
+    // Функция перепозиционирования оставшихся карточек (после удаления)
     function repositionRemainingCards() {
-        const orderedCards = [];
+        const cardsZone = document.getElementById('cardsZone');
+        if (!cardsZone) return;
+        const zoneRect = cardsZone.getBoundingClientRect();
+        if (zoneRect.width === 0) return;
+
+        const existingPositions = [];
+        const cardsArray = [];
         for (let i = 0; i < currentCardsData.length; i++) {
             const cid = currentCardsData[i].id;
             const el = activeCardElements.get(cid);
-            if (el) orderedCards.push(el);
+            if (el) cardsArray.push(el);
         }
-        orderedCards.forEach((cardEl, idx) => {
-            const angle = (idx % 3 - 1) * 1.2;
-            const offsetX = (idx % 5 - 2) * 2.5;
-            const offsetY = idx * 2.5;
-            cardEl.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg)`;
-            cardEl.style.zIndex = 100 + idx;
-            cardEl.style.top = `${12 + idx * 3}px`;
-            cardEl.style.left = `calc(50% - 80px)`;
+        // Перебираем и назначаем новые НЕ пересекающиеся позиции
+        cardsArray.forEach((cardEl, idx) => {
+            const realWidth = cardEl.offsetWidth;
+            const realHeight = cardEl.offsetHeight;
+            const margin = 10;
+            let bestPos = { left: margin + 10, top: margin + 10 };
+            let attempts = 0;
+            let placed = false;
+            while (!placed && attempts < 40) {
+                const left = margin + Math.random() * (zoneRect.width - realWidth - margin * 1.5);
+                const top = margin + Math.random() * (zoneRect.height - realHeight - margin * 1.5);
+                let overlapping = false;
+                for (let p of existingPositions) {
+                    if (Math.abs(p.left - left) < (realWidth + 12) && Math.abs(p.top - top) < (realHeight + 12)) {
+                        overlapping = true;
+                        break;
+                    }
+                }
+                if (!overlapping) {
+                    bestPos = { left, top };
+                    placed = true;
+                }
+                attempts++;
+            }
+            existingPositions.push(bestPos);
+            const rotation = (Math.random() - 0.5) * 4;
+            cardEl.style.left = `${bestPos.left}px`;
+            cardEl.style.top = `${bestPos.top}px`;
+            cardEl.style.transform = `rotate(${rotation}deg)`;
+            cardEl.style.zIndex = 10 + idx;
         });
     }
 
@@ -416,21 +624,16 @@
         const cardEl = activeCardElements.get(cardId);
         if (!cardEl) return;
         cardEl.classList.add('card-return-anim');
-        setTimeout(() => {
-            cardEl.classList.remove('card-return-anim');
-        }, 200);
+        setTimeout(() => cardEl.classList.remove('card-return-anim'), 220);
     }
 
-    // Анимация расширения урны при корректном сбросе
     function animateBinExpand(binElement) {
         if (!binElement) return;
         binElement.classList.add('bin-expand');
-        setTimeout(() => {
-            binElement.classList.remove('bin-expand');
-        }, 200);
+        setTimeout(() => binElement.classList.remove('bin-expand'), 200);
     }
 
-    // Основная логика обработки дропа (drag & drop / touch)
+    // Основная логика сброса (c кроликами)
     function processDrop(cardId, targetBinClass, binElementForAnimation = null) {
         if (!cardId) return false;
         const cardIndex = currentCardsData.findIndex(c => c.id === cardId);
@@ -440,52 +643,48 @@
         const isCorrect = (wasteClass === targetBinClass);
 
         if (isCorrect) {
-            // Правильное попадание: удаляем карточку
+            if (!rewardedCardIds.has(cardId)) {
+                rabbitsEarned++;
+                updateRabbitDisplay();
+                rewardedCardIds.add(cardId);
+                showRabbitCongrats(cardData.name);
+            } else {
+                showMessage(`✅ ${cardData.name} принят!`, false);
+            }
             currentCardsData.splice(cardIndex, 1);
             const cardElement = activeCardElements.get(cardId);
-            if (cardElement && cardElement.parentNode) {
-                cardElement.remove();
-            }
+            if (cardElement && cardElement.parentNode) cardElement.remove();
             activeCardElements.delete(cardId);
-            showMessage(`✅ ${cardData.name} принят! +0 ₽`, false);
             repositionRemainingCards();
-            if (binElementForAnimation) {
-                animateBinExpand(binElementForAnimation);
-            }
+            if (binElementForAnimation) animateBinExpand(binElementForAnimation);
             return true;
         } else {
-            // Ошибка: увеличиваем штраф, показываем пульсацию плашки штрафа
             errorCount++;
             updatePenaltyDisplay();
-            animatePenaltyBump();   // анимация расширения штрафного окошка
+            animatePenaltyBump();
             showMessage(`❌ Ошибка! ${cardData.name} не для класса ${targetBinClass}. Штраф +100 000 ₽`, true);
             animateCardReturn(cardId);
             return false;
         }
     }
 
-    // ---------- Drag & Drop мыши ----------
+    // Drag & Drop мыши
     let draggedCardId = null;
-    let dragSourceElement = null;
-
     function handleDragStart(e) {
         const card = e.target.closest('.card');
         if (!card) return;
         draggedCardId = card.getAttribute('data-id');
-        dragSourceElement = card;
         e.dataTransfer.setData('text/plain', draggedCardId);
         e.dataTransfer.effectAllowed = 'move';
         card.classList.add('dragging');
     }
-
     function handleDragEnd(e) {
         const card = e.target.closest('.card');
         if (card) card.classList.remove('dragging');
         draggedCardId = null;
-        dragSourceElement = null;
     }
 
-    // ---------- Touch поддержка (с ручным дропом) ----------
+    // Touch handling
     let touchTargetCard = null;
     let touchStartPos = { x: 0, y: 0 };
     let isDraggingTouch = false;
@@ -502,11 +701,9 @@
         touchStartPos.y = e.touches[0].clientY - rect.top;
         isDraggingTouch = true;
         card.classList.add('dragging');
-        card.style.position = 'absolute';
         card.style.zIndex = '1000';
         updateCardPositionTouch(e.touches[0]);
     }
-
     function handleTouchMove(e) {
         if (!isDraggingTouch || !touchTargetCard) return;
         e.preventDefault();
@@ -514,10 +711,7 @@
         const elemUnderTouch = document.elementsFromPoint(e.touches[0].clientX, e.touches[0].clientY);
         let targetBin = null;
         for (let el of elemUnderTouch) {
-            if (el.classList && el.classList.contains('bin')) {
-                targetBin = el;
-                break;
-            }
+            if (el.classList && el.classList.contains('bin')) { targetBin = el; break; }
         }
         if (targetBin && currentDropBin !== targetBin) {
             if (currentDropBin) currentDropBin.style.filter = '';
@@ -528,7 +722,6 @@
             currentDropBin = null;
         }
     }
-
     function updateCardPositionTouch(touch) {
         if (!touchTargetCard) return;
         const parentRect = document.getElementById('cardStack').getBoundingClientRect();
@@ -538,7 +731,6 @@
         touchTargetCard.style.top = `${top}px`;
         touchTargetCard.style.transform = 'rotate(0deg)';
     }
-
     function handleTouchEnd(e) {
         if (!isDraggingTouch || !touchTargetCard) {
             if (touchTargetCard) touchTargetCard.classList.remove('dragging');
@@ -546,21 +738,19 @@
             return;
         }
         e.preventDefault();
-        let droppedBin = currentDropBin;
-        if (droppedBin) {
-            const binClass = droppedBin.getAttribute('data-bin-class');
+        if (currentDropBin) {
+            const binClass = currentDropBin.getAttribute('data-bin-class');
             const cardId = touchTargetCard.getAttribute('data-id');
-            processDrop(cardId, binClass, droppedBin);
-            droppedBin.style.filter = '';
+            processDrop(cardId, binClass, currentDropBin);
+            currentDropBin.style.filter = '';
         } else {
             const cardId = touchTargetCard.getAttribute('data-id');
             animateCardReturn(cardId);
         }
         touchTargetCard.classList.remove('dragging');
-        repositionRemainingCards();   // возвращаем стопку в порядок
+        repositionRemainingCards();
         resetTouchState();
     }
-
     function resetTouchState() {
         if (currentDropBin) currentDropBin.style.filter = '';
         touchTargetCard = null;
@@ -568,65 +758,48 @@
         currentDropBin = null;
     }
 
-    // ----- НАСТРОЙКА УРН с градиентами (пастельные тона: от красно-розового до голубого) -----
+    // Настройка урн
     function setupBins() {
         const binsZone = document.getElementById('binsZone');
         if (!binsZone) return;
         binsZone.innerHTML = '';
         const binClasses = [
-            { label: "I класс опасности", classKey: "I", icon: "🗑️", gradient: "linear-gradient(145deg, #ffd9cc, #ffe0d0)" },     // пастельный красноватый
-            { label: "II класс опасности", classKey: "II", icon: "🗑️", gradient: "linear-gradient(145deg, #ffe0c4, #ffe8cf)" },    // пастельный оранжево-персик
-            { label: "III класс опасности", classKey: "III", icon: "🗑️", gradient: "linear-gradient(145deg, #f9e4bc, #fbefcf)" },   // пастельно-желтоватый
-            { label: "IV класс опасности", classKey: "IV", icon: "🗑️", gradient: "linear-gradient(145deg, #d9e6cf, #e2efda)" },      // пастельный салатово-зеленый
-            { label: "V класс опасности", classKey: "V", icon: "🗑️", gradient: "linear-gradient(145deg, #cfe9f2, #ddf0f5)" }         // пастельный голубой
+            { label: "I класс опасности", classKey: "I", icon: "🗑️", gradient: "linear-gradient(145deg, #ffd9cc, #ffe0d0)" },
+            { label: "II класс опасности", classKey: "II", icon: "🗑️", gradient: "linear-gradient(145deg, #ffe0c4, #ffe8cf)" },
+            { label: "III класс опасности", classKey: "III", icon: "🗑️", gradient: "linear-gradient(145deg, #f9e4bc, #fbefcf)" },
+            { label: "IV класс опасности", classKey: "IV", icon: "🗑️", gradient: "linear-gradient(145deg, #d9e6cf, #e2efda)" },
+            { label: "V класс опасности", classKey: "V", icon: "🗑️", gradient: "linear-gradient(145deg, #cfe9f2, #ddf0f5)" }
         ];
-
         binClasses.forEach(bin => {
             const binDiv = document.createElement('div');
             binDiv.className = 'bin';
             binDiv.setAttribute('data-bin-class', bin.classKey);
-            binDiv.setAttribute('data-bin-label', bin.label);
             binDiv.style.background = bin.gradient;
-
-            const iconSpan = document.createElement('div');
-            iconSpan.className = 'bin-icon';
-            iconSpan.innerText = bin.icon;
-            const classSpan = document.createElement('div');
-            classSpan.className = 'bin-class';
-            classSpan.innerText = bin.label;
-            classSpan.style.fontWeight = '800';
-            classSpan.style.fontSize = '11px';
-
-            binDiv.appendChild(iconSpan);
-            binDiv.appendChild(classSpan);
-
-            // Drag & Drop цели для мыши
-            binDiv.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-            });
-
+            binDiv.innerHTML = `<div class="bin-icon">${bin.icon}</div><div class="bin-class">${bin.label}</div>`;
+            binDiv.addEventListener('dragover', (e) => e.preventDefault());
             binDiv.addEventListener('drop', (e) => {
                 e.preventDefault();
                 const cardId = e.dataTransfer.getData('text/plain');
-                if (!cardId) return;
-                const targetClass = binDiv.getAttribute('data-bin-class');
-                processDrop(cardId, targetClass, binDiv);
+                if (cardId) processDrop(cardId, bin.classKey, binDiv);
             });
             binsZone.appendChild(binDiv);
         });
     }
 
-    // Инициализация всей игры
     function initGame() {
         setupBins();
-        initCardStack();
+        currentCardsData = wasteItems.map(item => ({ ...item, id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36) + Date.now() }));
+        currentCardsData = shuffleArray(currentCardsData);
+        renderCards();
         updatePenaltyDisplay();
+        updateRabbitDisplay();
+        // подстраховка: при изменении размеров окна перерисовываем позиции оставшихся карт
+        window.addEventListener('resize', () => {
+            if (currentCardsData.length > 0) repositionRemainingCards();
+        });
     }
 
-    window.addEventListener('load', () => {
-        initGame();
-    });
+    window.addEventListener('load', initGame);
 </script>
 </body>
 </html>
