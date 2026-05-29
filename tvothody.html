@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Интерактив: Классы опасности отходов — Ретро-телевизор</title>
+    <title>Интерактив: Классы опасности отходов — Ретро-телевизор с антенной</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
 
         body {
-            background: #fffff;  /* глубокий тёмный фон, напоминающий старый телезал */
+            background: #fffff;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -22,7 +22,7 @@
             padding: 16px;
         }
 
-        /* Обёртка — адаптивная, без переполнения */
+        /* Обёртка — адаптивная */
         .tv-wrapper {
             width: 100%;
             max-width: 1100px;
@@ -30,16 +30,123 @@
             transition: all 0.2s ease;
         }
 
-        /* ========== РЕТРО-ТЕЛЕВИЗОР (адаптивный) ========== */
+        /* ========== РЕТРО-ТЕЛЕВИЗОР С АНТЕННОЙ ========== */
         .retro-tv {
             background: #5a3e2b;
             border-radius: clamp(30px, 8vw, 60px) clamp(30px, 8vw, 60px) clamp(40px, 10vw, 80px) clamp(40px, 10vw, 80px);
             padding: clamp(12px, 4vw, 25px) clamp(16px, 5vw, 30px) clamp(20px, 6vw, 40px) clamp(16px, 5vw, 30px);
             box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 3px rgba(255, 245, 200, 0.2);
             position: relative;
+            margin-top: clamp(40px, 10vw, 70px); /* отступ для антенны */
         }
 
-        /* Декоративная "ручка" сверху */
+        /* ========== АНТЕННА (классические "рожки") ========== */
+        .antenna {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 70px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Основание антенны */
+        .antenna-base {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 20px;
+            background: linear-gradient(135deg, #8b694a, #5a3e2b);
+            border-radius: 4px 4px 8px 8px;
+            box-shadow: inset 0 1px 0 rgba(255,255,200,0.3), 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Левый "рожок" */
+        .antenna-left {
+            position: absolute;
+            bottom: 12px;
+            left: 20%;
+            width: 6px;
+            height: 60px;
+            background: linear-gradient(135deg, #b8895a, #7a5a3a);
+            transform: rotate(-35deg);
+            transform-origin: bottom left;
+            border-radius: 6px 6px 2px 2px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .antenna-left::after {
+            content: "●";
+            position: absolute;
+            top: -8px;
+            left: -4px;
+            font-size: 14px;
+            color: #d4a76a;
+            text-shadow: 0 0 2px #ffdd99;
+        }
+
+        /* Правый "рожок" */
+        .antenna-right {
+            position: absolute;
+            bottom: 12px;
+            right: 20%;
+            width: 6px;
+            height: 60px;
+            background: linear-gradient(135deg, #b8895a, #7a5a3a);
+            transform: rotate(35deg);
+            transform-origin: bottom right;
+            border-radius: 6px 6px 2px 2px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .antenna-right::after {
+            content: "●";
+            position: absolute;
+            top: -8px;
+            right: -4px;
+            font-size: 14px;
+            color: #d4a76a;
+            text-shadow: 0 0 2px #ffdd99;
+        }
+
+        /* Адаптация антенны под разные экраны */
+        @media (max-width: 640px) {
+            .antenna {
+                width: 140px;
+                top: -50px;
+            }
+            .antenna-left, .antenna-right {
+                height: 48px;
+                width: 5px;
+            }
+            .antenna-left::after, .antenna-right::after {
+                font-size: 10px;
+                top: -6px;
+            }
+            .antenna-base {
+                width: 12px;
+                height: 16px;
+            }
+            .retro-tv {
+                margin-top: clamp(35px, 8vw, 60px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .antenna {
+                width: 110px;
+                top: -42px;
+            }
+            .antenna-left, .antenna-right {
+                height: 40px;
+            }
+        }
+
+        /* Декоративная "ручка" сверху корпуса */
         .retro-tv::before {
             content: "";
             position: absolute;
@@ -78,7 +185,7 @@
             position: relative;
         }
 
-        /* Эффект кинескопа (градиент) */
+        /* Эффект кинескопа */
         .tv-screen::before {
             content: "";
             position: absolute;
@@ -92,7 +199,7 @@
             border-radius: inherit;
         }
 
-        /* Лёгкие строки развёртки */
+        /* Строки развёртки */
         .tv-screen::after {
             content: "";
             position: absolute;
@@ -130,7 +237,7 @@
             border-radius: 4px;
         }
 
-        /* Слайд — полная ширина, картинка без обрезки */
+        /* Слайд */
         .slide {
             flex: 0 0 100%;
             scroll-snap-align: start;
@@ -147,10 +254,10 @@
             object-fit: contain;
             background: #fef3e0;
             pointer-events: none;
-            max-height: 55vh;   /* на мобильных — комфортная высота, без обрезания */
+            max-height: 55vh;
         }
 
-        /* Панель управления — резиновая */
+        /* Панель управления */
         .nav-controls {
             display: flex;
             align-items: center;
@@ -162,7 +269,7 @@
             margin-top: 8px;
         }
 
-        /* Кнопки стилизованные, адаптивный размер */
+        /* Кнопки */
         .nav-btn, .fullscreen-btn {
             background: #3d2c1d;
             border: none;
@@ -187,7 +294,7 @@
             box-shadow: 0 1px 0 #1f140a;
         }
 
-        /* Индикаторы (точки) — резиновые, хорошо читаемые на любом экране */
+        /* Индикаторы */
         .indicators {
             display: flex;
             gap: clamp(6px, 2vw, 12px);
@@ -215,7 +322,7 @@
             box-shadow: 0 0 5px #ffcf8a;
         }
 
-        /* Счётчик и правая группа */
+        /* Счётчик */
         .counter {
             font-size: clamp(0.75rem, 3vw, 1rem);
             font-weight: bold;
@@ -240,7 +347,7 @@
             gap: 8px;
         }
 
-        /* Специальные правила для планшетов и десктопов — увеличиваем видимость */
+        /* Планшеты и десктопы */
         @media (min-width: 768px) {
             .slide img {
                 max-height: 68vh;
@@ -265,7 +372,7 @@
             }
         }
 
-        /* Полноэкранный режим (телевизор на весь экран) */
+        /* Полноэкранный режим */
         .retro-tv:fullscreen {
             background: #5a3e2b;
             border-radius: 30px;
@@ -275,6 +382,11 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            margin-top: 0;
+        }
+
+        .retro-tv:fullscreen .antenna {
+            display: none; /* в полноэкранном режиме антенна скрывается, чтобы не мешать */
         }
 
         .retro-tv:fullscreen .tv-screen {
@@ -300,6 +412,10 @@
             padding: clamp(16px, 4vh, 30px);
             width: 100vw;
             height: 100vh;
+            margin-top: 0;
+        }
+        .retro-tv:-webkit-full-screen .antenna {
+            display: none;
         }
         .retro-tv:-webkit-full-screen .slide img {
             max-height: 80vh;
@@ -307,7 +423,7 @@
             margin: 0 auto;
         }
 
-        /* Лампочка индикатора питания (для стиля) */
+        /* Лампочка индикатора питания */
         .power-led {
             position: absolute;
             bottom: clamp(8px, 3vw, 20px);
@@ -321,7 +437,7 @@
             z-index: 4;
         }
 
-        /* Адаптация для очень маленьких телефонов (до 400px) */
+        /* Адаптация для маленьких телефонов */
         @media (max-width: 480px) {
             .nav-controls {
                 padding: 12px 10px 6px 10px;
@@ -347,7 +463,7 @@
             }
         }
 
-        /* При альбомной ориентации на телефонах — чуть больше высоты картинки */
+        /* Альбомная ориентация на телефонах */
         @media (max-width: 800px) and (orientation: landscape) {
             .slide img {
                 max-height: 62vh;
@@ -364,47 +480,45 @@
 <body>
 <div class="tv-wrapper">
     <div class="retro-tv" id="retroTVContainer">
+        <!-- АНТЕННА (классические рожки) -->
+        <div class="antenna">
+            <div class="antenna-left"></div>
+            <div class="antenna-right"></div>
+            <div class="antenna-base"></div>
+        </div>
+
         <div class="power-led"></div>
         
         <div class="tv-screen">
             <div class="carousel" id="carousel">
-                <!-- слайд 1 – I класс, асбест / ртутные лампы -->
+                <!-- 10 слайдов -->
                 <div class="slide" data-index="0">
                     <img src="слайд 1.png" alt="I класс – чрезвычайно опасные отходы: асбест, ртутные лампы">
                 </div>
-                <!-- слайд 2 – I класс, Минамата -->
                 <div class="slide" data-index="1">
                     <img src="слайд 2.png" alt="I класс – болезнь Минамата, Япония">
                 </div>
-                <!-- слайд 3 – II класс, семена с фунгицидами, пестициды -->
                 <div class="slide" data-index="2">
                     <img src="слайд 3.png" alt="II класс – протравленные семена, пестициды">
                 </div>
-                <!-- слайд 4 – II класс, Венгрия красный шлам -->
                 <div class="slide" data-index="3">
                     <img src="слайд 4.png" alt="II класс – Венгрия 2010, красный шлам">
                 </div>
-                <!-- слайд 5 – III класс, куриный помёт -->
                 <div class="slide" data-index="4">
                     <img src="слайд 5.png" alt="III класс – свежий куриный помёт">
                 </div>
-                <!-- слайд 6 – III класс, Керченский пролив мазут -->
                 <div class="slide" data-index="5">
                     <img src="слайд 6.png" alt="III класс – крушение танкеров, мазут 2024">
                 </div>
-                <!-- слайд 7 – IV класс, пищевые отходы, конский навоз -->
                 <div class="slide" data-index="6">
                     <img src="слайд 7.png" alt="IV класс – пищевые отходы, конский навоз">
                 </div>
-                <!-- слайд 8 – IV класс, полигон ТКО Калужская область -->
                 <div class="slide" data-index="7">
                     <img src="слайд 8.png" alt="IV класс – затопление полигона ТКО">
                 </div>
-                <!-- слайд 9 – V класс, офисная бумага -->
                 <div class="slide" data-index="8">
                     <img src="слайд 9.png" alt="V класс – офисная бумага">
                 </div>
-                <!-- слайд 10 – V класс, Большое тихоокеанское пятно -->
                 <div class="slide" data-index="9">
                     <img src="слайд 10.png" alt="V класс – Большое тихоокеанское мусорное пятно">
                 </div>
@@ -427,7 +541,6 @@
 
 <script>
     (function() {
-        // DOM элементы
         const retroContainer = document.getElementById('retroTVContainer');
         const carousel = document.getElementById('carousel');
         const slides = document.querySelectorAll('.slide');
@@ -440,22 +553,16 @@
         const totalSlides = slides.length;
         let currentIndex = 0;
         let scrollTimeout = null;
-        let isScrollingSync = false;
 
-        // Обновление индикаторов + счётчика
         function updateUI(index) {
             const dots = document.querySelectorAll('.dot');
             dots.forEach((dot, i) => {
-                if (i === index) {
-                    dot.classList.add('active');
-                } else {
-                    dot.classList.remove('active');
-                }
+                if (i === index) dot.classList.add('active');
+                else dot.classList.remove('active');
             });
             counterSpan.innerText = `${index + 1} / ${totalSlides}`;
         }
 
-        // Плавный переход к слайду
         function scrollToSlide(index) {
             if (index < 0) index = 0;
             if (index >= totalSlides) index = totalSlides - 1;
@@ -471,7 +578,6 @@
             }
         }
 
-        // Определение активного слайда по центру (универсально)
         function getCurrentSlideIndex() {
             const carouselRect = carousel.getBoundingClientRect();
             if (!carouselRect.width) return 0;
@@ -490,7 +596,6 @@
             return closestIndex;
         }
 
-        // Синхронизация индекса при скролле
         function handleScroll() {
             if (scrollTimeout) clearTimeout(scrollTimeout);
             scrollTimeout = setTimeout(() => {
@@ -504,7 +609,6 @@
 
         carousel.addEventListener('scroll', handleScroll);
 
-        // Адаптация при изменении размеров окна/повороте
         let resizeTimer;
         window.addEventListener('resize', () => {
             if (resizeTimer) clearTimeout(resizeTimer);
@@ -514,30 +618,22 @@
                     currentIndex = newIdx;
                     updateUI(currentIndex);
                 }
-                // Небольшая коррекция скролла, если нужно
                 if (slides[currentIndex]) {
                     slides[currentIndex].scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
                 }
             }, 100);
         });
 
-        // Кнопки "Вперёд / Назад"
         function nextSlide() {
-            if (currentIndex < totalSlides - 1) {
-                scrollToSlide(currentIndex + 1);
-            }
+            if (currentIndex < totalSlides - 1) scrollToSlide(currentIndex + 1);
         }
-
         function prevSlide() {
-            if (currentIndex > 0) {
-                scrollToSlide(currentIndex - 1);
-            }
+            if (currentIndex > 0) scrollToSlide(currentIndex - 1);
         }
 
         prevBtn.addEventListener('click', prevSlide);
         nextBtn.addEventListener('click', nextSlide);
 
-        // Создание точек-индикаторов
         function createIndicators() {
             indicatorsContainer.innerHTML = '';
             for (let i = 0; i < totalSlides; i++) {
@@ -553,44 +649,29 @@
         }
         createIndicators();
 
-        // Инициализация — показываем первый слайд
         setTimeout(() => {
             const startIdx = getCurrentSlideIndex();
-            if (startIdx !== 0) {
-                scrollToSlide(0);
-            } else {
+            if (startIdx !== 0) scrollToSlide(0);
+            else {
                 currentIndex = 0;
                 updateUI(0);
             }
         }, 30);
 
-        // Горячие клавиши (стрелки и F)
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') {
-                prevSlide();
-                e.preventDefault();
-            } else if (e.key === 'ArrowRight') {
-                nextSlide();
-                e.preventDefault();
-            } else if (e.key === 'f' || e.key === 'F') {
-                toggleFullscreen();
-                e.preventDefault();
-            }
+            if (e.key === 'ArrowLeft') { prevSlide(); e.preventDefault(); }
+            else if (e.key === 'ArrowRight') { nextSlide(); e.preventDefault(); }
+            else if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); e.preventDefault(); }
         });
 
-        // ========== ПОЛНОЭКРАННЫЙ РЕЖИМ ==========
         function toggleFullscreen() {
             if (!document.fullscreenElement && !document.webkitFullscreenElement) {
                 const elem = retroContainer;
                 const requestMethod = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.msRequestFullscreen;
-                if (requestMethod) {
-                    requestMethod.call(elem).catch(err => console.warn(err));
-                }
+                if (requestMethod) requestMethod.call(elem).catch(err => console.warn(err));
             } else {
                 const exitMethod = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
-                if (exitMethod) {
-                    exitMethod.call(document);
-                }
+                if (exitMethod) exitMethod.call(document);
             }
         }
 
@@ -622,41 +703,20 @@
         document.addEventListener('fullscreenchange', onFullscreenChange);
         document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 
-        // Дополнительные стили для улучшения адаптивности и сохранения пропорций
         const style = document.createElement('style');
         style.textContent = `
-            .carousel {
-                scroll-snap-type: x mandatory;
-                scroll-padding: 0;
-            }
-            .slide {
-                scroll-snap-align: start;
-            }
+            .carousel { scroll-snap-type: x mandatory; scroll-padding: 0; }
+            .slide { scroll-snap-align: start; }
             .retro-tv:fullscreen .tv-screen,
-            .retro-tv:-webkit-full-screen .tv-screen {
-                flex: 1;
-                display: flex;
-                align-items: center;
-            }
+            .retro-tv:-webkit-full-screen .tv-screen { flex: 1; display: flex; align-items: center; }
             .retro-tv:fullscreen .carousel,
-            .retro-tv:-webkit-full-screen .carousel {
-                height: auto;
-                max-height: 85vh;
-            }
+            .retro-tv:-webkit-full-screen .carousel { height: auto; max-height: 85vh; }
             .retro-tv:fullscreen .slide img,
-            .retro-tv:-webkit-full-screen .slide img {
-                max-height: 80vh;
-                width: auto;
-                object-fit: contain;
-            }
-            /* touch-friendly */
-            button {
-                touch-action: manipulation;
-            }
+            .retro-tv:-webkit-full-screen .slide img { max-height: 80vh; width: auto; object-fit: contain; }
+            button { touch-action: manipulation; }
         `;
         document.head.appendChild(style);
 
-        // Наблюдатель за изменением размеров карусели (поворот, динамика)
         const resizeObserver = new ResizeObserver(() => {
             const idx = getCurrentSlideIndex();
             if (idx !== currentIndex) {
