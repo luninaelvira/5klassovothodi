@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Пакет документов на отход</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f5f2eb;
+            font-family: system-ui, -apple-system, 'Segoe UI', 'Nunito', 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            max-width: 620px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 40px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .inner {
+            padding: 28px 24px 36px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: #5a6b55;
+            letter-spacing: -0.2px;
+        }
+
+        .fullscreen-btn {
+            background: transparent;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.3rem;
+            color: #8f9e88;
+            transition: 0.2s;
+            line-height: 1;
+        }
+
+        .fullscreen-btn:hover {
+            background-color: #f0ede7;
+            color: #5a6b55;
+        }
+
+        .sub {
+            font-size: 0.9rem;
+            color: #9aaa96;
+            margin-bottom: 28px;
+            border-left: 3px solid #d4e2ca;
+            padding-left: 14px;
+        }
+
+        .choose-area {
+            background: #fdfaf5;
+            border-radius: 32px;
+            padding: 20px 18px;
+            margin: 20px 0;
+            border: 1px solid #efe8df;
+        }
+
+        .prompt {
+            font-weight: 500;
+            margin-bottom: 18px;
+            color: #6f8270;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .doc-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .doc-chip {
+            background: white;
+            border-radius: 80px;
+            padding: 8px 16px;
+            border: 1px solid #e2dcd0;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #6a7c62;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .doc-chip.selected {
+            background: #ddecd4;
+            border-color: #b8d4a8;
+            color: #3c6036;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .check-btn, .show-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            text-align: center;
+        }
+
+        .check-btn {
+            background-color: #e3d9cd;
+            color: #6a5e4e;
+        }
+
+        .check-btn:active {
+            transform: scale(0.97);
+        }
+
+        .show-btn {
+            background-color: #c9ddbc;
+            color: #3d5a38;
+        }
+
+        .show-btn:active {
+            transform: scale(0.97);
+        }
+
+        .show-btn.disabled {
+            background-color: #e8ede3;
+            color: #a6b99b;
+            cursor: not-allowed;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .error-msg {
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: #c9896e;
+            background: #fef1ea;
+            padding: 8px 14px;
+            border-radius: 40px;
+            display: inline-block;
+        }
+
+        .result-area {
+            margin-top: 24px;
+            background: #fefaf5;
+            border-radius: 28px;
+            padding: 20px;
+            border: 1px solid #efe5db;
+        }
+
+        .result-header {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #5f7357;
+            margin-bottom: 14px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .doc-list-scroll {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .doc-item {
+            background: white;
+            border-radius: 20px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            border-left: 5px solid #cbe0be;
+            font-size: 0.8rem;
+        }
+
+        .doc-title {
+            font-weight: 700;
+            color: #4f6648;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+        }
+
+        .doc-desc {
+            color: #74806d;
+            line-height: 1.4;
+            font-size: 0.75rem;
+        }
+
+        .footnote {
+            font-size: 0.65rem;
+            text-align: center;
+            margin-top: 24px;
+            color: #c2ccb6;
+            border-top: 1px solid #efe4da;
+            padding-top: 18px;
+        }
+
+        .doc-list-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .doc-list-scroll::-webkit-scrollbar-track {
+            background: #f0eae2;
+            border-radius: 10px;
+        }
+        .doc-list-scroll::-webkit-scrollbar-thumb {
+            background: #cfdbc4;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 500px) {
+            .inner {
+                padding: 20px 16px 28px;
+            }
+            .doc-chip {
+                padding: 6px 12px;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="inner">
+        <div class="header">
+            <h1>📦 Пакет документов на отход</h1>
+            <button class="fullscreen-btn" id="fullscreenBtn" title="На весь экран">⤢</button>
+        </div>
+        <div class="sub">
+            Подтверждение класса опасности для отходов I-V классов<br>
+            (пункт 5 Приказа №246)
+        </div>
+
+        <div class="choose-area">
+            <div class="prompt">
+                <span>✓</span> Отметь все документы, которые нужны по пункту 5
+            </div>
+            <div class="doc-grid" id="docsGrid">
+                <div class="doc-chip" data-id="1">📄 Заявление</div>
+                <div class="doc-chip" data-id="2">⚙️ Выкопировки (ТУ, регламенты)</div>
+                <div class="doc-chip" data-id="3">📝 Сведения о происхождении отходов</div>
+                <div class="doc-chip" data-id="4">🌀 Агрегатное состояние и форма</div>
+                <div class="doc-chip" data-id="5">🧪 Акты отбора проб</div>
+                <div class="doc-chip" data-id="6">📊 Протоколы исследований (состав)</div>
+                <div class="doc-chip" data-id="7">🔢 Расчёт класса опасности</div>
+                <div class="doc-chip" data-id="8">🧫 Протокол биотестирования</div>
+            </div>
+            <div class="button-group">
+                <button class="check-btn" id="checkBtn">Проверить</button>
+                <button class="show-btn disabled" id="showBtn" disabled>Показать полный состав</button>
+            </div>
+            <div id="errorMsg" style="min-height: 40px;"></div>
+        </div>
+
+        <div class="result-area" id="resultArea">
+            <div class="result-header">
+                <span>📌</span> Полный перечень документов (п.5)
+            </div>
+            <div class="doc-list-scroll" id="docListScroll">
+                <div style="color:#c2c2ae; text-align:center; padding: 20px;">Нажмите «Показать полный состав» после проверки</div>
+            </div>
+        </div>
+        <div class="footnote">
+            Основание: приказ Минприроды №246 от 23.04.2026
+        </div>
+    </div>
+</div>
+
+<script>
+    // Полный набор корректных ID (все 8)
+    const requiredIds = [1, 2, 3, 4, 5, 6, 7, 8];
+    
+    // Данные для подробного описания (строго из пункта 5)
+    const docsData = {
+        1: { title: "📋 Заявление", desc: "Содержит: ИНН, ОГРНИП/ОГРН, адрес деятельности, ФИО (или наименование юрлица), место образования отходов." },
+        2: { title: "📑 Выкопировки из документов", desc: "Технологические регламенты, технические условия (ТУ), стандарты, руководства по эксплуатации, проектная документация." },
+        3: { title: "🏭 Сведения о происхождении отходов", desc: "Информация о принадлежности к производству/техпроцессу или к продукции, при использовании которой образовался отход (свободная форма)." },
+        4: { title: "💧 Агрегатное состояние и физическая форма", desc: "Указывается отдельно: твёрдое, сыпучее, пастообразное, жидкое и т.д. (свободная форма)." },
+        5: { title: "🧪 Акты отбора проб", desc: "Оформлены аккредитованной испытательной лабораторией (центром) в соответствии с 412-ФЗ." },
+        6: { title: "📈 Протоколы исследований", desc: "Подтверждают химический и/или компонентный состав отхода (количественные анализы)." },
+        7: { title: "🧮 Расчёт класса опасности", desc: "Выполнен по Критериям отнесения к классу опасности (статья 4.1 89-ФЗ)." },
+        8: { title: "🦠 Протокол биотестирования", desc: "Проведён аккредитованной лабораторией (центром) для оценки токсичности отхода." }
+    };
+
+    const chips = document.querySelectorAll('.doc-chip');
+    const checkBtn = document.getElementById('checkBtn');
+    const showBtn = document.getElementById('showBtn');
+    const errorDiv = document.getElementById('errorMsg');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const resultScroll = document.getElementById('docListScroll');
+
+    // Храним выбранные пользователем ID
+    let selectedIds = new Set();
+
+    // Обработка кликов по чипсам
+    chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            const id = parseInt(chip.dataset.id);
+            if (selectedIds.has(id)) {
+                selectedIds.delete(id);
+                chip.classList.remove('selected');
+            } else {
+                selectedIds.add(id);
+                chip.classList.add('selected');
+            }
+            // при новом выборе скрываем ошибку, сбрасываем блокировку кнопки "Показать"
+            errorDiv.innerHTML = '';
+            showBtn.disabled = true;
+            showBtn.classList.add('disabled');
+            // также сбрасываем старый результат (чтобы не вводить в заблуждение)
+            resultScroll.innerHTML = `<div style="color:#c2c2ae; text-align:center; padding: 20px;">Нажмите «Показать полный состав» после проверки</div>`;
+        });
+    });
+
+    // Функция проверки
+    function checkSelection() {
+        // сравниваем выбранное множество с requiredIds
+        const isFullSet = requiredIds.length === selectedIds.size && requiredIds.every(id => selectedIds.has(id));
+        
+        if (!isFullSet) {
+            // подсветим, чего не хватает
+            const missing = requiredIds.filter(id => !selectedIds.has(id));
+            const missingNames = missing.map(id => {
+                const chip = Array.from(chips).find(c => parseInt(c.dataset.id) === id);
+                return chip ? chip.innerText.trim() : `документ ${id}`;
+            }).join(', ');
+            errorDiv.innerHTML = `<div class="error-msg">❌ Не все документы отмечены. Пропущено: ${missingNames}.</div>`;
+            showBtn.disabled = true;
+            showBtn.classList.add('disabled');
+            // также очищаем детальный список
+            resultScroll.innerHTML = `<div style="color:#c2c2ae; text-align:center; padding: 20px;">Сначала отметьте все 8 документов верно</div>`;
+            return false;
+        } else {
+            errorDiv.innerHTML = `<div class="error-msg" style="background:#e2f0db; color:#4f7842;">✅ Всё верно! Все необходимые документы отмечены.</div>`;
+            showBtn.disabled = false;
+            showBtn.classList.remove('disabled');
+            return true;
+        }
+    }
+
+    // Отображение полного состава документов (всегда 8 с деталями)
+    function showFullDocList() {
+        let html = '';
+        for (let id of requiredIds) {
+            const data = docsData[id];
+            html += `
+                <div class="doc-item">
+                    <div class="doc-title">${data.title}</div>
+                    <div class="doc-desc">${data.desc}</div>
+                </div>
+            `;
+        }
+        resultScroll.innerHTML = html;
+    }
+
+    // Обработчик на "Проверить"
+    checkBtn.addEventListener('click', () => {
+        checkSelection();
+    });
+
+    // Обработчик на "Показать полный состав" (доступна только после правильной проверки)
+    showBtn.addEventListener('click', () => {
+        if (!showBtn.disabled) {
+            showFullDocList();
+        }
+    });
+
+    // Полноэкранный режим (две косые стрелочки)
+    function toggleFullscreen() {
+        const elem = document.documentElement;
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            if (elem.requestFullscreen) elem.requestFullscreen();
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        }
+    }
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+</script>
+</body>
+</html>
