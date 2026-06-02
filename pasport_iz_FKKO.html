@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Интерактивный тренажёр: Паспорт отхода (ФККО)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #eef2ea; /* пастельный фон */
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 24px 16px;
+            color: #2c3e2f; /* темно-серый с лёгким зелёным отливом */
+        }
+
+        /* контейнер для паспорта */
+        .passport-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fefcf5;
+            border-radius: 28px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        /* кнопка fullscreen */
+        .fullscreen-btn {
+            background: #e6dfcc;
+            border: none;
+            font-size: 1.7rem;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 60px;
+            color: #4a5b3e;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(2px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            font-weight: 500;
+        }
+        .fullscreen-btn:hover {
+            background: #ddd2bb;
+            color: #2d3e26;
+        }
+        .fullscreen-btn span {
+            font-size: 1.2rem;
+        }
+
+        .passport-header {
+            padding: 20px 24px 8px 24px;
+            display: flex;
+            justify-content: flex-end;
+            border-bottom: 1px solid #ece4d4;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* стилизация табличной части */
+        .passport-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            background: #fefcf5;
+        }
+
+        .passport-table td, .passport-table th {
+            border: 1px solid #e2daca;
+            padding: 14px 12px;
+            vertical-align: top;
+            background-color: #fefcf5;
+        }
+
+        .label-cell {
+            background-color: #f6f2e8;
+            font-weight: 600;
+            width: 32%;
+            color: #3e4d36;
+        }
+
+        .value-cell {
+            background-color: #ffffff;
+            color: #2f3e2a;
+        }
+
+        .approve-block {
+            font-family: monospace;
+            background: #fefcf5;
+            border-left: 1px solid #e2daca;
+            padding: 16px;
+            text-align: right;
+        }
+
+        /* интерактивные поля */
+        .interactive-select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 20px;
+            border: 1px solid #d9cfb5;
+            background-color: #fffbf2;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: #2c3e2f;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .interactive-select:focus {
+            outline: none;
+            border-color: #b3c7a3;
+            box-shadow: 0 0 0 2px rgba(157, 189, 130, 0.3);
+        }
+
+        /* компонентный состав: поля ввода процентов */
+        .comp-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .comp-label {
+            width: 90px;
+            font-weight: 600;
+            color: #3c5433;
+        }
+        .comp-input {
+            width: 100px;
+            padding: 8px 10px;
+            border-radius: 24px;
+            border: 1px solid #d9cfb5;
+            background: #fffbf2;
+            text-align: center;
+            font-weight: 500;
+            color: #2f3e2a;
+        }
+        .comp-unit {
+            color: #6f6b5e;
+        }
+
+        /* цветовая индикация */
+        .correct-highlight {
+            background-color: #cfe6cd !important;
+            transition: background 0.2s;
+        }
+        .wrong-highlight {
+            background-color: #fad7d5 !important;
+            transition: background 0.2s;
+        }
+        .neutral-cell {
+            background-color: #ffffff;
+        }
+
+        /* Кнопка проверки */
+        .check-button {
+            background: #cbdbb7;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 48px;
+            color: #2d4625;
+            cursor: pointer;
+            margin: 24px auto;
+            display: block;
+            width: fit-content;
+            transition: 0.2s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+        }
+        .check-button:hover {
+            background: #b7ca9e;
+            transform: scale(1.02);
+        }
+
+        .feedback-message {
+            background: #f4efdf;
+            border-radius: 28px;
+            padding: 18px 24px;
+            margin: 16px 24px 28px 24px;
+            font-size: 0.95rem;
+            color: #3d4e33;
+            border-left: 8px solid #bbcfa8;
+        }
+
+        hr {
+            margin: 8px 0;
+            border-color: #ece0ce;
+        }
+
+        /* Для мобильной адаптации */
+        @media (max-width: 700px) {
+            .passport-table, .passport-table tbody, .passport-table tr, .passport-table td {
+                display: block;
+                width: 100%;
+            }
+            .passport-table tr {
+                margin-bottom: 20px;
+                border: 1px solid #e2daca;
+                border-radius: 20px;
+                background: #fefcf5;
+            }
+            .label-cell, .value-cell {
+                display: block;
+                width: 100%;
+            }
+            .label-cell {
+                border-bottom: none;
+                font-weight: 700;
+            }
+            .value-cell {
+                border-top: none;
+            }
+            .approve-block {
+                text-align: left;
+            }
+        }
+
+        /* иконки */
+        .select-icon {
+            font-size: 1.2rem;
+            margin-right: 6px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .styled-select {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #a5a088;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="passport-container" id="passportRoot">
+    <div class="passport-header">
+        <button class="fullscreen-btn" id="fullscreenBtn" aria-label="Полноэкранный режим">
+            <span>⤢</span> 
+        </button>
+    </div>
+    <div style="padding: 0 20px 0 20px;">
+        <div style="text-align: right; margin-bottom: 8px;">
+            <div style="font-size: 0.8rem; color:#7e8f6e;">УТВЕРЖДАЮ</div>
+            <div>Директор ООО «Авангард»</div>
+            <div style="display: flex; justify-content: flex-end; gap: 40px; margin-top: 5px;">
+                <span>(подпись)</span> <span>И.М. Толкунов</span>
+            </div>
+            <div>"____" __________ 20___ г.</div>
+            <div>М.П.</div>
+        </div>
+        <h3 style="text-align: center; font-weight: 500; margin: 20px 0 12px 0; color:#3b5a2e;">ПАСПОРТ ОТХОДОВ I-IV КЛАССОВ ОПАСНОСТИ,<br>включенных в Федеральный классификационный каталог отходов</h3>
+    </div>
+
+    <table class="passport-table" id="mainPassportTable">
+        <!-- строка: Наименование вида отходов по ФККО -->
+        <tr>
+            <td class="label-cell">Наименование вида отходов по <a href="#" style="color:#7c9a60;">ФККО</a></td>
+            <td class="value-cell" id="cellWasteName">
+                <div class="styled-select">
+                    <span class="select-icon">🗑️</span>
+                    <select id="selectWasteName" class="interactive-select">
+                        <!-- варианты будут вставлены через js -->
+                    </select>
+                </div>
+            </td>
+        </tr>
+        <!-- Код вида отходов по ФККО -->
+        <tr>
+            <td class="label-cell">Код вида отходов по <a href="#" style="color:#7c9a60;">ФККО</a></td>
+            <td class="value-cell" id="cellWasteCode">
+                <div class="styled-select">
+                    <span class="select-icon">🔢</span>
+                    <select id="selectWasteCode" class="interactive-select"></select>
+                </div>
+            </td>
+        </tr>
+        <!-- Происхождение отходов -->
+        <tr>
+            <td class="label-cell">Происхождение отходов (технологический процесс)</td>
+            <td class="value-cell" id="cellOrigin">
+                <div class="styled-select">
+                    <span class="select-icon">🏭</span>
+                    <select id="selectOrigin" class="interactive-select"></select>
+                </div>
+            </td>
+        </tr>
+        <!-- Компонентный состав (интерактивные проценты) -->
+        <tr>
+            <td class="label-cell">Химический и (или) компонентный состав (в порядке убывания)</td>
+            <td class="value-cell" id="cellComposition">
+                <div id="compInputsBlock">
+                    <div class="comp-row"><span class="comp-label">Сталь</span><input type="number" id="compSteel" class="comp-input" placeholder="%"><span class="comp-unit">%</span></div>
+                    <div class="comp-row"><span class="comp-label">Пластик</span><input type="number" id="compPlastic" class="comp-input" placeholder="%"><span class="comp-unit">%</span></div>
+                    <div class="comp-row"><span class="comp-label">Резина</span><input type="number" id="compRubber" class="comp-input" placeholder="%"><span class="comp-unit">%</span></div>
+                    <div class="comp-row"><span class="comp-label">Медь</span><input type="number" id="compCopper" class="comp-input" placeholder="%"><span class="comp-unit">%</span></div>
+                </div>
+                <div style="font-size:0.75rem; color:#948c78; margin-top: 8px;">Укажите содержание компонентов в % (сумма должна быть 100, для проверки сравним с эталоном)</div>
+            </td>
+        </tr>
+        <!-- Способ определения состава -->
+        <tr>
+            <td class="label-cell">Способ определения химического и (или) компонентного состава</td>
+            <td class="value-cell" id="cellMethod">
+                <div class="styled-select">
+                    <span class="select-icon">🔬</span>
+                    <select id="selectMethod" class="interactive-select"></select>
+                </div>
+            </td>
+        </tr>
+        <!-- Агрегатное состояние и физическая форма -->
+        <tr>
+            <td class="label-cell">Агрегатное состояние и физическая форма</td>
+            <td class="value-cell" id="cellForm">
+                <div class="styled-select">
+                    <span class="select-icon">🧊</span>
+                    <select id="selectForm" class="interactive-select"></select>
+                </div>
+            </td>
+        </tr>
+        <!-- Класс опасности -->
+        <tr>
+            <td class="label-cell">Класс опасности по степени негативного воздействия на окружающую среду</td>
+            <td class="value-cell" id="cellHazardClass">
+                <div class="styled-select">
+                    <span class="select-icon">⚠️</span>
+                    <select id="selectHazard" class="interactive-select"></select>
+                </div>
+            </td>
+        </tr>
+        <!-- сведения о лице (название юрлица) немного тоже проверим, но в образце уже заполнено, но мы сделаем выбор для интерактива из вариантов -->
+        <tr>
+            <td class="label-cell">Юридическое лицо (полное наименование)</td>
+            <td class="value-cell" id="cellLegalName">
+                <div class="styled-select">
+                    <span class="select-icon">🏢</span>
+                    <select id="selectLegal" class="interactive-select"></select>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="feedback-message" id="feedbackMsg">
+        👋 Выберите варианты для полей, затем нажмите «Проверить». Правильные ответы подсветятся зелёным.
+    </div>
+    <button class="check-button" id="checkButton">✅ ПРОВЕРИТЬ</button>
+    <footer>Паспорт отхода (демо-тренажёр) — данные по образцу</footer>
+</div>
+
+<script>
+    // Эталонные правильные значения
+    const correctAnswers = {
+        wasteName: "Электрочайник, утративший потребительские свойства",
+        wasteCode: "4 82 524 11 52 4",
+        origin: "Использование электрочайника с утратой потребительских свойств",
+        method: "ПНД Ф 16.3.55-08 Методика определения морфологического состава твердых отходов производства и потребления гравиметрическим методом",
+        form: "Изделия из нескольких материалов",
+        hazard: "IV",
+        legalName: "Общество с ограниченной ответственностью «Авангард»",
+        // композитные проценты
+        composition: { steel: 75, plastic: 15, rubber: 7, copper: 3 }
+    };
+
+    // Генерация вариантов (перемешанные) для каждого поля
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // варианты для наименования отхода
+    const wasteNameOptions = [
+        "Электрочайник, утративший потребительские свойства",
+        "Чайник электрический, бывший в употреблении",
+        "Прибор нагревательный электрический с истекшим сроком службы",
+        "Электрочайник с повреждённым нагревательным элементом"
+    ];
+    // код отхода
+    const codeOptions = [
+        "4 82 524 11 52 4",
+        "4 82 523 21 52 3",
+        "4 82 500 00 00 0",
+        "4 82 524 13 52 4"
+    ];
+    // происхождение
+    const originOptions = [
+        "Использование электрочайника с утратой потребительских свойств",
+        "Замена старого электрочайника на новый",
+        "Утилизация бытовой техники после поломки",
+        "Эксплуатация прибора до потери функциональности"
+    ];
+    // способ определения
+    const methodOptions = [
+        "ПНД Ф 16.3.55-08 Методика определения морфологического состава твердых отходов производства и потребления гравиметрическим методом",
+        "ГОСТ Р 53691-2009 Метод определения компонентного состава",
+        "Расчётно-аналитический метод по справочникам",
+        "Визуальный осмотр без лабораторного анализа"
+    ];
+    // агрегатное состояние
+    const formOptions = [
+        "Изделия из нескольких материалов",
+        "Твёрдое изделие (металлопластик)",
+        "Смесь полимеров и металлов",
+        "Изделие комбинированное"
+    ];
+    // класс опасности
+    const hazardOptions = ["IV", "III", "V", "II"];
+    // юр лицо варианты
+    const legalOptions = [
+        "Общество с ограниченной ответственностью «Авангард»",
+        "ООО «ТехноЭкоСервис»",
+        "ЗАО «Электрочайник Плюс»",
+        "ИП Смирнов А.А."
+    ];
+
+    // ссылки на элементы select
+    let selectWasteName, selectWasteCode, selectOrigin, selectMethod, selectForm, selectHazard, selectLegal;
+    // инпуты компонентов
+    let inpSteel, inpPlastic, inpRubber, inpCopper;
+
+    function populateSelectors() {
+        selectWasteName = document.getElementById('selectWasteName');
+        selectWasteCode = document.getElementById('selectWasteCode');
+        selectOrigin = document.getElementById('selectOrigin');
+        selectMethod = document.getElementById('selectMethod');
+        selectForm = document.getElementById('selectForm');
+        selectHazard = document.getElementById('selectHazard');
+        selectLegal = document.getElementById('selectLegal');
+
+        // копии и перемешивание
+        const shuffledNames = shuffleArray([...wasteNameOptions]);
+        const shuffledCodes = shuffleArray([...codeOptions]);
+        const shuffledOrigins = shuffleArray([...originOptions]);
+        const shuffledMethods = shuffleArray([...methodOptions]);
+        const shuffledForms = shuffleArray([...formOptions]);
+        const shuffledHazards = shuffleArray([...hazardOptions]);
+        const shuffledLegals = shuffleArray([...legalOptions]);
+
+        shuffledNames.forEach(opt => { let o = new Option(opt, opt); selectWasteName.appendChild(o); });
+        shuffledCodes.forEach(opt => { let o = new Option(opt, opt); selectWasteCode.appendChild(o); });
+        shuffledOrigins.forEach(opt => { let o = new Option(opt, opt); selectOrigin.appendChild(o); });
+        shuffledMethods.forEach(opt => { let o = new Option(opt, opt); selectMethod.appendChild(o); });
+        shuffledForms.forEach(opt => { let o = new Option(opt, opt); selectForm.appendChild(o); });
+        shuffledHazards.forEach(opt => { let o = new Option(opt, opt); selectHazard.appendChild(o); });
+        shuffledLegals.forEach(opt => { let o = new Option(opt, opt); selectLegal.appendChild(o); });
+    }
+
+    // сброс подсветки (убираем классы)
+    function resetHighlights() {
+        const cells = [
+            document.getElementById('cellWasteName'),
+            document.getElementById('cellWasteCode'),
+            document.getElementById('cellOrigin'),
+            document.getElementById('cellMethod'),
+            document.getElementById('cellForm'),
+            document.getElementById('cellHazardClass'),
+            document.getElementById('cellLegalName')
+        ];
+        cells.forEach(cell => {
+            if(cell) {
+                cell.classList.remove('correct-highlight', 'wrong-highlight', 'neutral-cell');
+                // добавляем нейтральный фон по умолчанию
+                cell.style.backgroundColor = '';
+            }
+        });
+        // сброс для компонентной ячейки отдельно
+        const compCell = document.getElementById('cellComposition');
+        if(compCell) compCell.classList.remove('correct-highlight', 'wrong-highlight');
+        // также сбросим инпуты цвета фона внутри (оставляем нейтрал)
+        const compInputs = [inpSteel, inpPlastic, inpRubber, inpCopper];
+        compInputs.forEach(inp => {
+            if(inp) inp.style.backgroundColor = '';
+        });
+    }
+
+    // проверка компонентов
+    function checkComposition() {
+        let steel = parseFloat(inpSteel.value);
+        let plastic = parseFloat(inpPlastic.value);
+        let rubber = parseFloat(inpRubber.value);
+        let copper = parseFloat(inpCopper.value);
+        if(isNaN(steel)) steel = 0;
+        if(isNaN(plastic)) plastic = 0;
+        if(isNaN(rubber)) rubber = 0;
+        if(isNaN(copper)) copper = 0;
+        const correctComp = correctAnswers.composition;
+        const steelOk = (steel === correctComp.steel);
+        const plasticOk = (plastic === correctComp.plastic);
+        const rubberOk = (rubber === correctComp.rubber);
+        const copperOk = (copper === correctComp.copper);
+        const allOk = steelOk && plasticOk && rubberOk && copperOk;
+        // подсветка полей инпутов (пастельные)
+        inpSteel.style.backgroundColor = steelOk ? '#cfe6cd' : '#fad7d5';
+        inpPlastic.style.backgroundColor = plasticOk ? '#cfe6cd' : '#fad7d5';
+        inpRubber.style.backgroundColor = rubberOk ? '#cfe6cd' : '#fad7d5';
+        inpCopper.style.backgroundColor = copperOk ? '#cfe6cd' : '#fad7d5';
+        return allOk;
+    }
+
+    // общая проверка всех полей (кроме компонентов отдельно)
+    function checkAll() {
+        resetHighlights();
+        let allCorrect = true;
+        // проверка выпадающих списков
+        const wasteNameVal = selectWasteName.value;
+        const wasteCodeVal = selectWasteCode.value;
+        const originVal = selectOrigin.value;
+        const methodVal = selectMethod.value;
+        const formVal = selectForm.value;
+        const hazardVal = selectHazard.value;
+        const legalVal = selectLegal.value;
+
+        const isWasteNameCorrect = (wasteNameVal === correctAnswers.wasteName);
+        const isCodeCorrect = (wasteCodeVal === correctAnswers.wasteCode);
+        const isOriginCorrect = (originVal === correctAnswers.origin);
+        const isMethodCorrect = (methodVal === correctAnswers.method);
+        const isFormCorrect = (formVal === correctAnswers.form);
+        const isHazardCorrect = (hazardVal === correctAnswers.hazard);
+        const isLegalCorrect = (legalVal === correctAnswers.legalName);
+
+        const cellsMap = [
+            {cond: isWasteNameCorrect, cellId: 'cellWasteName', correctVal: correctAnswers.wasteName, userVal: wasteNameVal},
+            {cond: isCodeCorrect, cellId: 'cellWasteCode', correctVal: correctAnswers.wasteCode, userVal: wasteCodeVal},
+            {cond: isOriginCorrect, cellId: 'cellOrigin', correctVal: correctAnswers.origin, userVal: originVal},
+            {cond: isMethodCorrect, cellId: 'cellMethod', correctVal: correctAnswers.method, userVal: methodVal},
+            {cond: isFormCorrect, cellId: 'cellForm', correctVal: correctAnswers.form, userVal: formVal},
+            {cond: isHazardCorrect, cellId: 'cellHazardClass', correctVal: correctAnswers.hazard, userVal: hazardVal},
+            {cond: isLegalCorrect, cellId: 'cellLegalName', correctVal: correctAnswers.legalName, userVal: legalVal}
+        ];
+
+        cellsMap.forEach(item => {
+            const cell = document.getElementById(item.cellId);
+            if (cell) {
+                if (item.cond) {
+                    cell.classList.add('correct-highlight');
+                    cell.classList.remove('wrong-highlight');
+                } else {
+                    cell.classList.add('wrong-highlight');
+                    cell.classList.remove('correct-highlight');
+                    allCorrect = false;
+                }
+            }
+        });
+
+        // проверка компонентного состава
+        const compOk = checkComposition();
+        if (!compOk) allCorrect = false;
+        const compCellElem = document.getElementById('cellComposition');
+        if (compOk) {
+            compCellElem.classList.add('correct-highlight');
+            compCellElem.classList.remove('wrong-highlight');
+        } else {
+            compCellElem.classList.add('wrong-highlight');
+            compCellElem.classList.remove('correct-highlight');
+        }
+
+        // формируем обратную связь
+        const feedbackDiv = document.getElementById('feedbackMsg');
+        if (allCorrect) {
+            feedbackDiv.innerHTML = `🎉✨ Отлично! Все поля заполнены верно! Паспорт соответствует образцу. Вы великолепно разбираетесь в отходах! ✨🎉`;
+            feedbackDiv.style.borderLeftColor = "#9bc48b";
+            feedbackDiv.style.backgroundColor = "#e0f0db";
+        } else {
+            let errorsList = [];
+            if (!isWasteNameCorrect) errorsList.push(`Наименование отхода: должно быть "${correctAnswers.wasteName}"`);
+            if (!isCodeCorrect) errorsList.push(`Код ФККО: должен быть "${correctAnswers.wasteCode}"`);
+            if (!isOriginCorrect) errorsList.push(`Происхождение: "${correctAnswers.origin}"`);
+            if (!isMethodCorrect) errorsList.push(`Способ определения состава: верный вариант — "${correctAnswers.method}"`);
+            if (!isFormCorrect) errorsList.push(`Агрегатное состояние: "${correctAnswers.form}"`);
+            if (!isHazardCorrect) errorsList.push(`Класс опасности: "${correctAnswers.hazard}"`);
+            if (!isLegalCorrect) errorsList.push(`Юридическое лицо: "${correctAnswers.legalName}"`);
+            // компоненты
+            const c = correctAnswers.composition;
+            let compErrors = [];
+            if (parseFloat(inpSteel.value) !== c.steel) compErrors.push(`Сталь = ${c.steel}%`);
+            if (parseFloat(inpPlastic.value) !== c.plastic) compErrors.push(`Пластик = ${c.plastic}%`);
+            if (parseFloat(inpRubber.value) !== c.rubber) compErrors.push(`Резина = ${c.rubber}%`);
+            if (parseFloat(inpCopper.value) !== c.copper) compErrors.push(`Медь = ${c.copper}%`);
+            if (compErrors.length) errorsList.push(`Компонентный состав: верные значения — ${compErrors.join(', ')}.`);
+
+            feedbackDiv.innerHTML = `❌ Обнаружены ошибки. Проверьте следующие поля:<br><ul style="margin-top: 8px; margin-left: 20px;">${errorsList.map(e => `<li>${e}</li>`).join('')}</ul>Попробуйте ещё раз!`;
+            feedbackDiv.style.borderLeftColor = "#e7b7b0";
+            feedbackDiv.style.backgroundColor = "#fde7e4";
+        }
+    }
+
+    // функция fullscreen
+    function toggleFullscreen() {
+        const container = document.getElementById('passportRoot');
+        if (!document.fullscreenElement) {
+            container.requestFullscreen().catch(err => {
+                console.warn(`Ошибка fullscreen: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    // инициализация
+    function init() {
+        populateSelectors();
+        inpSteel = document.getElementById('compSteel');
+        inpPlastic = document.getElementById('compPlastic');
+        inpRubber = document.getElementById('compRubber');
+        inpCopper = document.getElementById('compCopper');
+        // установка нейтральных значений (пустые, но можно placeholder)
+        inpSteel.placeholder = "75";
+        inpPlastic.placeholder = "15";
+        inpRubber.placeholder = "7";
+        inpCopper.placeholder = "3";
+        // дополнительная иконка (убираем страшное)
+        const checkBtn = document.getElementById('checkButton');
+        checkBtn.addEventListener('click', checkAll);
+        const fullBtn = document.getElementById('fullscreenBtn');
+        fullBtn.addEventListener('click', toggleFullscreen);
+        // начальный сброс подсветки
+        resetHighlights();
+        // подсказка, что интерактив готов
+    }
+
+    init();
+</script>
+</body>
+</html>
