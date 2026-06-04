@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивный паспорт отходов ФККО</title>
+    <style>
+        :root {
+            --pastel-green: #d4edda;
+            --pastel-green-border: #28a745;
+            --pastel-green-text: #155724;
+            --pastel-red: #f8d7da;
+            --pastel-red-border: #dc3545;
+            --pastel-red-text: #721c24;
+            --primary-color: #007bff;
+            --primary-hover: #0056b3;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .fullscreen-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .fullscreen-btn:hover {
+            background-color: #5a6268;
+        }
+
+        .header-approve {
+            text-align: right;
+            margin-bottom: 30px;
+            margin-top: 40px;
+        }
+        .header-approve p {
+            margin: 5px 0;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 18px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .passport-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .passport-table th, .passport-table td {
+            border: 1px solid #dee2e6;
+            padding: 12px 15px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .passport-table th {
+            background-color: #e9ecef;
+            width: 45%;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .quiz-select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background-color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .quiz-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
+        }
+
+        .correct {
+            background-color: var(--pastel-green) !important;
+            border-color: var(--pastel-green-border) !important;
+            color: var(--pastel-green-text);
+        }
+
+        .incorrect {
+            background-color: var(--pastel-red) !important;
+            border-color: var(--pastel-red-border) !important;
+            color: var(--pastel-red-text);
+        }
+
+        .check-btn {
+            display: block;
+            width: 100%;
+            max-width: 350px;
+            margin: 20px auto;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .check-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        #resultMessage {
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .static-text {
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .normative-text {
+            background-color: #f8f9fa;
+            padding: 10px 12px;
+            border-left: 3px solid #6c757d;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #495057;
+            font-style: italic;
+        }
+
+        .comp-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        .comp-row:last-child {
+            border-bottom: none;
+        }
+        .comp-name {
+            font-weight: 500;
+            flex: 1;
+        }
+        .comp-select {
+            width: 120px;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .fullscreen-btn {
+                top: 10px;
+                right: 10px;
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            .passport-table, .passport-table tbody, .passport-table tr, .passport-table th, .passport-table td {
+                display: block;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .passport-table tr {
+                margin-bottom: 15px;
+                border: 1px solid #dee2e6;
+                border-radius: 6px;
+                overflow: hidden;
+            }
+            .passport-table th {
+                width: 100%;
+                background-color: #f8f9fa;
+                border-bottom: none;
+                font-size: 15px;
+            }
+            .passport-table td {
+                border-top: none;
+            }
+            .comp-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .comp-select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶ На весь экран</button>
+
+    <div class="header-approve">
+        <p><strong>УТВЕРЖДАЮ</strong></p>
+        <p>Директор ООО «Авангард»</p>
+        <p>____________ / И.М. Толкунов /</p>
+        <p>"____" _____________ 20___ г.</p>
+        <p>М.П.</p>
+    </div>
+
+    <h1>Паспорт отходов I-IV классов опасности,<br>включенных в Федеральный классификационный каталог отходов</h1>
+
+    <table class="passport-table">
+        <tr>
+            <th>Наименование вида отходов по ФККО</th>
+            <td><select id="name_waste" class="quiz-select"><option value="">-- Выберите вариант --</option></select></td>
+        </tr>
+        <tr>
+            <th>Код вида отходов по ФККО</th>
+            <td><select id="code_waste" class="quiz-select"><option value="">-- Выберите вариант --</option></select></td>
+        </tr>
+        <tr>
+            <th>Происхождение отходов</th>
+            <td><select id="origin_waste" class="quiz-select"><option value="">-- Выберите вариант --</option></select></td>
+        </tr>
+        <tr>
+            <th>Химический и (или) компонентный состав<br><small>(указывается в порядке убывания содержания)</small></th>
+            <td>
+                <div class="comp-row">
+                    <span class="comp-name">Сталь:</span>
+                    <select id="comp_steel" class="quiz-select comp-select"><option value="">-- % --</option></select>
+                </div>
+                <div class="comp-row">
+                    <span class="comp-name">Пластик:</span>
+                    <select id="comp_plastic" class="quiz-select comp-select"><option value="">-- % --</option></select>
+                </div>
+                <div class="comp-row">
+                    <span class="comp-name">Резина:</span>
+                    <select id="comp_rubber" class="quiz-select comp-select"><option value="">-- % --</option></select>
+                </div>
+                <div class="comp-row">
+                    <span class="comp-name">Медь:</span>
+                    <select id="comp_copper" class="quiz-select comp-select"><option value="">-- % --</option></select>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <th>Способ определения химического и (или) компонентного состава</th>
+            <td>
+                <div class="normative-text">
+                    ПНД Ф 16.3.55-08 Методика определения морфологического состава твердых отходов производства и потребления гравиметрическим методом
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <th>Агрегатное состояние и физическая форма</th>
+            <td><select id="aggregate_state" class="quiz-select"><option value="">-- Выберите вариант --</option></select></td>
+        </tr>
+        <tr>
+            <th>Класс опасности по степени негативного воздействия на ОС</th>
+            <td><select id="danger_class" class="quiz-select"><option value="">-- Выберите вариант --</option></select></td>
+        </tr>
+        <tr>
+            <th>Сведения о лице, которое образовало отходы</th>
+            <td class="static-text">
+                ООО «Авангард»<br>
+                ИНН: 7704504451 | ОКПО: 04719870 | ОКВЭД: 45.20<br>
+                Адрес: 400120, г. Волгоград, ул. Актюбинская, 21
+            </td>
+        </tr>
+    </table>
+
+    <button id="checkBtn" class="check-btn">Проверить заполнение</button>
+    <div id="resultMessage"></div>
+
+    <script>
+        // Данные для интерактивных полей (правильный ответ и правдоподобные неверные варианты)
+        const questions = {
+            name_waste: {
+                correct: "Электрочайник, утративший потребительские свойства",
+                options: [
+                    "Электрочайник, утративший потребительские свойства",
+                    "Электрочайник электрический, лом и отходы",
+                    "Чайник заварочный, утративший потребительские свойства",
+                    "Приборы бытовые электрические прочие, утратившие потребительские свойства"
+                ]
+            },
+            code_waste: {
+                correct: "4 82 524 11 52 4",
+                options: [
+                    "4 82 524 11 52 4",
+                    "4 82 524 11 39 4",
+                    "4 82 101 01 52 4",
+                    "4 69 111 11 52 4"
+                ]
+            },
+            origin_waste: {
+                correct: "Использование электрочайника с утратой потребительских свойств",
+                options: [
+                    "Использование электрочайника с утратой потребительских свойств",
+                    "Ремонт и техническое обслуживание электрочайников",
+                    "Производство электрочайников (возвратные отходы)",
+                    "Сортировка твердых коммунальных отходов"
+                ]
+            },
+            aggregate_state: {
+                correct: "Изделия из нескольких материалов",
+                options: [
+                    "Изделия из нескольких материалов",
+                    "Твердое вещество, кусковое",
+                    "Смесь твердых и жидких веществ",
+                    "Твердое вещество, пылевидное"
+                ]
+            },
+            danger_class: {
+                correct: "IV",
+                options: [
+                    "IV",
+                    "III",
+                    "II",
+                    "V"
+                ]
+            },
+            comp_steel: { correct: "75 %", options: ["75 %", "80 %", "60 %", "70 %", "85 %"] },
+            comp_plastic: { correct: "15 %", options: ["15 %", "10 %", "20 %", "25 %", "5 %"] },
+            comp_rubber: { correct: "7 %", options: ["7 %", "5 %", "10 %", "3 %", "15 %"] },
+            comp_copper: { correct: "3 %", options: ["3 %", "1 %", "5 %", "7 %", "10 %"] }
+        };
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            for (const [id, data] of Object.entries(questions)) {
+                const select = document.getElementById(id);
+                const shuffledOptions = shuffle([...data.options]);
+                
+                shuffledOptions.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt;
+                    select.appendChild(option);
+                });
+            }
+
+            document.getElementById('checkBtn').addEventListener('click', () => {
+                let allCorrect = true;
+                let answeredAll = true;
+                const resultDiv = document.getElementById('resultMessage');
+
+                for (const [id, data] of Object.entries(questions)) {
+                    const select = document.getElementById(id);
+                    const selectedValue = select.value;
+
+                    select.classList.remove('correct', 'incorrect');
+
+                    if (!selectedValue) {
+                        answeredAll = false;
+                        select.classList.add('incorrect');
+                        allCorrect = false;
+                    } else if (selectedValue === data.correct) {
+                        select.classList.add('correct');
+                    } else {
+                        select.classList.add('incorrect');
+                        allCorrect = false;
+                    }
+                }
+
+                resultDiv.style.display = 'block';
+                if (!answeredAll) {
+                    resultDiv.textContent = "⚠️ Пожалуйста, заполните все поля (включая проценты состава) перед проверкой!";
+                    resultDiv.style.backgroundColor = "#fff3cd";
+                    resultDiv.style.color = "#856404";
+                    resultDiv.style.border = "1px solid #ffeeba";
+                } else if (allCorrect) {
+                    resultDiv.textContent = "✅ Отлично! Все ответы верны. Паспорт заполнен безупречно.";
+                    resultDiv.style.backgroundColor = "var(--pastel-green)";
+                    resultDiv.style.color = "var(--pastel-green-text)";
+                    resultDiv.style.border = "1px solid var(--pastel-green-border)";
+                } else {
+                    resultDiv.textContent = "❌ Есть ошибки. Поля, подсвеченные красным, заполнены неверно. Попробуйте еще раз.";
+                    resultDiv.style.backgroundColor = "var(--pastel-red)";
+                    resultDiv.style.color = "var(--pastel-red-text)";
+                    resultDiv.style.border = "1px solid var(--pastel-red-border)";
+                }
+            });
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Ошибка при попытке перейти в полноэкранный режим: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
