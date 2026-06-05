@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Интерактив: Классы опасности отходов — Ретро-телевизор</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* отключаем выделение, но не трогаем прокрутку */
+        }
+
+        /* На десктопе — без прокрутки страницы, контент центрируется */
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background: #1e1915;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', 'Courier', 'VT323', monospace;
+            padding: 16px;
+            overflow-y: auto; /* на мобильных устройствах прокрутка будет работать */
+        }
+
+        /* Для экранов, где контент не помещается по вертикали — включаем прокрутку */
+        @media (max-width: 700px) and (max-height: 700px) {
+            body {
+                align-items: flex-start;
+                padding: 16px;
+            }
+        }
+
+        /* Обёртка — гибкая, подстраивается под контент */
+        .tv-wrapper {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* ========== РЕТРО-ТЕЛЕВИЗОР С АНТЕННОЙ ========== */
+        .retro-tv {
+            background: #5a3e2b;
+            border-radius: clamp(30px, 8vw, 60px) clamp(30px, 8vw, 60px) clamp(40px, 10vw, 80px) clamp(40px, 10vw, 80px);
+            padding: clamp(12px, 4vw, 25px) clamp(16px, 5vw, 30px) clamp(20px, 6vw, 40px) clamp(16px, 5vw, 30px);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 3px rgba(255, 245, 200, 0.2);
+            position: relative;
+            margin-top: clamp(40px, 10vw, 70px);
+        }
+
+        /* ========== АНТЕННА ========== */
+        .antenna {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 70px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .antenna-base {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 20px;
+            background: linear-gradient(135deg, #8b694a, #5a3e2b);
+            border-radius: 4px 4px 8px 8px;
+            box-shadow: inset 0 1px 0 rgba(255,255,200,0.3), 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .antenna-left {
+            position: absolute;
+            bottom: 12px;
+            left: 20%;
+            width: 6px;
+            height: 60px;
+            background: linear-gradient(135deg, #b8895a, #7a5a3a);
+            transform: rotate(-35deg);
+            transform-origin: bottom left;
+            border-radius: 6px 6px 2px 2px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .antenna-left::after {
+            content: "●";
+            position: absolute;
+            top: -8px;
+            left: -4px;
+            font-size: 14px;
+            color: #d4a76a;
+            text-shadow: 0 0 2px #ffdd99;
+        }
+
+        .antenna-right {
+            position: absolute;
+            bottom: 12px;
+            right: 20%;
+            width: 6px;
+            height: 60px;
+            background: linear-gradient(135deg, #b8895a, #7a5a3a);
+            transform: rotate(35deg);
+            transform-origin: bottom right;
+            border-radius: 6px 6px 2px 2px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .antenna-right::after {
+            content: "●";
+            position: absolute;
+            top: -8px;
+            right: -4px;
+            font-size: 14px;
+            color: #d4a76a;
+            text-shadow: 0 0 2px #ffdd99;
+        }
+
+        @media (max-width: 640px) {
+            .antenna { width: 140px; top: -50px; }
+            .antenna-left, .antenna-right { height: 48px; width: 5px; }
+            .antenna-left::after, .antenna-right::after { font-size: 10px; top: -6px; }
+            .antenna-base { width: 12px; height: 16px; }
+            .retro-tv { margin-top: clamp(35px, 8vw, 60px); }
+        }
+
+        @media (max-width: 480px) {
+            .antenna { width: 110px; top: -42px; }
+            .antenna-left, .antenna-right { height: 40px; }
+        }
+
+        /* Ручка сверху */
+        .retro-tv::before {
+            content: "";
+            position: absolute;
+            top: clamp(6px, 2vw, 12px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: clamp(80px, 20vw, 120px);
+            height: clamp(10px, 2.5vw, 18px);
+            background: #b87c4f;
+            border-radius: 30px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 1px 0 rgba(255,245,200,0.6);
+            z-index: 3;
+        }
+
+        /* Динамик снизу */
+        .retro-tv::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 20%;
+            width: 60%;
+            height: 10px;
+            background: #3e2a1c;
+            border-radius: 20px;
+            filter: blur(2px);
+            opacity: 0.6;
+            z-index: 0;
+        }
+
+        /* Экран */
+        .tv-screen {
+            background: #fef3e0;
+            border-radius: clamp(16px, 5vw, 28px);
+            overflow: hidden;
+            box-shadow: inset 0 0 0 clamp(3px, 1vw, 6px) #d8b182, inset 0 0 0 clamp(6px, 2vw, 12px) #aa794c, 0 8px 20px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .tv-screen::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 40%, rgba(255,245,220,0.1) 0%, rgba(0,0,0,0.15) 90%);
+            pointer-events: none;
+            z-index: 2;
+            border-radius: inherit;
+        }
+
+        .tv-screen::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 2px, transparent 2px, transparent 6px);
+            pointer-events: none;
+            z-index: 2;
+            border-radius: inherit;
+        }
+
+        /* Карусель — горизонтальный скролл, без вертикальной прокрутки внутри */
+        .carousel {
+            display: flex;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            background: #fef3e0;
+            border-radius: clamp(12px, 3vw, 24px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .carousel::-webkit-scrollbar {
+            height: 4px;
+            background-color: #e2cfb5;
+            border-radius: 4px;
+        }
+        .carousel::-webkit-scrollbar-thumb {
+            background-color: #b48b5a;
+            border-radius: 4px;
+        }
+
+        .slide {
+            flex: 0 0 100%;
+            scroll-snap-align: start;
+            background: #fef3e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            background: #fef3e0;
+            pointer-events: none;
+        }
+
+        /* Панель управления */
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: clamp(12px, 4vw, 18px) clamp(12px, 5vw, 28px) clamp(8px, 3vw, 12px) clamp(12px, 5vw, 28px);
+            background: transparent;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .nav-btn, .fullscreen-btn {
+            background: #3d2c1d;
+            border: none;
+            font-size: clamp(1.2rem, 5vw, 1.5rem);
+            font-weight: bold;
+            color: #fbeccd;
+            width: clamp(44px, 12vw, 52px);
+            height: clamp(44px, 12vw, 52px);
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.1s linear;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 0 #1f140a, inset 0 1px 2px rgba(255,245,180,0.3);
+            font-family: monospace;
+            touch-action: manipulation;
+        }
+
+        .nav-btn:active, .fullscreen-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #1f140a;
+        }
+
+        .indicators {
+            display: flex;
+            gap: clamp(6px, 2vw, 12px);
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            max-width: 50%;
+            flex: 1;
+        }
+
+        .dot {
+            width: clamp(8px, 3vw, 11px);
+            height: clamp(8px, 3vw, 11px);
+            background: #cfa776;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 0 2px #4f2e12;
+            flex-shrink: 0;
+        }
+
+        .dot.active {
+            background: #f5bc70;
+            width: clamp(18px, 6vw, 26px);
+            box-shadow: 0 0 5px #ffcf8a;
+        }
+
+        .counter {
+            font-size: clamp(0.75rem, 3vw, 1rem);
+            font-weight: bold;
+            background: #2f241b;
+            padding: clamp(4px, 2vw, 6px) clamp(10px, 3vw, 16px);
+            border-radius: 40px;
+            color: #f8e2b0;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            box-shadow: inset 0 0 4px #1a1008, 0 2px 4px rgba(0,0,0,0.3);
+            white-space: nowrap;
+        }
+
+        .right-group {
+            display: flex;
+            align-items: center;
+            gap: clamp(8px, 2.5vw, 12px);
+        }
+
+        .left-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Планшеты и десктопы */
+        @media (min-width: 768px) {
+            body {
+                padding: 24px;
+            }
+            .nav-controls {
+                gap: 20px;
+            }
+            .indicators {
+                max-width: 400px;
+            }
+        }
+
+        /* На маленьких экранах (смартфоны) если телевизор не влезает по высоте — появляется прокрутка страницы */
+        @media (max-width: 700px) {
+            body {
+                display: block;
+                padding: 20px 16px;
+            }
+            .tv-wrapper {
+                max-width: 100%;
+            }
+        }
+
+        /* Полноэкранный режим */
+        .retro-tv:fullscreen {
+            background: #5a3e2b;
+            border-radius: 30px;
+            padding: clamp(16px, 4vh, 30px);
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-top: 0;
+        }
+
+        .retro-tv:fullscreen .antenna {
+            display: none;
+        }
+
+        .retro-tv:fullscreen .tv-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .retro-tv:fullscreen .carousel {
+            flex: 1;
+            height: auto;
+        }
+
+        .retro-tv:fullscreen .slide img {
+            max-height: 80vh;
+            width: auto;
+            margin: 0 auto;
+        }
+
+        .retro-tv:-webkit-full-screen {
+            background: #5a3e2b;
+            border-radius: 30px;
+            padding: clamp(16px, 4vh, 30px);
+            width: 100vw;
+            height: 100vh;
+            margin-top: 0;
+        }
+        .retro-tv:-webkit-full-screen .antenna {
+            display: none;
+        }
+        .retro-tv:-webkit-full-screen .slide img {
+            max-height: 80vh;
+            width: auto;
+            margin: 0 auto;
+        }
+
+        /* Лампочка питания */
+        .power-led {
+            position: absolute;
+            bottom: clamp(8px, 3vw, 20px);
+            right: clamp(12px, 4vw, 35px);
+            width: clamp(8px, 2.5vw, 12px);
+            height: clamp(8px, 2.5vw, 12px);
+            background: #61d96b;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #83fc8e;
+            opacity: 0.85;
+            z-index: 4;
+        }
+    </style>
+</head>
+<body>
+<div class="tv-wrapper">
+    <div class="retro-tv" id="retroTVContainer">
+        <!-- АНТЕННА -->
+        <div class="antenna">
+            <div class="antenna-left"></div>
+            <div class="antenna-right"></div>
+            <div class="antenna-base"></div>
+        </div>
+
+        <div class="power-led"></div>
+        
+        <div class="tv-screen">
+            <div class="carousel" id="carousel">
+                <div class="slide" data-index="0">
+                    <img src="слайд 1.png" alt="I класс – асбест, ртутные лампы">
+                </div>
+                <div class="slide" data-index="1">
+                    <img src="слайд 2.png" alt="I класс – болезнь Минамата">
+                </div>
+                <div class="slide" data-index="2">
+                    <img src="слайд 3.png" alt="II класс – пестициды">
+                </div>
+                <div class="slide" data-index="3">
+                    <img src="слайд 4.png" alt="II класс – Венгрия, красный шлам">
+                </div>
+                <div class="slide" data-index="4">
+                    <img src="слайд 5.png" alt="III класс – куриный помёт">
+                </div>
+                <div class="slide" data-index="5">
+                    <img src="слайд 6.png" alt="III класс – разлив мазута">
+                </div>
+                <div class="slide" data-index="6">
+                    <img src="слайд 7.png" alt="IV класс – пищевые отходы">
+                </div>
+                <div class="slide" data-index="7">
+                    <img src="слайд 8.png" alt="IV класс – полигон ТКО">
+                </div>
+                <div class="slide" data-index="8">
+                    <img src="слайд 9.png" alt="V класс – офисная бумага">
+                </div>
+                <div class="slide" data-index="9">
+                    <img src="слайд 10.png" alt="V класс – мусорное пятно в океане">
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-controls">
+            <div class="left-group">
+                <button class="nav-btn" id="prevBtn" aria-label="Предыдущий слайд" title="Назад (←)">◀</button>
+            </div>
+            <div class="indicators" id="indicators"></div>
+            <div class="right-group">
+                <button class="nav-btn" id="nextBtn" aria-label="Следующий слайд" title="Вперёд (→)">▶</button>
+                <button class="fullscreen-btn" id="fullscreenBtn" aria-label="Полноэкранный режим" title="На весь экран (F)">⛶</button>
+                <div class="counter" id="slideCounter">1 / 10</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const retroContainer = document.getElementById('retroTVContainer');
+        const carousel = document.getElementById('carousel');
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const indicatorsContainer = document.getElementById('indicators');
+        const counterSpan = document.getElementById('slideCounter');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+        const totalSlides = slides.length;
+        let currentIndex = 0;
+        let scrollTimeout = null;
+
+        function updateUI(index) {
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, i) => {
+                if (i === index) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
+            counterSpan.innerText = `${index + 1} / ${totalSlides}`;
+        }
+
+        function scrollToSlide(index) {
+            if (index < 0) index = 0;
+            if (index >= totalSlides) index = totalSlides - 1;
+            const slideElement = slides[index];
+            if (slideElement) {
+                slideElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'start'
+                });
+                currentIndex = index;
+                updateUI(currentIndex);
+            }
+        }
+
+        function getCurrentSlideIndex() {
+            const carouselRect = carousel.getBoundingClientRect();
+            if (!carouselRect.width) return 0;
+            let closestIndex = 0;
+            let minDistance = Infinity;
+            slides.forEach((slide, idx) => {
+                const rect = slide.getBoundingClientRect();
+                const slideCenter = rect.left + rect.width / 2;
+                const viewCenter = carouselRect.left + carouselRect.width / 2;
+                const distance = Math.abs(slideCenter - viewCenter);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestIndex = idx;
+                }
+            });
+            return closestIndex;
+        }
+
+        function handleScroll() {
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const newIndex = getCurrentSlideIndex();
+                if (newIndex !== currentIndex) {
+                    currentIndex = newIndex;
+                    updateUI(currentIndex);
+                }
+            }, 50);
+        }
+
+        carousel.addEventListener('scroll', handleScroll);
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                const newIdx = getCurrentSlideIndex();
+                if (newIdx !== currentIndex) {
+                    currentIndex = newIdx;
+                    updateUI(currentIndex);
+                }
+                if (slides[currentIndex]) {
+                    slides[currentIndex].scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
+                }
+            }, 100);
+        });
+
+        function nextSlide() {
+            if (currentIndex < totalSlides - 1) scrollToSlide(currentIndex + 1);
+        }
+        function prevSlide() {
+            if (currentIndex > 0) scrollToSlide(currentIndex - 1);
+        }
+
+        prevBtn.addEventListener('click', prevSlide);
+        nextBtn.addEventListener('click', nextSlide);
+
+        function createIndicators() {
+            indicatorsContainer.innerHTML = '';
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    scrollToSlide(i);
+                });
+                indicatorsContainer.appendChild(dot);
+            }
+        }
+        createIndicators();
+
+        setTimeout(() => {
+            const startIdx = getCurrentSlideIndex();
+            if (startIdx !== 0) scrollToSlide(0);
+            else {
+                currentIndex = 0;
+                updateUI(0);
+            }
+        }, 30);
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') { prevSlide(); e.preventDefault(); }
+            else if (e.key === 'ArrowRight') { nextSlide(); e.preventDefault(); }
+            else if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); e.preventDefault(); }
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                const elem = retroContainer;
+                const requestMethod = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.msRequestFullscreen;
+                if (requestMethod) requestMethod.call(elem).catch(err => console.warn(err));
+            } else {
+                const exitMethod = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+                if (exitMethod) exitMethod.call(document);
+            }
+        }
+
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+        function onFullscreenChange() {
+            const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+            if (isFullscreen) {
+                fullscreenBtn.textContent = '✖';
+                fullscreenBtn.setAttribute('aria-label', 'Выйти из полноэкранного режима');
+                fullscreenBtn.title = 'Выйти (Esc)';
+            } else {
+                fullscreenBtn.textContent = '⛶';
+                fullscreenBtn.setAttribute('aria-label', 'Полноэкранный режим');
+                fullscreenBtn.title = 'На весь экран (F)';
+            }
+            setTimeout(() => {
+                const newIdx = getCurrentSlideIndex();
+                if (newIdx !== currentIndex) {
+                    currentIndex = newIdx;
+                    updateUI(currentIndex);
+                }
+                if (slides[currentIndex]) {
+                    slides[currentIndex].scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
+                }
+            }, 70);
+        }
+
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+
+        const style = document.createElement('style');
+        style.textContent = `
+            .carousel { scroll-snap-type: x mandatory; scroll-padding: 0; overflow-y: hidden; }
+            .slide { scroll-snap-align: start; }
+            .retro-tv:fullscreen .tv-screen,
+            .retro-tv:-webkit-full-screen .tv-screen { flex: 1; display: flex; align-items: center; }
+            .retro-tv:fullscreen .carousel,
+            .retro-tv:-webkit-full-screen .carousel { flex: 1; height: auto; max-height: 85vh; }
+            .retro-tv:fullscreen .slide img,
+            .retro-tv:-webkit-full-screen .slide img { max-height: 80vh; width: auto; object-fit: contain; }
+            button { touch-action: manipulation; }
+        `;
+        document.head.appendChild(style);
+
+        const resizeObserver = new ResizeObserver(() => {
+            const idx = getCurrentSlideIndex();
+            if (idx !== currentIndex) {
+                currentIndex = idx;
+                updateUI(currentIndex);
+            }
+        });
+        resizeObserver.observe(carousel);
+    })();
+</script>
+</body>
+</html>
