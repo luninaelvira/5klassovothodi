@@ -245,6 +245,7 @@
             gap: 10px;
             flex-wrap: wrap;
             margin-top: 8px;
+            position: relative;
         }
 
         .nav-btn, .fullscreen-btn {
@@ -411,6 +412,52 @@
 
 <script>
     (function() {
+        // ----- РЕШЕНИЕ 2: Пытаемся добавить разрешения iframe (тихо, без лишних кнопок) -----
+        function fixIframePermissions() {
+            try {
+                // Проверяем, находимся ли внутри iframe
+                if (window.self !== window.top) {
+                    // Пытаемся получить iframe, в котором мы встроены
+                    const iframes = window.parent.document.querySelectorAll('iframe');
+                    let myIframe = null;
+                    for (let ifr of iframes) {
+                        try {
+                            if (ifr.contentWindow === window) {
+                                myIframe = ifr;
+                                break;
+                            }
+                        } catch(e) { /* cross-origin, пропускаем */ }
+                    }
+                    if (myIframe) {
+                        // Добавляем необходимые атрибуты
+                        let changed = false;
+                        if (!myIframe.hasAttribute('allowfullscreen')) {
+                            myIframe.setAttribute('allowfullscreen', '');
+                            changed = true;
+                        }
+                        if (!myIframe.hasAttribute('allow')) {
+                            myIframe.setAttribute('allow', 'fullscreen');
+                            changed = true;
+                        } else if (myIframe.getAttribute('allow').indexOf('fullscreen') === -1) {
+                            myIframe.setAttribute('allow', myIframe.getAttribute('allow') + '; fullscreen');
+                            changed = true;
+                        }
+                        if (changed) {
+                            console.log('✅ Iframe разрешения добавлены: allowfullscreen, allow="fullscreen"');
+                        }
+                        return true;
+                    }
+                }
+            } catch(e) {
+                console.warn('❌ Не удалось добавить разрешения iframe (cross-origin или ошибка):', e);
+            }
+            return false;
+        }
+
+        // Пытаемся исправить разрешения при загрузке
+        fixIframePermissions();
+
+        // Получаем элементы
         const retroContainer = document.getElementById('retroTVContainer');
         const carousel = document.getElementById('carousel');
         const slides = document.querySelectorAll('.slide');
@@ -509,27 +556,22 @@
             else if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); e.preventDefault(); }
         });
 
-        // ========== УЛУЧШЕННЫЙ ПОЛНОЭКРАННЫЙ РЕЖИМ ==========
         function toggleFullscreen() {
             const elem = retroContainer;
-            
-            // Проверяем, находимся ли мы уже в полноэкранном режиме
             const isFullscreenNow = !!(document.fullscreenElement || document.webkitFullscreenElement);
             
             if (!isFullscreenNow) {
-                // Пытаемся войти в полноэкранный режим
                 const requestMethod = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.msRequestFullscreen;
                 if (requestMethod) {
                     requestMethod.call(elem).catch(err => {
                         console.warn('Fullscreen error:', err);
-                        // Пользовательское уведомление (опционально)
-                        alert('Полноэкранный режим недоступен. Проверьте, что страница открыта по HTTPS и разрешены полноэкранные запросы.');
+                        // Тихое сообщение без дурацких кнопок — просто объясняем причину
+                        alert('Полноэкранный режим недоступен.\n\nПричина: страница открыта по HTTP или в iframe нет разрешения allowfullscreen.\n\nРекомендация: откройте этот интерактив в отдельной вкладке браузера.');
                     });
                 } else {
                     alert('Ваш браузер не поддерживает полноэкранный режим');
                 }
             } else {
-                // Выходим из полноэкранного режима
                 const exitMethod = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
                 if (exitMethod) exitMethod.call(document);
             }
@@ -546,7 +588,6 @@
                 fullscreenBtn.textContent = '⛶';
                 fullscreenBtn.title = 'На весь экран (F)';
             }
-            // Корректируем позицию слайда после смены режима
             setTimeout(() => {
                 const newIdx = getCurrentSlideIndex();
                 if (newIdx !== currentIndex) {
