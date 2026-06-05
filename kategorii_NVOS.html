@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Эко-тренажёр: Категории НВОС</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Nunito', 'Helvetica Neue', sans-serif;
+            background: #eef2f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        /* Основная карточка */
+        .quiz-container {
+            max-width: 650px;
+            width: 100%;
+            background: #ffffffdd;
+            backdrop-filter: blur(2px);
+            border-radius: 48px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        /* Хедер с прогрессом */
+        .progress-area {
+            background: #fef9f0;
+            padding: 20px 28px 12px 28px;
+            border-bottom: 1px solid #ffe6c7;
+        }
+
+        .step-badge {
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #c29a6b;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-bg {
+            background: #eedfcb;
+            border-radius: 40px;
+            height: 6px;
+            width: 100%;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: #b7ccb1;
+            width: 0%;
+            height: 100%;
+            border-radius: 40px;
+            transition: width 0.3s ease;
+        }
+
+        /* Основной контент */
+        .question-card {
+            padding: 28px 28px 20px 28px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2c4230;
+            letter-spacing: -0.3px;
+            margin-bottom: 12px;
+        }
+
+        .company-desc {
+            background: #faf7f0;
+            padding: 18px 20px;
+            border-radius: 32px;
+            margin: 16px 0 20px 0;
+            border-left: 6px solid #c2d4b6;
+            color: #2e3f2c;
+            font-size: 1rem;
+            line-height: 1.45;
+            box-shadow: inset 0 0 0 1px #f3ede2, 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .company-desc strong {
+            font-weight: 700;
+            color: #5f7c4b;
+        }
+
+        .question-text {
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin: 20px 0 12px 0;
+            color: #424242;
+            background: #fff6ea;
+            display: inline-block;
+            padding: 5px 18px;
+            border-radius: 60px;
+        }
+
+        /* Варианты ответов (плитки) */
+        .options-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin: 20px 0 28px;
+            justify-content: center;
+        }
+
+        .option-btn {
+            flex: 1;
+            min-width: 80px;
+            background: #f9f5ed;
+            border: 1px solid #e5daca;
+            border-radius: 60px;
+            padding: 12px 8px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            font-family: monospace;
+            letter-spacing: 1px;
+            color: #4f5a44;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        .option-btn:hover {
+            background: #e7efdf;
+            border-color: #bbcbaa;
+            transform: translateY(-2px);
+        }
+
+        /* обратная связь */
+        .feedback {
+            background: #f4efe7;
+            border-radius: 28px;
+            padding: 18px 22px;
+            margin: 12px 0 16px;
+            transition: all 0.2s;
+            border-left: 5px solid #b7ccb1;
+        }
+
+        .feedback.correct {
+            background: #e0f0dd;
+            border-left-color: #5c9e4c;
+        }
+
+        .feedback.wrong {
+            background: #ffe8e3;
+            border-left-color: #e6a28e;
+        }
+
+        .feedback p {
+            margin: 6px 0;
+            font-size: 0.95rem;
+        }
+
+        .feedback-emoji {
+            font-size: 1.5rem;
+            margin-right: 8px;
+        }
+
+        .explanation {
+            font-size: 0.9rem;
+            color: #4a4a4a;
+            margin-top: 10px;
+            padding-top: 6px;
+            border-top: 1px dashed #cfcbbc;
+        }
+
+        .next-btn {
+            background: #b7ccb1;
+            border: none;
+            width: 100%;
+            padding: 14px 0;
+            border-radius: 80px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2a422a;
+            margin-top: 12px;
+            cursor: pointer;
+            transition: 0.15s;
+            font-family: inherit;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .next-btn:active {
+            transform: scale(0.97);
+        }
+
+        .next-btn:disabled {
+            background: #ddd8ce;
+            color: #8e8a7c;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-area {
+            text-align: center;
+            padding: 20px 28px 32px;
+        }
+
+        .restart-btn {
+            background: #d9cfb5;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-top: 16px;
+            cursor: pointer;
+            transition: 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            background: #f9f6ef;
+            padding: 12px;
+            color: #9c9180;
+            border-top: 1px solid #eee3d4;
+        }
+
+        @media (max-width: 480px) {
+            .question-card {
+                padding: 20px;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            .option-btn {
+                font-size: 1.3rem;
+                padding: 8px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container" id="app">
+    <div class="progress-area">
+        <div class="step-badge" id="stepLabel">Задание 1 из 3</div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+    <div id="dynamicContent"></div>
+    <footer>🌿 Категории НВОС — интерактивный тест</footer>
+</div>
+
+<script>
+    // Данные задач (Ситуация 3 исправлена: 2 млн 300 тыс. птицемест, у Ситуации 2 новое обоснование)
+    const QUIZ_DATA = [
+        {
+            title: "ООО «ЗаСтеклом»",
+            description: "Занимается производством стекла и стекольных изделий. Есть выбросы, сбросы и отходы. Проектная мощность завода — 500 тонн в сутки.",
+            question: "Какой категории должен стоять на учёте как объект НВОС?",
+            options: ["I", "II", "III", "IV"],
+            correct: "I",
+            explanation: "Согласно Критериям, объекты, осуществляющие производство стекла с проектной производительностью 20 тонн в сутки и более, относятся к I категории НВОС."
+        },
+        {
+            title: "ООО «Моло-КоКо»",
+            description: "Производит молочную продукцию. Есть выбросы, сбросы и отходы. Сточные воды проходят очистку на ЛОС и сбрасываются в реку.",
+            question: "К какой категории относится ООО «Моло-КоКо»?",
+            options: ["I", "II", "III", "IV"],
+            correct: "II",
+            explanation: "Предприятия по производству молочной продукции в случае осуществления сбросов загрязняющих веществ в составе сточных вод в водные объекты с использованием локальных очистных сооружений подпадают под критерии II категории НВОС."
+        },
+        {
+            title: "АО «Рябы»",
+            description: "Разводит сельскохозяйственную птицу в количестве 2 млн 300 тыс. птицемест.",
+            question: "К какой категории относится АО «Рябы»?",
+            options: ["I", "II", "III", "IV"],
+            correct: "I",
+            explanation: "Согласно критериям, предприятия с содержанием птицы от 2 млн птицемест относятся к I категории НВОС. (Мощность 2 300 000 птицемест превышает порог в 2 млн.)"
+        }
+    ];
+
+    let currentIndex = 0;
+    let userAnswers = new Array(QUIZ_DATA.length).fill(null);
+    let answerStatus = new Array(QUIZ_DATA.length).fill(false);
+    let hasAnsweredCurrent = false;
+    let selectedOptionForCurrent = null;
+    let isCorrectAnswerSelected = false;
+
+    const app = document.getElementById('dynamicContent');
+    const stepLabelSpan = document.getElementById('stepLabel');
+    const progressFillDiv = document.getElementById('progressFill');
+
+    function updateProgressAndStep() {
+        if (currentIndex < QUIZ_DATA.length) {
+            stepLabelSpan.innerText = `Задание ${currentIndex+1} из ${QUIZ_DATA.length}`;
+            const answeredCount = userAnswers.filter(a => a !== null).length;
+            const percent = (answeredCount / QUIZ_DATA.length) * 100;
+            progressFillDiv.style.width = `${percent}%`;
+        } else {
+            stepLabelSpan.innerText = `Результат`;
+            progressFillDiv.style.width = `100%`;
+        }
+    }
+
+    function renderCurrentQuestion() {
+        if (currentIndex >= QUIZ_DATA.length) {
+            renderResult();
+            return;
+        }
+
+        const data = QUIZ_DATA[currentIndex];
+        const isAlreadyAnswered = (userAnswers[currentIndex] !== null);
+        
+        if (isAlreadyAnswered) {
+            hasAnsweredCurrent = true;
+            selectedOptionForCurrent = userAnswers[currentIndex];
+            isCorrectAnswerSelected = (selectedOptionForCurrent === data.correct);
+        } else {
+            hasAnsweredCurrent = false;
+            selectedOptionForCurrent = null;
+            isCorrectAnswerSelected = false;
+        }
+
+        let html = `
+            <div class="question-card">
+                <h2>🏭 ${escapeHtml(data.title)}</h2>
+                <div class="company-desc">
+                    <strong>📋 Описание:</strong> ${escapeHtml(data.description)}
+                </div>
+                <div class="question-text">❓ ${escapeHtml(data.question)}</div>
+                <div class="options-grid" id="optionsGrid">
+        `;
+
+        for (let opt of data.options) {
+            let selectedMark = (selectedOptionForCurrent === opt) ? ' ✔️' : '';
+            html += `<div class="option-btn" data-opt="${opt}">${opt}${selectedMark}</div>`;
+        }
+
+        html += `</div>`;
+
+        if (hasAnsweredCurrent) {
+            const isCorrect = isCorrectAnswerSelected;
+            const correctLetter = data.correct;
+            const feedbackClass = isCorrect ? 'correct' : 'wrong';
+            const emoji = isCorrect ? '✅' : '❌';
+            const userChoice = selectedOptionForCurrent;
+            const message = isCorrect 
+                ? `Верно! Категория ${correctLetter}.` 
+                : `Неверно. Вы выбрали категорию ${userChoice}, а правильный ответ — ${correctLetter}.`;
+            html += `
+                <div class="feedback ${feedbackClass}">
+                    <p><span class="feedback-emoji">${emoji}</span> ${message}</p>
+                    <div class="explanation">💡 <strong>Обоснование:</strong> ${escapeHtml(data.explanation)}</div>
+                </div>
+            `;
+        } else {
+            html += `<div class="feedback" style="background: #faf6ed; opacity:0.8;"><p>💡 Нажмите на вариант ответа, чтобы проверить себя.</p></div>`;
+        }
+
+        const nextDisabled = !hasAnsweredCurrent ? 'disabled' : '';
+        const isLast = (currentIndex === QUIZ_DATA.length - 1);
+        const nextButtonText = isLast ? 'Завершить тест →' : 'Далее →';
+        html += `<button class="next-btn" id="nextButton" ${nextDisabled}>${nextButtonText}</button>`;
+        html += `</div>`;
+
+        app.innerHTML = html;
+
+        // Обработчики для вариантов
+        const optionDivs = document.querySelectorAll('.option-btn');
+        optionDivs.forEach(div => {
+            div.addEventListener('click', (e) => {
+                if (hasAnsweredCurrent) return;
+                const chosen = div.getAttribute('data-opt');
+                if (!chosen) return;
+                selectedOptionForCurrent = chosen;
+                const correctAns = data.correct;
+                const isCorrect = (chosen === correctAns);
+                isCorrectAnswerSelected = isCorrect;
+                hasAnsweredCurrent = true;
+                userAnswers[currentIndex] = chosen;
+                answerStatus[currentIndex] = isCorrect;
+                renderCurrentQuestion();
+                updateProgressAndStep();
+            });
+        });
+
+        // Подсветка уже отвеченных вариантов
+        if (hasAnsweredCurrent) {
+            const allOptions = document.querySelectorAll('.option-btn');
+            allOptions.forEach(btn => {
+                const optVal = btn.getAttribute('data-opt');
+                if (optVal === data.correct) {
+                    btn.style.background = "#cbe5c2";
+                    btn.style.borderColor = "#8fbc73";
+                    btn.style.color = "#254e1a";
+                }
+                if (userAnswers[currentIndex] === optVal && userAnswers[currentIndex] !== data.correct) {
+                    btn.style.background = "#f7cfc1";
+                    btn.style.borderColor = "#e2a28b";
+                    btn.style.color = "#914b32";
+                }
+                if (userAnswers[currentIndex] === optVal && userAnswers[currentIndex] === data.correct) {
+                    btn.style.background = "#b9dcac";
+                    btn.style.fontWeight = "bold";
+                }
+            });
+        }
+
+        const nextBtn = document.getElementById('nextButton');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (!hasAnsweredCurrent) return;
+                if (currentIndex < QUIZ_DATA.length - 1) {
+                    currentIndex++;
+                    if (userAnswers[currentIndex] !== null) {
+                        hasAnsweredCurrent = true;
+                        selectedOptionForCurrent = userAnswers[currentIndex];
+                        isCorrectAnswerSelected = (selectedOptionForCurrent === QUIZ_DATA[currentIndex].correct);
+                    } else {
+                        hasAnsweredCurrent = false;
+                        selectedOptionForCurrent = null;
+                        isCorrectAnswerSelected = false;
+                    }
+                    renderCurrentQuestion();
+                    updateProgressAndStep();
+                } else {
+                    if (hasAnsweredCurrent) {
+                        currentIndex++;
+                        renderResult();
+                        updateProgressAndStep();
+                    }
+                }
+            });
+        }
+    }
+
+    function renderResult() {
+        let totalCorrect = 0;
+        for (let i = 0; i < QUIZ_DATA.length; i++) {
+            if (userAnswers[i] === QUIZ_DATA[i].correct) totalCorrect++;
+        }
+        const totalTasks = QUIZ_DATA.length;
+        const percent = Math.round((totalCorrect / totalTasks) * 100);
+        let message = '';
+        if (percent === 100) message = '🌟 Превосходно! Вы отлично знаете категории НВОС!';
+        else if (percent >= 66) message = '🌿 Хороший результат, но стоит повторить критерии.';
+        else message = '📘 Попробуйте ещё раз — обратите внимание на обоснования.';
+
+        let resultHtml = `
+            <div class="result-area">
+                <div style="font-size: 3rem; margin: 10px 0;">🏭📊</div>
+                <h2 style="font-size: 1.9rem;">Ваш результат</h2>
+                <div style="background: #e4efdf; border-radius: 80px; padding: 12px 18px; margin: 20px 0; display: inline-block; width: auto;">
+                    <span style="font-size: 2.2rem; font-weight:800;">${totalCorrect}/${totalTasks}</span>
+                    <span style="font-size:1rem;">  (${percent}%)</span>
+                </div>
+                <p style="margin: 12px 0 10px; background:#fef6e8; padding:12px; border-radius: 44px;">${message}</p>
+                <button class="restart-btn" id="restartQuiz">⟳ Пройти заново</button>
+                <div style="margin-top: 24px; font-size: 0.85rem; background:#f5efe4; padding: 12px; border-radius: 32px;">
+                    💡 Подсказка: для объектов I категории — значительное негативное воздействие, II — умеренное, III — незначительное, IV — минимальное.
+                </div>
+            </div>
+        `;
+        app.innerHTML = resultHtml;
+        const restartBtn = document.getElementById('restartQuiz');
+        if (restartBtn) {
+            restartBtn.addEventListener('click', () => {
+                currentIndex = 0;
+                userAnswers = new Array(QUIZ_DATA.length).fill(null);
+                answerStatus = new Array(QUIZ_DATA.length).fill(false);
+                hasAnsweredCurrent = false;
+                selectedOptionForCurrent = null;
+                isCorrectAnswerSelected = false;
+                updateProgressAndStep();
+                renderCurrentQuestion();
+            });
+        }
+        progressFillDiv.style.width = '100%';
+        stepLabelSpan.innerText = `Результат`;
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    renderCurrentQuestion();
+    updateProgressAndStep();
+</script>
+</body>
+</html>
