@@ -9,10 +9,9 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none; /* отключаем выделение, но не трогаем прокрутку */
+            user-select: none;
         }
 
-        /* На десктопе — без прокрутки страницы, контент центрируется */
         html, body {
             height: 100%;
         }
@@ -24,18 +23,15 @@
             justify-content: center;
             font-family: 'Courier New', 'Courier', 'VT323', monospace;
             padding: 16px;
-            overflow-y: auto; /* на мобильных устройствах прокрутка будет работать */
+            overflow-y: auto;
         }
 
-        /* Для экранов, где контент не помещается по вертикали — включаем прокрутку */
         @media (max-width: 700px) and (max-height: 700px) {
             body {
                 align-items: flex-start;
-                padding: 16px;
             }
         }
 
-        /* Обёртка — гибкая, подстраивается под контент */
         .tv-wrapper {
             width: 100%;
             max-width: 1100px;
@@ -45,7 +41,6 @@
             justify-content: center;
         }
 
-        /* ========== РЕТРО-ТЕЛЕВИЗОР С АНТЕННОЙ ========== */
         .retro-tv {
             background: #5a3e2b;
             border-radius: clamp(30px, 8vw, 60px) clamp(30px, 8vw, 60px) clamp(40px, 10vw, 80px) clamp(40px, 10vw, 80px);
@@ -55,7 +50,6 @@
             margin-top: clamp(40px, 10vw, 70px);
         }
 
-        /* ========== АНТЕННА ========== */
         .antenna {
             position: absolute;
             top: -60px;
@@ -138,7 +132,6 @@
             .antenna-left, .antenna-right { height: 40px; }
         }
 
-        /* Ручка сверху */
         .retro-tv::before {
             content: "";
             position: absolute;
@@ -153,7 +146,6 @@
             z-index: 3;
         }
 
-        /* Динамик снизу */
         .retro-tv::after {
             content: "";
             position: absolute;
@@ -168,7 +160,6 @@
             z-index: 0;
         }
 
-        /* Экран */
         .tv-screen {
             background: #fef3e0;
             border-radius: clamp(16px, 5vw, 28px);
@@ -203,7 +194,6 @@
             border-radius: inherit;
         }
 
-        /* Карусель — горизонтальный скролл, без вертикальной прокрутки внутри */
         .carousel {
             display: flex;
             overflow-x: auto;
@@ -246,7 +236,6 @@
             pointer-events: none;
         }
 
-        /* Панель управления */
         .nav-controls {
             display: flex;
             align-items: center;
@@ -333,31 +322,17 @@
             gap: 8px;
         }
 
-        /* Планшеты и десктопы */
         @media (min-width: 768px) {
-            body {
-                padding: 24px;
-            }
-            .nav-controls {
-                gap: 20px;
-            }
-            .indicators {
-                max-width: 400px;
-            }
+            body { padding: 24px; }
+            .nav-controls { gap: 20px; }
+            .indicators { max-width: 400px; }
         }
 
-        /* На маленьких экранах (смартфоны) если телевизор не влезает по высоте — появляется прокрутка страницы */
         @media (max-width: 700px) {
-            body {
-                display: block;
-                padding: 20px 16px;
-            }
-            .tv-wrapper {
-                max-width: 100%;
-            }
+            body { display: block; padding: 20px 16px; }
+            .tv-wrapper { max-width: 100%; }
         }
 
-        /* Полноэкранный режим */
         .retro-tv:fullscreen {
             background: #5a3e2b;
             border-radius: 30px;
@@ -369,27 +344,10 @@
             justify-content: center;
             margin-top: 0;
         }
-
-        .retro-tv:fullscreen .antenna {
-            display: none;
-        }
-
-        .retro-tv:fullscreen .tv-screen {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .retro-tv:fullscreen .carousel {
-            flex: 1;
-            height: auto;
-        }
-
-        .retro-tv:fullscreen .slide img {
-            max-height: 80vh;
-            width: auto;
-            margin: 0 auto;
-        }
+        .retro-tv:fullscreen .antenna { display: none; }
+        .retro-tv:fullscreen .tv-screen { flex: 1; display: flex; flex-direction: column; }
+        .retro-tv:fullscreen .carousel { flex: 1; height: auto; }
+        .retro-tv:fullscreen .slide img { max-height: 80vh; width: auto; margin: 0 auto; }
 
         .retro-tv:-webkit-full-screen {
             background: #5a3e2b;
@@ -399,16 +357,9 @@
             height: 100vh;
             margin-top: 0;
         }
-        .retro-tv:-webkit-full-screen .antenna {
-            display: none;
-        }
-        .retro-tv:-webkit-full-screen .slide img {
-            max-height: 80vh;
-            width: auto;
-            margin: 0 auto;
-        }
+        .retro-tv:-webkit-full-screen .antenna { display: none; }
+        .retro-tv:-webkit-full-screen .slide img { max-height: 80vh; width: auto; margin: 0 auto; }
 
-        /* Лампочка питания */
         .power-led {
             position: absolute;
             bottom: clamp(8px, 3vw, 20px);
@@ -426,58 +377,32 @@
 <body>
 <div class="tv-wrapper">
     <div class="retro-tv" id="retroTVContainer">
-        <!-- АНТЕННА -->
         <div class="antenna">
             <div class="antenna-left"></div>
             <div class="antenna-right"></div>
             <div class="antenna-base"></div>
         </div>
-
         <div class="power-led"></div>
-        
         <div class="tv-screen">
             <div class="carousel" id="carousel">
-                <div class="slide" data-index="0">
-                    <img src="слайд 1.png" alt="I класс – асбест, ртутные лампы">
-                </div>
-                <div class="slide" data-index="1">
-                    <img src="слайд 2.png" alt="I класс – болезнь Минамата">
-                </div>
-                <div class="slide" data-index="2">
-                    <img src="слайд 3.png" alt="II класс – пестициды">
-                </div>
-                <div class="slide" data-index="3">
-                    <img src="слайд 4.png" alt="II класс – Венгрия, красный шлам">
-                </div>
-                <div class="slide" data-index="4">
-                    <img src="слайд 5.png" alt="III класс – куриный помёт">
-                </div>
-                <div class="slide" data-index="5">
-                    <img src="слайд 6.png" alt="III класс – разлив мазута">
-                </div>
-                <div class="slide" data-index="6">
-                    <img src="слайд 7.png" alt="IV класс – пищевые отходы">
-                </div>
-                <div class="slide" data-index="7">
-                    <img src="слайд 8.png" alt="IV класс – полигон ТКО">
-                </div>
-                <div class="slide" data-index="8">
-                    <img src="слайд 9.png" alt="V класс – офисная бумага">
-                </div>
-                <div class="slide" data-index="9">
-                    <img src="слайд 10.png" alt="V класс – мусорное пятно в океане">
-                </div>
+                <div class="slide"><img src="слайд 1.png" alt="I класс – асбест, ртутные лампы"></div>
+                <div class="slide"><img src="слайд 2.png" alt="I класс – болезнь Минамата"></div>
+                <div class="slide"><img src="слайд 3.png" alt="II класс – пестициды"></div>
+                <div class="slide"><img src="слайд 4.png" alt="II класс – Венгрия, красный шлам"></div>
+                <div class="slide"><img src="слайд 5.png" alt="III класс – куриный помёт"></div>
+                <div class="slide"><img src="слайд 6.png" alt="III класс – разлив мазута"></div>
+                <div class="slide"><img src="слайд 7.png" alt="IV класс – пищевые отходы"></div>
+                <div class="slide"><img src="слайд 8.png" alt="IV класс – полигон ТКО"></div>
+                <div class="slide"><img src="слайд 9.png" alt="V класс – офисная бумага"></div>
+                <div class="slide"><img src="слайд 10.png" alt="V класс – мусорное пятно"></div>
             </div>
         </div>
-
         <div class="nav-controls">
-            <div class="left-group">
-                <button class="nav-btn" id="prevBtn" aria-label="Предыдущий слайд" title="Назад (←)">◀</button>
-            </div>
+            <div class="left-group"><button class="nav-btn" id="prevBtn">◀</button></div>
             <div class="indicators" id="indicators"></div>
             <div class="right-group">
-                <button class="nav-btn" id="nextBtn" aria-label="Следующий слайд" title="Вперёд (→)">▶</button>
-                <button class="fullscreen-btn" id="fullscreenBtn" aria-label="Полноэкранный режим" title="На весь экран (F)">⛶</button>
+                <button class="nav-btn" id="nextBtn">▶</button>
+                <button class="fullscreen-btn" id="fullscreenBtn">⛶</button>
                 <div class="counter" id="slideCounter">1 / 10</div>
             </div>
         </div>
@@ -511,23 +436,15 @@
         function scrollToSlide(index) {
             if (index < 0) index = 0;
             if (index >= totalSlides) index = totalSlides - 1;
-            const slideElement = slides[index];
-            if (slideElement) {
-                slideElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'nearest',
-                    inline: 'start'
-                });
-                currentIndex = index;
-                updateUI(currentIndex);
-            }
+            slides[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+            currentIndex = index;
+            updateUI(currentIndex);
         }
 
         function getCurrentSlideIndex() {
             const carouselRect = carousel.getBoundingClientRect();
             if (!carouselRect.width) return 0;
-            let closestIndex = 0;
-            let minDistance = Infinity;
+            let closestIndex = 0, minDistance = Infinity;
             slides.forEach((slide, idx) => {
                 const rect = slide.getBoundingClientRect();
                 const slideCenter = rect.left + rect.width / 2;
@@ -554,30 +471,19 @@
 
         carousel.addEventListener('scroll', handleScroll);
 
-        let resizeTimer;
         window.addEventListener('resize', () => {
-            if (resizeTimer) clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
+            setTimeout(() => {
                 const newIdx = getCurrentSlideIndex();
                 if (newIdx !== currentIndex) {
                     currentIndex = newIdx;
                     updateUI(currentIndex);
                 }
-                if (slides[currentIndex]) {
-                    slides[currentIndex].scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
-                }
+                slides[currentIndex]?.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
             }, 100);
         });
 
-        function nextSlide() {
-            if (currentIndex < totalSlides - 1) scrollToSlide(currentIndex + 1);
-        }
-        function prevSlide() {
-            if (currentIndex > 0) scrollToSlide(currentIndex - 1);
-        }
-
-        prevBtn.addEventListener('click', prevSlide);
-        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', () => { if (currentIndex > 0) scrollToSlide(currentIndex - 1); });
+        nextBtn.addEventListener('click', () => { if (currentIndex < totalSlides - 1) scrollToSlide(currentIndex + 1); });
 
         function createIndicators() {
             indicatorsContainer.innerHTML = '';
@@ -585,10 +491,7 @@
                 const dot = document.createElement('div');
                 dot.classList.add('dot');
                 if (i === 0) dot.classList.add('active');
-                dot.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    scrollToSlide(i);
-                });
+                dot.addEventListener('click', () => scrollToSlide(i));
                 indicatorsContainer.appendChild(dot);
             }
         }
@@ -597,24 +500,36 @@
         setTimeout(() => {
             const startIdx = getCurrentSlideIndex();
             if (startIdx !== 0) scrollToSlide(0);
-            else {
-                currentIndex = 0;
-                updateUI(0);
-            }
+            else { currentIndex = 0; updateUI(0); }
         }, 30);
 
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') { prevSlide(); e.preventDefault(); }
-            else if (e.key === 'ArrowRight') { nextSlide(); e.preventDefault(); }
+            if (e.key === 'ArrowLeft') { if (currentIndex > 0) scrollToSlide(currentIndex - 1); e.preventDefault(); }
+            else if (e.key === 'ArrowRight') { if (currentIndex < totalSlides - 1) scrollToSlide(currentIndex + 1); e.preventDefault(); }
             else if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); e.preventDefault(); }
         });
 
+        // ========== УЛУЧШЕННЫЙ ПОЛНОЭКРАННЫЙ РЕЖИМ ==========
         function toggleFullscreen() {
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                const elem = retroContainer;
+            const elem = retroContainer;
+            
+            // Проверяем, находимся ли мы уже в полноэкранном режиме
+            const isFullscreenNow = !!(document.fullscreenElement || document.webkitFullscreenElement);
+            
+            if (!isFullscreenNow) {
+                // Пытаемся войти в полноэкранный режим
                 const requestMethod = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.msRequestFullscreen;
-                if (requestMethod) requestMethod.call(elem).catch(err => console.warn(err));
+                if (requestMethod) {
+                    requestMethod.call(elem).catch(err => {
+                        console.warn('Fullscreen error:', err);
+                        // Пользовательское уведомление (опционально)
+                        alert('Полноэкранный режим недоступен. Проверьте, что страница открыта по HTTPS и разрешены полноэкранные запросы.');
+                    });
+                } else {
+                    alert('Ваш браузер не поддерживает полноэкранный режим');
+                }
             } else {
+                // Выходим из полноэкранного режима
                 const exitMethod = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
                 if (exitMethod) exitMethod.call(document);
             }
@@ -626,50 +541,32 @@
             const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
             if (isFullscreen) {
                 fullscreenBtn.textContent = '✖';
-                fullscreenBtn.setAttribute('aria-label', 'Выйти из полноэкранного режима');
                 fullscreenBtn.title = 'Выйти (Esc)';
             } else {
                 fullscreenBtn.textContent = '⛶';
-                fullscreenBtn.setAttribute('aria-label', 'Полноэкранный режим');
                 fullscreenBtn.title = 'На весь экран (F)';
             }
+            // Корректируем позицию слайда после смены режима
             setTimeout(() => {
                 const newIdx = getCurrentSlideIndex();
                 if (newIdx !== currentIndex) {
                     currentIndex = newIdx;
                     updateUI(currentIndex);
                 }
-                if (slides[currentIndex]) {
-                    slides[currentIndex].scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
-                }
+                slides[currentIndex]?.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
             }, 70);
         }
 
         document.addEventListener('fullscreenchange', onFullscreenChange);
         document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 
-        const style = document.createElement('style');
-        style.textContent = `
-            .carousel { scroll-snap-type: x mandatory; scroll-padding: 0; overflow-y: hidden; }
-            .slide { scroll-snap-align: start; }
-            .retro-tv:fullscreen .tv-screen,
-            .retro-tv:-webkit-full-screen .tv-screen { flex: 1; display: flex; align-items: center; }
-            .retro-tv:fullscreen .carousel,
-            .retro-tv:-webkit-full-screen .carousel { flex: 1; height: auto; max-height: 85vh; }
-            .retro-tv:fullscreen .slide img,
-            .retro-tv:-webkit-full-screen .slide img { max-height: 80vh; width: auto; object-fit: contain; }
-            button { touch-action: manipulation; }
-        `;
-        document.head.appendChild(style);
-
-        const resizeObserver = new ResizeObserver(() => {
+        new ResizeObserver(() => {
             const idx = getCurrentSlideIndex();
             if (idx !== currentIndex) {
                 currentIndex = idx;
                 updateUI(currentIndex);
             }
-        });
-        resizeObserver.observe(carousel);
+        }).observe(carousel);
     })();
 </script>
 </body>
