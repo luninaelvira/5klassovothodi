@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Экоквест: Спасти дафний! Чайник IV класса · пошаговый</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #d4eae2 0%, #bdd9cf 100%);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* контейнер-карточка (листалка) */
+        .step-card {
+            max-width: 700px;
+            width: 100%;
+            background: #fffcf5;
+            border-radius: 60px;
+            box-shadow: 0 20px 40px rgba(0, 30, 10, 0.25);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        /* шапка с дафниями и чайником */
+        .hero {
+            background: #2c5a3b;
+            padding: 18px 24px;
+            text-align: center;
+            color: #fef7d2;
+        }
+
+        .hero h2 {
+            margin: 0 0 6px 0;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .hero p {
+            margin: 6px 0 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .daphnia-badge {
+            background: #1e3a2e;
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        /* основное содержимое шага */
+        .step-content {
+            padding: 24px 28px 28px;
+        }
+
+        /* единый стиль для кружков с номерами частей */
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: #2c5a3b;
+            color: white;
+            font-weight: 800;
+            font-size: 1.7rem;
+            border-radius: 50%;
+            margin-right: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .step-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1f4432;
+        }
+
+        .story-card {
+            background: #f2efe7;
+            border-left: 6px solid #e7a74e;
+            padding: 14px 18px;
+            border-radius: 36px;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .question-block {
+            background: white;
+            border-radius: 42px;
+            padding: 8px 20px 20px;
+            margin: 20px 0;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        .question-text {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin: 18px 0 14px;
+            color: #1f4432;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 12px 0 8px;
+        }
+
+        .option {
+            background: #f9f7f2;
+            border: 1.5px solid #dfe3db;
+            border-radius: 80px;
+            padding: 12px 18px;
+            cursor: pointer;
+            transition: 0.1s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option:hover {
+            background: #e7f0ea;
+            border-color: #8bbf9e;
+        }
+
+        .option.selected {
+            background: #d9e9de;
+            border-color: #2c5a3b;
+        }
+
+        .option-letter {
+            font-weight: 800;
+            background: #dee2db;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 1rem;
+        }
+
+        .selected .option-letter {
+            background: #2c5a3b;
+            color: white;
+        }
+
+        .feedback {
+            margin: 12px 0 6px;
+            padding: 12px 16px;
+            border-radius: 32px;
+            font-size: 0.9rem;
+            background: #f1f6f3;
+            display: none;
+            border-left: 5px solid;
+        }
+
+        .feedback.correct {
+            background: #e0f2e3;
+            border-left-color: #2b7a4b;
+            color: #145c33;
+            display: block;
+        }
+
+        .feedback.wrong {
+            background: #ffe7e5;
+            border-left-color: #c7362b;
+            color: #8b2c1e;
+            display: block;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 28px;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: #e7a74e;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.1s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-btn.secondary {
+            background: #b9cfc1;
+            color: #2c3a2b;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            transform: scale(0.97);
+            background: #dd9540;
+        }
+
+        .nav-btn.secondary:hover:not(:disabled) {
+            background: #a3bba8;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        .result-box {
+            background: #1e3a2e;
+            border-radius: 48px;
+            padding: 20px 24px;
+            margin-top: 15px;
+            color: #fef3cf;
+            text-align: center;
+        }
+
+        .result-box h3 {
+            font-size: 1.8rem;
+            margin: 0 0 10px;
+        }
+
+        .daphnia-final {
+            font-size: 2.4rem;
+            margin: 10px 0;
+        }
+
+        .progress-dots {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 10px 0 5px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #cddfd4;
+            border-radius: 10px;
+            transition: 0.2s;
+        }
+
+        .dot.active {
+            background: #e7a74e;
+            width: 24px;
+        }
+
+        hr {
+            margin: 15px 0;
+            border-color: #cfdec6;
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 14px;
+            background: #f1ede5;
+            color: #626b5e;
+        }
+
+        @media (max-width: 550px) {
+            .step-content {
+                padding: 18px;
+            }
+            .step-title {
+                font-size: 1.3rem;
+            }
+            .step-number {
+                width: 38px;
+                height: 38px;
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="step-card" id="app">
+    <div class="hero">
+        <h2>
+            <span>🦐</span> Экоквест: Спасти дафний! <span>🫖</span>
+        </h2>
+        <div class="daphnia-badge">🧪 биотестирование · эмалированный чайник</div>
+        <p style="margin-top: 10px;">Определяем класс опасности, которого нет в ФККО</p>
+    </div>
+    <div class="step-content" id="stepContent">
+        <!-- Динамический контент шагов (1,2,3) -->
+    </div>
+    <footer>
+        🦐 Пошаговый квест по приказу Минприроды №158 · Дафнии главные эксперты
+    </footer>
+</div>
+
+<script>
+    // ТРИ ЧАСТИ (шага). После третьего шага — финал с IV классом.
+    // Каждый шаг содержит ровно один вопрос с вариантами.
+    // Номера шагов визуально одинаковые, круглые.
+
+    const stepsData = [
+        { // ШАГ 1: про водную вытяжку
+            title: "Подготовка к эксперименту",
+            story: "📋 Вы эколог ООО «Подсолнух». Эмалированный чайник (не в ФККО). Расчётный метод дал IV класс, но для уверенности проводим биотестирование с дафниями. Первый шаг — приготовление водной вытяжки.",
+            question: "Зачем нужна водная вытяжка, а не просто кусок чайника кинуть к дафниям?",
+            options: [
+                "А) Дафнии пьют только воду, они не едят металл.",
+                "Б) Водная вытяжка имитирует воздействие отхода на окружающую среду через воду (дождь, грунтовые воды).",
+                "В) Так быстрее, потому что дафнии погибают только в жидкой среде."
+            ],
+            correct: 1, // индекс Б
+            explanation: "✅ Верно! Критерии (раздел III) требуют именно водную вытяжку — она показывает, какие вещества вымываются из отхода в природу. Дальше — чистая наука."
+        },
+        { // ШАГ 2: результаты 96 часов → IV класс
+            title: "Данные биотестирования (96 часов)",
+            story: "🧪 Лаборатория подготовила три стакана: контроль (чистая вода), разведение 1:10 и чистую вытяжку. Через 96 часов фиксируем гибель дафний.",
+            question: "📊 Результаты через 96 часов: \n• Контроль: гибель 4% \n• Вытяжка 1:10 → гибель 22% \n• Вытяжка без разведения → гибель 44% \n\nКакой класс опасности по Критериям (раздел III)?",
+            options: [
+                "А) III класс (гибель 20–50%, но 44% — это почти III?)",
+                "Б) IV класс — от 10% до 50% гибели за 96 часов (44% входит в IV)",
+                "В) V класс, так как меньше 50% гибели"
+            ],
+            correct: 1, // IV класс
+            explanation: "📘 Совершенно верно! По Критериям: IV класс — гибель гидробионтов от 10% до 50% включительно за 96 часов. 44% — это IV класс. Чайник умеренно опасен. Переходим к последнему этапу."
+        },
+        { // ШАГ 3: проверка раннего срока (24ч = 28% гибели) и фиксация IV класса
+            title: "Контрольный срок 24 часа",
+            story: "Лаборант перепроверяет дафний через 24 часа — вдруг реакция проявится быстрее? Данные: гибель в неразведённой вытяжке = 28% (ниже 50%).",
+            question: "Учитывая основной срок (96ч, 44% гибели) и ранний срок (24ч, 28% гибели), какой итоговый класс опасности отхода?",
+            options: [
+                "А) IV класс — основной 96 часов даёт 44% (IV), ранний срок не показал критической гибели (>50%). Класс остаётся IV.",
+                "Б) III класс — потому что ранний срок тоже надо учитывать (но 28% < 50%, поэтому нет повышения).",
+                "В) V класс — так как за 24 часа погибло меньше половины."
+            ],
+            correct: 0, // IV остаётся
+            explanation: "✅ Абсолютно верно! Критерии закрепляют класс по 96-часовой экспозиции. Если на более раннем сроке гибель НЕ превысила 50%, класс не повышается. Итог: IV класс. Дафнии подтвердили!"
+        }
+    ];
+
+    let currentStep = 0;          // 0,1,2
+    let userAnswers = [null, null, null]; // ответы по шагам
+    let quizCompleted = false;
+
+    const stepContentDiv = document.getElementById('stepContent');
+
+    // Функция отрисовки текущего шага с единым круглым номером
+    function renderStep() {
+        if (quizCompleted) {
+            renderFinalResult();
+            return;
+        }
+
+        const step = stepsData[currentStep];
+        const stepNumber = currentStep + 1;
+        const selectedVal = userAnswers[currentStep];
+
+        let html = `
+            <div class="step-header">
+                <div class="step-number">${stepNumber}</div>
+                <div class="step-title">${step.title}</div>
+            </div>
+            <div class="story-card">
+                ${step.story}
+            </div>
+            <div class="question-block">
+                <div class="question-text">${step.question.replace(/\n/g, '<br>')}</div>
+                <div class="options" id="stepOptions">
+        `;
+
+        // рендерим варианты ответов
+        step.options.forEach((opt, idx) => {
+            const isSelected = (selectedVal === idx);
+            const selectedClass = isSelected ? 'selected' : '';
+            html += `
+                <div class="option ${selectedClass}" data-opt-index="${idx}">
+                    <span class="option-letter">${String.fromCharCode(65+idx)}</span>
+                    <span>${opt}</span>
+                </div>
+            `;
+        });
+
+        html += `
+                </div>
+                <div class="feedback" id="stepFeedback"></div>
+                <div class="nav-buttons">
+                    <button class="nav-btn secondary" id="prevBtn" ${currentStep === 0 ? 'disabled' : ''}>◀ Назад</button>
+                    <button class="nav-btn" id="nextBtn" ${selectedVal === null ? 'disabled' : ''}>${currentStep === stepsData.length-1 ? 'Завершить' : 'Далее ▶'}</button>
+                </div>
+            </div>
+        `;
+
+        stepContentDiv.innerHTML = html;
+
+        // Добавляем обработчики для вариантов ответа
+        const optionsDivs = document.querySelectorAll('.option');
+        const feedbackDiv = document.getElementById('stepFeedback');
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+
+        optionsDivs.forEach(opt => {
+            opt.addEventListener('click', () => {
+                if (quizCompleted) return;
+                const selectedIdx = parseInt(opt.dataset.optIndex);
+                // сохраняем ответ
+                userAnswers[currentStep] = selectedIdx;
+
+                // обновляем визуал выделения
+                optionsDivs.forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+
+                // проверка и фидбек
+                const isCorrect = (selectedIdx === step.correct);
+                feedbackDiv.innerHTML = isCorrect ? 
+                    `<span>✅ ${step.explanation}</span>` : 
+                    `<span>❌ Неверно. ${step.explanation}</span>`;
+                feedbackDiv.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
+
+                // активируем кнопку далее
+                if (nextBtn) nextBtn.disabled = false;
+            });
+        });
+
+        // обработчик "Далее / Завершить"
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (quizCompleted) return;
+                if (userAnswers[currentStep] === null) return;
+
+                if (currentStep === stepsData.length - 1) {
+                    // Завершаем квест, показываем финал с IV классом
+                    finishQuiz();
+                } else {
+                    // переходим на следующий шаг
+                    currentStep++;
+                    renderStep();
+                }
+            });
+        }
+
+        // обработчик "Назад"
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (quizCompleted) return;
+                if (currentStep > 0) {
+                    currentStep--;
+                    renderStep();
+                }
+            });
+        }
+    }
+
+    // Функция завершения: финальный экран с IV классом и дафниями
+    function finishQuiz() {
+        quizCompleted = true;
+        // проверим что все ответы даны (должны быть)
+        const finalClass = "IV класс";
+        let finalMessage = `
+            <div class="step-header">
+                <div class="step-number">🏁</div>
+                <div class="step-title">Результат биотестирования</div>
+            </div>
+            <div class="result-box">
+                <div class="daphnia-final">
+                    🦐🦐🦐  ><((((°>   🫖✨
+                </div>
+                <h3>✅ ИТОГОВЫЙ КЛАСС ОПАСНОСТИ: <span style="background:#f1c40f; padding:6px 14px; border-radius:40px; color:#2c3e2b;">IV класс</span></h3>
+                <p style="font-size:1rem; margin-top:12px;">
+                🔬 <strong>Финальные данные биотестирования эмалированного чайника:</strong><br><br>
+                • Гибель дафний за 96 часов: <strong>44%</strong> (попадает в диапазон IV класса: 10–50%)<br>
+                • Гибель за 24 часа: <strong>28%</strong> (не превысила порога 50%, поэтому класс не повысился)<br>
+                • Расчётный метод также дал <strong>IV класс</strong>.<br><br>
+                📖 Согласно <strong>Критериям (Приказ Минприроды №158, раздел III)</strong>:<br>
+                <em>IV класс опасности</em> — «умеренно опасные отходы».<br>
+                🧾 Биотестирование проведено корректно, класс подтверждён.<br><br>
+                🎉 <strong>Поздравляем!</strong> Вы успешно определили класс отхода, которого нет в ФККО. Теперь нужно отправить подтверждение в Росприроднадзор.  
+                </p>
+                <hr style="background:#b9caaf;">
+                <p style="font-size:0.85rem;">🦐 <em>Дафнии выжили на 56% и говорят спасибо за точные расчёты!</em></p>
+                <div style="margin-top: 15px; font-size: 1.8rem;">🫖 ♻️ 🦐</div>
+            </div>
+            <div style="margin-top: 20px; text-align: center;">
+                <button id="restartBtn" class="nav-btn" style="background:#b9cfc1; color:#1f4432;">🔄 Пройти квест заново</button>
+            </div>
+        `;
+        stepContentDiv.innerHTML = finalMessage;
+        const restartBtn = document.getElementById('restartBtn');
+        if (restartBtn) {
+            restartBtn.addEventListener('click', () => {
+                resetQuiz();
+            });
+        }
+    }
+
+    function renderFinalResult() {
+        // Дублируем на случай прямого вызова
+        finishQuiz();
+    }
+
+    function resetQuiz() {
+        currentStep = 0;
+        userAnswers = [null, null, null];
+        quizCompleted = false;
+        renderStep();
+    }
+
+    // Добавим индикаторы прогресса (точки) в hero, чтобы визуально показать части 1,2,3
+    function addProgressDots() {
+        const heroDiv = document.querySelector('.hero');
+        if (heroDiv && !document.querySelector('.progress-dots')) {
+            const dotContainer = document.createElement('div');
+            dotContainer.className = 'progress-dots';
+            for (let i = 0; i < 3; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.setAttribute('data-dot', i);
+                dotContainer.appendChild(dot);
+            }
+            heroDiv.appendChild(dotContainer);
+        }
+    }
+
+    // Обновление активной точки при каждом рендере
+    function updateActiveDot() {
+        const dots = document.querySelectorAll('.dot');
+        if (dots.length && !quizCompleted) {
+            dots.forEach((dot, idx) => {
+                if (idx === currentStep) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        } else if (quizCompleted && dots.length) {
+            // в финале все точки сделать нейтральными, но можно подсветить все
+            dots.forEach(dot => dot.classList.remove('active'));
+        }
+    }
+
+    // Переопределим рендер, чтобы обновлять точки и стили
+    const originalRender = renderStep;
+    renderStep = function() {
+        originalRender();
+        addProgressDots();
+        updateActiveDot();
+    };
+
+    const originalFinish = finishQuiz;
+    finishQuiz = function() {
+        originalFinish();
+        const dots = document.querySelectorAll('.dot');
+        if (dots.length) {
+            dots.forEach(dot => dot.classList.remove('active'));
+        }
+    };
+
+    // стартуем
+    addProgressDots();
+    renderStep();
+</script>
+</body>
+</html>
