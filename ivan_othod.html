@@ -11,7 +11,7 @@
 
         body {
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: #eef2f5;
+            background: #fffff;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -219,7 +219,7 @@
     <div class="characters">
         <div class="character-card">
             <div class="avatar-frame">
-                <img src="https://placehold.co/400x400/e9ecef/2c6e49?text=Чайник" alt="Сломанный чайник" id="kettleImg">
+                <img src="https://luninaelvira.github.io/5klassovothodi/moy_chaynik.png">
             </div>
             <div class="character-info">
                 <h3>Отход</h3>
@@ -228,7 +228,7 @@
         </div>
         <div class="character-card">
             <div class="avatar-frame">
-                <img src="https://placehold.co/400x400/b0bec5/1e3a2f?text=Иван+Иванович" alt="Иван Иванович" id="ivanImg">
+                <img src="https://luninaelvira.github.io/5klassovothodi/ivan_ivanovich.jpg">
             </div>
             <div class="character-info">
                 <h3>Иван Иванович</h3>
@@ -239,7 +239,7 @@
 
     <div class="chat-area" id="chatArea">
         <div class="message-bubble ivan" id="ivanMessage">
-            <strong>Иван Иванович:</strong> «Я посмотрел в интернете — везде пишут, что чайники состоят из пластика и металла. Давайте так и запишем в журнал отходов. Зачем нам лишние деньги тратить?»
+            <strong>Иван Иванович:</strong> «Я посмотрел в интернете — везде пишут, что чайники состоят из пластика и металла. Давайте так и запишем в паспорт отхода. Зачем нам лишние деньги тратить?»
         </div>
 
         <div class="question-label" id="questionLabel">
@@ -278,7 +278,7 @@
         feedbackDiv.classList.remove('shift-left');
         ivanMessageDiv.classList.remove('part2-message');
         
-        ivanMessageDiv.innerHTML = '<strong>Иван Иванович:</strong> «Я посмотрел в интернете — везде пишут, что чайники состоят из пластика и металла. Давайте так и запишем в журнал отходов. Зачем нам лишние деньги тратить?»';
+        ivanMessageDiv.innerHTML = '<strong>Иван Иванович:</strong> «Я посмотрел в интернете — везде пишут, что чайники состоят из пластика и металла. Давайте так и запишем в паспорт отхода. Зачем нам лишние деньги тратить?»';
         ivanMessageDiv.className = 'message-bubble ivan';
         questionLabel.innerHTML = '<strong>Ваше действие:</strong> Что ответите Ивану Ивановичу?';
         
@@ -287,10 +287,10 @@
 
     function renderPart1Options() {
         optionsDiv.innerHTML = `
-            <button class="option-btn" data-choice="a">А) Согласен, Иван Иванович, интернет не врёт. Записываем состав "пластик + металл".</button>
-            <button class="option-btn" data-choice="b">Б) Иван Иванович, вы правы насчёт денег. Давайте просто возьмём похожий чайник из ФККО и не будем ничего доказывать.</button>
-            <button class="option-btn" data-choice="c">В) Спасибо за инициативу, но интернет — не официальный источник. Сначала проверим паспорт чайника и техдокументацию.</button>
-            <button class="option-btn" data-choice="d">Г) Срочно вызываем аккредитованную лабораторию, даже паспорт не смотрим. Это единственный законный способ.</button>
+            <button class="option-btn" data-choice="a">А) Согласен, Иван Иванович. Записываем состав "пластик + металл".</button>
+            <button class="option-btn" data-choice="b">Б) Иван Иванович, вы правы насчет денег. Давайте просто возьмем похожий чайник из ФККО и не нужно ничего доказывать.</button>
+            <button class="option-btn" data-choice="c">В) Спасибо, Иван Иванович, но что-то я не доверяю интернету, мало ли что там пишут, это не официальный источник. Сначала проверим техдокументацию чайника.</button>
+            <button class="option-btn" data-choice="d">Г) Давайте вызываем аккредитованную лабораторию, техдокументацию искать и смотреть бесполезно. Это единственный законный способ.</button>
         `;
         document.querySelectorAll('.option-btn').forEach(btn => {
             btn.classList.remove('part2-option');
@@ -305,7 +305,7 @@
         if (step !== 'part1') return;
 
         if (choice === 'a') {
-            feedbackDiv.innerHTML = `<div class="feedback error">❌ Ошибка. Инспектор Росприроднадзора не примет "интернет" как доказательство. Штраф за неподтверждение класса опасности (ст. 14 Закона № 89-ФЗ).</div>`;
+            feedbackDiv.innerHTML = `<div class="feedback error">❌ Ошибка. Инспектор Росприроднадзора не примет "интернет" как доказательство. Штраф за неподтверждение класса опасности.</div>`;
             resetBtn.classList.remove('hidden');
             statusHint.innerHTML = 'Нажмите «Начать заново» и выберите вариант с документами.';
             step = 'finished';
@@ -327,10 +327,10 @@
         }
         if (choice === 'c') {
             // ПРАВИЛЬНЫЙ ВАРИАНТ — ПЕРЕХОД КО ВТОРОЙ ЧАСТИ
-            feedbackDiv.innerHTML = `<div class="feedback success shift-left">✅ Хорошее начало! Вы правы: сначала ищем паспорт, ТУ, ГОСТ. В нашем уроке в паспорте оказалось мало информации (только сталь и пластик без подробностей).</div>`;
+            feedbackDiv.innerHTML = `<div class="feedback success shift-left">✅ Хорошее начало! Вы правы: сначала ищем паспорт, ТУ. В нашем уроке в техдокументе от чайника оказалось мало информации (только сталь и пластик без подробностей).</div>`;
             
             // Меняем внешний вид сообщения Ивана Ивановича на гамму второй части
-            ivanMessageDiv.innerHTML = '<strong>Иван Иванович (после вашего совета):</strong> «Хорошо, я нашёл паспорт чайника. Там написано: "корпус — сталь, крышка и ручка — пластик". Этого хватит?»';
+            ivanMessageDiv.innerHTML = '<strong>Иван Иванович (после вашего совета):</strong> «Хорошо, я нашёл техдокумент чайника. Там написано: "корпус — сталь, крышка и ручка — пластик". Этого хватит?»';
             ivanMessageDiv.className = 'message-bubble part2-message';
             
             questionLabel.innerHTML = '<strong>Ваше действие:</strong> Что ответите теперь?';
@@ -344,9 +344,9 @@
 
     function renderPart2Options() {
         optionsDiv.innerHTML = `
-            <button class="option-btn part2-option" data-choice="second_1">1) Да, отлично, вносим в отчёт.</button>
+            <button class="option-btn part2-option" data-choice="second_1">1) Да, отлично, так в паспорт и запишем.</button>
             <button class="option-btn part2-option" data-choice="second_2">2) Нет, этого мало. Нужен полный состав (тип стали, тип пластика, другие материалы). Если нет других документов — заказываем лабораторию.</button>
-            <button class="option-btn part2-option" data-choice="second_3">3) Берём другой чайник в ФККО, где состав проще.</button>
+            <button class="option-btn part2-option" data-choice="second_3">3) Давайте выберем другой чайник в ФККО, где состав проще.</button>
         `;
         document.querySelectorAll('.option-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -360,12 +360,12 @@
         if (step !== 'part2') return;
 
         if (choice === 'second_2') {
-            feedbackDiv.innerHTML = `<div class="feedback success">✅ Абсолютно верно! Вы действуете как профессионал: паспорт дал мало информации → других документов нет → аккредитованная лаборатория. После протокола докажете класс при любой проверке.</div>`;
+            feedbackDiv.innerHTML = `<div class="feedback success">✅ Абсолютно верно! Вы действуете как профессионал: техдокумент дал мало информации → других документов нет → аккредитованная лаборатория. После протокола докажете класс при любой проверке.</div>`;
             nextStepsDiv.innerHTML = `
                 <div class="feedback success" style="margin-top:15px;">
                 🎉 <strong>Правильный алгоритм:</strong><br>
                 Паспорт → данных недостаточно → аккредитованная лаборатория → протокол → спокойствие на проверке.<br><br>
-                <strong>Итог:</strong> Чайник — IV класс опасности, подтверждение в РПН не требуется.
+                <strong>Итог:</strong> Чайник — IV класс опасности, есть в ФККО, подтверждение в РПН не требуется.
                 </div>
             `;
             optionsDiv.innerHTML = '';
@@ -374,13 +374,13 @@
             step = 'finished';
         } 
         else if (choice === 'second_1') {
-            feedbackDiv.innerHTML = `<div class="feedback error">❌ Неверно. В паспорте нет полного состава. Этого недостаточно для доказательства инспектору. Нужна лаборатория.</div>`;
+            feedbackDiv.innerHTML = `<div class="feedback error">❌ Неверно. В техдокументе нет полного состава. Этого недостаточно для доказательства идентичности отхода отходу из ФККО. Нужна лаборатория.</div>`;
             resetBtn.classList.remove('hidden');
             statusHint.innerHTML = 'Нажмите «Начать заново» и выберите вариант с лабораторией.';
             step = 'finished';
         } 
         else if (choice === 'second_3') {
-            feedbackDiv.innerHTML = `<div class="feedback error">❌ Ошибка. Нельзя брать «другой чайник» из ФККО — состав может не совпадать. Это нарушение порядка идентификации.</div>`;
+            feedbackDiv.innerHTML = `<div class="feedback error">❌ Ошибка. Нельзя просто взять и выбрать «другой чайник» из ФККО — состав и происхождение могут не совпадать. Это нарушение порядка идентификации.</div>`;
             resetBtn.classList.remove('hidden');
             statusHint.innerHTML = 'Нажмите «Начать заново» и выберите вариант с лабораторией.';
             step = 'finished';
