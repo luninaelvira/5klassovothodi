@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Интерактив №3: Чья лаборатория? — Полная версия</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #eef2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .interactive-container {
+            max-width: 950px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .characters {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            background: linear-gradient(135deg, #1e5f3a 0%, #2a7a4a 100%);
+            padding: 20px 30px;
+            flex-wrap: wrap;
+        }
+
+        .character-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 40px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+            min-width: 180px;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+        }
+
+        .avatar-frame {
+            width: 70px;
+            height: 70px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 3px solid #ffc107;
+        }
+
+        .avatar-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .character-info h3 {
+            margin: 0 0 4px 0;
+            font-size: 1.2rem;
+        }
+
+        .character-info p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #2c3e2f;
+            font-weight: 500;
+        }
+
+        .chat-area {
+            padding: 25px 30px;
+            background: #fefcf5;
+        }
+
+        .message-bubble {
+            background: #e6f4ea;
+            border-radius: 24px;
+            padding: 18px 22px;
+            margin-bottom: 28px;
+            border-left: 6px solid #2a7a4a;
+            font-size: 1rem;
+            line-height: 1.45;
+            color: #1e2a1e;
+        }
+
+        .message-bubble.ivan {
+            background: #e9ecef;
+            border-left-color: #ff9800;
+        }
+
+        /* Стиль для сообщения во второй части (новая гамма) */
+        .message-bubble.part2-message {
+            background: #d9eaff;
+            border-left-color: #1e4a6b;
+            color: #0a2a3b;
+        }
+
+        .question-label {
+            font-weight: 700;
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 60px;
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            color: #1e3a2f;
+        }
+
+        .option-btn:hover {
+            background: #f1f9f0;
+            border-color: #2a7a4a;
+            transform: translateX(5px);
+        }
+
+        /* Стили для кнопок во второй части (спокойная серо-синяя гамма) */
+        .part2-option {
+            border-color: #bcccd9;
+            background: #f8fafc;
+            color: #1e4a6b;
+        }
+        .part2-option:hover {
+            background: #e6f0fa;
+            border-color: #1e4a6b;
+        }
+
+        .feedback {
+            border-radius: 20px;
+            padding: 18px 22px;
+            margin-top: 20px;
+            font-weight: 500;
+        }
+
+        .feedback.success {
+            background: #e0f2e9;
+            border-left: 5px solid #1e7e34;
+        }
+
+        .feedback.error {
+            background: #ffe8e6;
+            border-left: 5px solid #d32f2f;
+        }
+
+        .feedback.warning {
+            background: #fff3e0;
+            border-left: 5px solid #ed6c02;
+        }
+
+        .next-step-btn {
+            background: #607d8b;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 0.95rem;
+        }
+
+        .next-step-btn:hover {
+            background: #4a636e;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .status-text {
+            font-size: 0.85rem;
+            color: #2c6e49;
+            margin-top: 15px;
+        }
+
+        /* Сдвиг ответа из первой части влево */
+        .shift-left {
+            margin-left: -10px;
+            padding-left: 20px;
+            border-left: 3px dashed #2a7a4a;
+        }
+
+        hr {
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="interactive-container" id="app">
+    <div class="characters">
+        <div class="character-card">
+            <div class="avatar-frame">
+                <img src="https://placehold.co/400x400/e9ecef/2c6e49?text=Чайник" alt="Сломанный чайник" id="kettleImg">
+            </div>
+            <div class="character-info">
+                <h3>Отход</h3>
+                <p>Электрочайник (сломан)</p>
+            </div>
+        </div>
+        <div class="character-card">
+            <div class="avatar-frame">
+                <img src="https://placehold.co/400x400/b0bec5/1e3a2f?text=Иван+Иванович" alt="Иван Иванович" id="ivanImg">
+            </div>
+            <div class="character-info">
+                <h3>Иван Иванович</h3>
+                <p>Секретарь</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-area" id="chatArea">
+        <div class="message-bubble ivan" id="ivanMessage">
+            <strong>Иван Иванович:</strong> «Я посмотрел в интернете — везде пишут, что чайники состоят из пластика и металла. Давайте так и запишем в журнал отходов. Зачем нам лишние деньги тратить?»
+        </div>
+
+        <div class="question-label" id="questionLabel">
+            <strong>Ваше действие:</strong> Что ответите Ивану Ивановичу?
+        </div>
+
+        <div id="optionsContainer" class="options"></div>
+        <div id="feedbackArea"></div>
+        <div id="nextStepsArea"></div>
+        <div>
+            <button id="resetBtn" class="next-step-btn hidden">Начать заново</button>
+        </div>
+        <div class="status-text" id="statusHint"></div>
+    </div>
+</div>
+
+<script>
+    let step = 'part1';
+
+    const optionsDiv = document.getElementById('optionsContainer');
+    const feedbackDiv = document.getElementById('feedbackArea');
+    const nextStepsDiv = document.getElementById('nextStepsArea');
+    const resetBtn = document.getElementById('resetBtn');
+    const statusHint = document.getElementById('statusHint');
+    const ivanMessageDiv = document.getElementById('ivanMessage');
+    const questionLabel = document.getElementById('questionLabel');
+
+    function resetDialog() {
+        step = 'part1';
+        feedbackDiv.innerHTML = '';
+        nextStepsDiv.innerHTML = '';
+        statusHint.innerHTML = '';
+        resetBtn.classList.add('hidden');
+        
+        // Убираем классы сдвига и новой гаммы, если были
+        feedbackDiv.classList.remove('shift-left');
+        ivanMessageDiv.classList.remove('part2-message');
+        
+        ivanMessageDiv.innerHTML = '<strong>Иван Иванович:</strong> «Я посмотрел в интернете — везде пишут, что чайники состоят из пластика и металла. Давайте так и запишем в журнал отходов. Зачем нам лишние деньги тратить?»';
+        ivanMessageDiv.className = 'message-bubble ivan';
+        questionLabel.innerHTML = '<strong>Ваше действие:</strong> Что ответите Ивану Ивановичу?';
+        
+        renderPart1Options();
+    }
+
+    function renderPart1Options() {
+        optionsDiv.innerHTML = `
+            <button class="option-btn" data-choice="a">А) Согласен, Иван Иванович, интернет не врёт. Записываем состав "пластик + металл".</button>
+            <button class="option-btn" data-choice="b">Б) Иван Иванович, вы правы насчёт денег. Давайте просто возьмём похожий чайник из ФККО и не будем ничего доказывать.</button>
+            <button class="option-btn" data-choice="c">В) Спасибо за инициативу, но интернет — не официальный источник. Сначала проверим паспорт чайника и техдокументацию.</button>
+            <button class="option-btn" data-choice="d">Г) Срочно вызываем аккредитованную лабораторию, даже паспорт не смотрим. Это единственный законный способ.</button>
+        `;
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.remove('part2-option');
+            btn.addEventListener('click', (e) => {
+                const choice = btn.getAttribute('data-choice');
+                handlePart1(choice);
+            });
+        });
+    }
+
+    function handlePart1(choice) {
+        if (step !== 'part1') return;
+
+        if (choice === 'a') {
+            feedbackDiv.innerHTML = `<div class="feedback error">❌ Ошибка. Инспектор Росприроднадзора не примет "интернет" как доказательство. Штраф за неподтверждение класса опасности (ст. 14 Закона № 89-ФЗ).</div>`;
+            resetBtn.classList.remove('hidden');
+            statusHint.innerHTML = 'Нажмите «Начать заново» и выберите вариант с документами.';
+            step = 'finished';
+            return;
+        }
+        if (choice === 'b') {
+            feedbackDiv.innerHTML = `<div class="feedback error">❌ Ошибка. «Похожий отход» из ФККО — не доказательство. Нужно подтвердить признаки именно вашего отхода.</div>`;
+            resetBtn.classList.remove('hidden');
+            statusHint.innerHTML = 'Нажмите «Начать заново» и выберите вариант с проверкой документов.';
+            step = 'finished';
+            return;
+        }
+        if (choice === 'd') {
+            feedbackDiv.innerHTML = `<div class="feedback warning">⚠️ Неоптимально. Лаборатория — правильно, но дорого. Сначала всегда проверяем техническую документацию. Попробуйте ещё раз.</div>`;
+            resetBtn.classList.remove('hidden');
+            statusHint.innerHTML = 'Начните с проверки паспорта изделия.';
+            step = 'finished';
+            return;
+        }
+        if (choice === 'c') {
+            // ПРАВИЛЬНЫЙ ВАРИАНТ — ПЕРЕХОД КО ВТОРОЙ ЧАСТИ
+            feedbackDiv.innerHTML = `<div class="feedback success shift-left">✅ Хорошее начало! Вы правы: сначала ищем паспорт, ТУ, ГОСТ. В нашем уроке в паспорте оказалось мало информации (только сталь и пластик без подробностей).</div>`;
+            
+            // Меняем внешний вид сообщения Ивана Ивановича на гамму второй части
+            ivanMessageDiv.innerHTML = '<strong>Иван Иванович (после вашего совета):</strong> «Хорошо, я нашёл паспорт чайника. Там написано: "корпус — сталь, крышка и ручка — пластик". Этого хватит?»';
+            ivanMessageDiv.className = 'message-bubble part2-message';
+            
+            questionLabel.innerHTML = '<strong>Ваше действие:</strong> Что ответите теперь?';
+            
+            // ПЕРЕХОД КО ВТОРОЙ ЧАСТИ
+            step = 'part2';
+            renderPart2Options();
+            statusHint.innerHTML = 'Отлично! Теперь решите, что делать после проверки паспорта.';
+        }
+    }
+
+    function renderPart2Options() {
+        optionsDiv.innerHTML = `
+            <button class="option-btn part2-option" data-choice="second_1">1) Да, отлично, вносим в отчёт.</button>
+            <button class="option-btn part2-option" data-choice="second_2">2) Нет, этого мало. Нужен полный состав (тип стали, тип пластика, другие материалы). Если нет других документов — заказываем лабораторию.</button>
+            <button class="option-btn part2-option" data-choice="second_3">3) Берём другой чайник в ФККО, где состав проще.</button>
+        `;
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const choice = btn.getAttribute('data-choice');
+                handlePart2(choice);
+            });
+        });
+    }
+
+    function handlePart2(choice) {
+        if (step !== 'part2') return;
+
+        if (choice === 'second_2') {
+            feedbackDiv.innerHTML = `<div class="feedback success">✅ Абсолютно верно! Вы действуете как профессионал: паспорт дал мало информации → других документов нет → аккредитованная лаборатория. После протокола докажете класс при любой проверке.</div>`;
+            nextStepsDiv.innerHTML = `
+                <div class="feedback success" style="margin-top:15px;">
+                🎉 <strong>Правильный алгоритм:</strong><br>
+                Паспорт → данных недостаточно → аккредитованная лаборатория → протокол → спокойствие на проверке.<br><br>
+                <strong>Итог:</strong> Чайник — IV класс опасности, подтверждение в РПН не требуется.
+                </div>
+            `;
+            optionsDiv.innerHTML = '';
+            statusHint.innerHTML = 'Вы успешно прошли кейс!';
+            resetBtn.classList.remove('hidden');
+            step = 'finished';
+        } 
+        else if (choice === 'second_1') {
+            feedbackDiv.innerHTML = `<div class="feedback error">❌ Неверно. В паспорте нет полного состава. Этого недостаточно для доказательства инспектору. Нужна лаборатория.</div>`;
+            resetBtn.classList.remove('hidden');
+            statusHint.innerHTML = 'Нажмите «Начать заново» и выберите вариант с лабораторией.';
+            step = 'finished';
+        } 
+        else if (choice === 'second_3') {
+            feedbackDiv.innerHTML = `<div class="feedback error">❌ Ошибка. Нельзя брать «другой чайник» из ФККО — состав может не совпадать. Это нарушение порядка идентификации.</div>`;
+            resetBtn.classList.remove('hidden');
+            statusHint.innerHTML = 'Нажмите «Начать заново» и выберите вариант с лабораторией.';
+            step = 'finished';
+        }
+    }
+
+    resetBtn.onclick = () => resetDialog();
+    resetDialog();
+</script>
+
+</body>
+</html>
