@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Оповещение о разливе нефти: интерактивная таблица</title>
+    <title>Оповещение о разливе нефти — интерактивная таблица</title>
     <style>
         * {
             margin: 0;
@@ -12,8 +12,8 @@
         }
 
         body {
-            background: #fffff;
-            font-family: 'Segoe UI', 'Roboto', 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(145deg, #eef2f5 0%, #e2e8f0 100%);
+            font-family: 'Segoe UI', 'Roboto', 'Inter', system-ui, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -30,7 +30,6 @@
             backdrop-filter: blur(2px);
             overflow: hidden;
             border: 1px solid rgba(255,255,240,0.6);
-            transition: all 0.2s;
         }
 
         .header {
@@ -47,6 +46,47 @@
             -webkit-background-clip: text;
             color: transparent;
             letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Красная аварийная лампа (вместо чёрно-белого эмодзи) */
+        .red-alert-lamp {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            background: radial-gradient(circle at 35% 35%, #ff4433, #aa1e0e);
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px rgba(170, 30, 14, 0.4), 0 0 12px 2px rgba(255, 68, 51, 0.6);
+            animation: pulse 1.2s infinite ease-in-out;
+        }
+        .red-alert-lamp::before {
+            content: "";
+            position: absolute;
+            top: 6px;
+            left: 8px;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            filter: blur(1px);
+        }
+        .red-alert-lamp::after {
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 10px;
+            background: #5a2e2a;
+            border-radius: 2px;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 68, 51, 0.5), 0 0 0 0 rgba(255, 68, 51, 0.3); }
+            70% { box-shadow: 0 0 0 6px rgba(255, 68, 51, 0), 0 0 0 12px rgba(255, 68, 51, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 68, 51, 0), 0 0 0 0 rgba(255, 68, 51, 0); }
         }
 
         .sub-header {
@@ -116,7 +156,6 @@
             vertical-align: top;
         }
 
-        /* кликабельные строки */
         .notification-table tbody tr {
             cursor: pointer;
             transition: all 0.15s ease;
@@ -126,7 +165,6 @@
             background-color: #f3fafd;
         }
 
-        /* Стили для бейджей */
         .badge {
             display: inline-block;
             background: #f6e5db;
@@ -161,7 +199,7 @@
             margin: 0.2rem 0;
         }
 
-        /* === УМНЫЙ ТОСТ: фиксированная ширина, перенос текста === */
+        /* всплывающий тост с переносом и ограничением ширины */
         .info-toast {
             position: fixed;
             bottom: 28px;
@@ -183,7 +221,6 @@
             opacity: 0;
             text-align: center;
             letter-spacing: 0.2px;
-            /* Ограничиваем ширину и добавляем перенос */
             max-width: min(90vw, 560px);
             width: auto;
             white-space: normal;
@@ -210,9 +247,12 @@
 <body>
 <div class="card">
     <div class="header">
-        <h1>🚨 Оповещение о разливе нефти и нефтепродуктов</h1>
+        <h1>
+            <span class="red-alert-lamp"></span>
+            Оповещение о разливе нефти и нефтепродуктов
+        </h1>
         <div class="sub-header">
-            <span>⚡ Двухэтапный порядок — сроки с момента обнаружения </span>
+            <span>⚡ Двухэтапный порядок — сроки с момента <u>обнаружения</u></span>
             <button class="btn-download" id="downloadWordBtn">📄 Скачать таблицу (Word)</button>
         </div>
     </div>
@@ -285,12 +325,12 @@
     </div>
     <footer>
         📌 <strong>Кликабельные строки</strong> — нажмите на любую строку, чтобы увидеть пояснение (всплывающая подсказка с ограниченной шириной и переносом текста).<br>
-        ✅ Таблица актуальна после внесения изменений в постановление № 2451 (срок действия продлён до 01.09.2032). Все сроки — с момента <strong>обнаружения</strong> разлива.
+        ✅ Таблица выполнена по постановлению № 2451. Все сроки указаны с момента <strong>обнаружения</strong> разлива. <strong style="color:#c72a1a;">
     </footer>
 </div>
 
 <script>
-    // Умный тост с нормальной шириной и переносом
+    // Всплывающий тост
     let toast = document.querySelector('.info-toast');
     if (!toast) {
         toast = document.createElement('div');
@@ -307,26 +347,24 @@
         window.toastTimeout = setTimeout(() => {
             toast.style.opacity = '0';
             toast.style.transform = 'translateX(-50%) scale(0.96)';
-        }, 3200);
+        }, 3400);
     }
 
-    // Добавляем обработчики на каждую строку таблицы (кроме заголовка)
+    // Добавляем кликабельность
     const rows = document.querySelectorAll('#alertTable tbody tr');
     rows.forEach(row => {
         const stage = row.getAttribute('data-stage');
         const details = row.getAttribute('data-details');
-        
         if (stage && details) {
             row.addEventListener('click', (e) => {
                 e.stopPropagation();
                 showSmartToast(`📌 ${stage}: ${details}`);
-                // Приятный визуальный отклик
+                // визуальный фидбек
                 const originalBg = row.style.backgroundColor;
                 row.style.backgroundColor = '#fff2e0';
                 setTimeout(() => { row.style.backgroundColor = ''; }, 200);
             });
         } else {
-            // fallback на случай отсутствия атрибутов
             const textHint = row.innerText.trim().substring(0, 100);
             row.addEventListener('click', () => {
                 showSmartToast(`ℹ️ ${textHint}... (смотрите требования ПП №2451)`);
@@ -334,7 +372,7 @@
         }
     });
 
-    // Экспорт в Word (без потери данных)
+    // Экспорт в Word
     function exportToWord() {
         const originalTable = document.getElementById('alertTable');
         if (!originalTable) return;
@@ -359,7 +397,7 @@
         <html>
         <head><meta charset="UTF-8"><title>Оповещение о разливе нефти</title>${styles}</head>
         <body>
-            <h1>🚨 Порядок оповещения о разливе нефти и нефтепродуктов</h1>
+            <h1>Оповещение о разливе нефти и нефтепродуктов</h1>
             <div class="sub">Двухэтапная система (ПП РФ №2451 в действующей редакции)</div>
             ${clonedTable.outerHTML}
             <footer>Документ сформирован ${new Date().toLocaleDateString('ru-RU')} в соответствии с требованиями к оповещению (сроки с момента обнаружения).</footer>
