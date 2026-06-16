@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактив: Нужна ли СЗЗ?</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #f4f7fc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            max-width: 720px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0,20,50,0.12);
+            padding: 32px 28px;
+            transition: all 0.2s;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0b1e3a;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .subhead {
+            color: #5b6f87;
+            font-size: 15px;
+            border-left: 4px solid #2b7be4;
+            padding-left: 14px;
+            margin-bottom: 28px;
+            background: #f0f5fe;
+            border-radius: 0 12px 12px 0;
+            line-height: 1.5;
+        }
+        .conditions-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+        .condition-item {
+            background: #f9faff;
+            border-radius: 18px;
+            padding: 16px 20px;
+            border: 1px solid #e3e9f2;
+            transition: border 0.15s, background 0.15s;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+        .condition-item.active {
+            background: #f0f6ff;
+            border-color: #2b7be4;
+            box-shadow: 0 2px 8px rgba(43,123,228,0.08);
+        }
+        .condition-item.disabled {
+            opacity: 0.5;
+            filter: grayscale(0.4);
+            pointer-events: none;
+        }
+        .condition-item .badge {
+            min-width: 32px;
+            height: 32px;
+            background: #e3e9f2;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 15px;
+            color: #1d334f;
+        }
+        .condition-item.active .badge {
+            background: #2b7be4;
+            color: white;
+        }
+        .condition-content {
+            flex: 1;
+        }
+        .condition-content h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #0b1e3a;
+        }
+        .condition-content p {
+            font-size: 14px;
+            color: #4d627c;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+        .toggle-wrap {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .toggle-btn {
+            background: white;
+            border: 1px solid #d0d9e6;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #2b3f5e;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .toggle-btn:hover:not(.disabled) {
+            background: #eef3fc;
+        }
+        .toggle-btn.active {
+            background: #2b7be4;
+            border-color: #2b7be4;
+            color: white;
+        }
+        .toggle-btn.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .result-area {
+            background: #f8fafd;
+            border-radius: 20px;
+            padding: 22px 24px;
+            margin-top: 12px;
+            border: 1px solid #e3e9f2;
+            min-height: 100px;
+            transition: all 0.2s;
+        }
+        .result-placeholder {
+            color: #8a9bb0;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+        .result-content {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .result-content .verdict {
+            font-weight: 700;
+            font-size: 20px;
+        }
+        .result-content .verdict.positive { color: #b91c1c; }   /* красный — нужна */
+        .result-content .verdict.warning { color: #b45f06; }    /* оранжевый */
+        .result-content .verdict.neutral { color: #1a5e3a; }    /* зеленый */
+        .result-content .comment {
+            font-size: 15px;
+            color: #1d334f;
+            line-height: 1.5;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 14px;
+            border-left: 4px solid #2b7be4;
+        }
+        .footnote {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #6f85a0;
+            border-top: 1px dashed #d8e0eb;
+            padding-top: 16px;
+            text-align: center;
+        }
+        .badge-cond {
+            display: inline-block;
+            background: #eef3fc;
+            border-radius: 40px;
+            padding: 2px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #1d4a7c;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>🏭 СЗЗ: проверить необходимость</h1>
+    <div class="subhead">
+        ⚖️ Санитарно-защитная зона нужна, если <strong>одновременно</strong> выполнены три условия.
+    </div>
+
+    <div class="conditions-grid" id="conditionsGrid">
+        <!-- Условие 1 -->
+        <div class="condition-item" id="cond1">
+            <div class="badge">1</div>
+            <div class="condition-content">
+                <h3>Объект капитального строительства</h3>
+                <p>Здание, строение или сооружение с привязкой к земле и правами в ЕГРН.</p>
+                <div class="toggle-wrap">
+                    <button class="toggle-btn" data-cond="1" data-value="yes">✅ Да</button>
+                    <button class="toggle-btn" data-cond="1" data-value="no">❌ Нет</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Условие 2 -->
+        <div class="condition-item disabled" id="cond2">
+            <div class="badge">2</div>
+            <div class="condition-content">
+                <h3>Объект стоит на учёте (категория)</h3>
+                <p>Попадает под критерии постановки на учёт или уже присвоена категория.</p>
+                <div class="toggle-wrap">
+                    <button class="toggle-btn" data-cond="2" data-value="yes">✅ Да</button>
+                    <button class="toggle-btn" data-cond="2" data-value="no">❌ Нет</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Условие 3 -->
+        <div class="condition-item disabled" id="cond3">
+            <div class="badge">3</div>
+            <div class="condition-content">
+                <h3>Риск превышения 0,1 ПДК / ПДУ за границей</h3>
+                <p>Замеры показывают, что воздействие может выйти за границы участка и превысить порог.</p>
+                <div class="toggle-wrap">
+                    <button class="toggle-btn" data-cond="3" data-value="yes">✅ Да, есть риск</button>
+                    <button class="toggle-btn" data-cond="3" data-value="no">❌ Нет, нет риска</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- РЕЗУЛЬТАТ -->
+    <div class="result-area" id="resultArea">
+        <div class="result-placeholder" id="placeholder">
+            <span>🧐</span> Выберите параметры, чтобы получить решение
+        </div>
+        <div class="result-content" id="resultContent" style="display: none;"></div>
+    </div>
+
+    <div class="footnote">
+        <span class="badge-cond">Важно</span> Комбинация только «2 и 3» без первого — не имеет логического смысла и заблокирована.
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Состояние: 1 = да/нет, 2 = да/нет, 3 = да/нет
+        const state = {
+            1: null, // null, 'yes', 'no'
+            2: null,
+            3: null
+        };
+
+        const condElements = {
+            1: document.getElementById('cond1'),
+            2: document.getElementById('cond2'),
+            3: document.getElementById('cond3')
+        };
+
+        const toggleBtns = document.querySelectorAll('.toggle-btn');
+        const placeholder = document.getElementById('placeholder');
+        const resultContent = document.getElementById('resultContent');
+
+        // Функция обновления UI (активация/блокировка)
+        function updateUI() {
+            // Условие 1 всегда активно
+            const cond1Active = (state[1] !== null);
+            // Если условие 1 активно — разблокируем 2 и 3
+            const isCond1Resolved = (state[1] !== null);
+
+            // Управление disabled-классом для 2 и 3
+            if (isCond1Resolved) {
+                condElements[2].classList.remove('disabled');
+                condElements[3].classList.remove('disabled');
+            } else {
+                condElements[2].classList.add('disabled');
+                condElements[3].classList.add('disabled');
+                // Сбрасываем значения 2 и 3, если они были
+                if (state[2] !== null) { state[2] = null; }
+                if (state[3] !== null) { state[3] = null; }
+            }
+
+            // Обновляем активные классы для кнопок
+            toggleBtns.forEach(btn => {
+                const cond = parseInt(btn.dataset.cond, 10);
+                const value = btn.dataset.value;
+                const parentCond = condElements[cond];
+                // Если условие заблокировано — кнопки отключаем визуально
+                if (parentCond.classList.contains('disabled')) {
+                    btn.classList.add('disabled');
+                    btn.classList.remove('active');
+                } else {
+                    btn.classList.remove('disabled');
+                    // Активна ли кнопка?
+                    if (state[cond] === value) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                }
+            });
+
+            // Активный фон для самих карточек
+            [1,2,3].forEach(i => {
+                const el = condElements[i];
+                if (state[i] !== null && !el.classList.contains('disabled')) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+
+            // --- Логика вывода результата ---
+            renderResult();
+        }
+
+        // Основная логика вывода
+        function renderResult() {
+            const s1 = state[1];
+            const s2 = state[2];
+            const s3 = state[3];
+
+            // Если первое условие не выбрано — показываем плейсхолдер
+            if (s1 === null) {
+                placeholder.style.display = 'flex';
+                resultContent.style.display = 'none';
+                return;
+            }
+
+            // Если условие 1 = НЕТ (не капстроительство)
+            if (s1 === 'no') {
+                placeholder.style.display = 'none';
+                resultContent.style.display = 'block';
+                resultContent.innerHTML = `
+                    <div class="verdict neutral">⛔ СЗЗ не требуется</div>
+                    <div class="comment">
+                        <strong>Объект не является капитальным строением</strong> (нет привязки к земле / прав в ЕГРН). 
+                        Требования СанПиН 2.2.1/2.1.1.1200-03 в части установления СЗЗ на такие объекты не распространяются. 
+                        Дальнейшие условия (учёт и превышения) не имеют значения.
+                    </div>
+                `;
+                return;
+            }
+
+            // Если s1 === 'yes' — дальше смотрим на 2 и 3
+            // но если 2 и 3 не выбраны — показываем промежуточный статус
+            if (s2 === null || s3 === null) {
+                placeholder.style.display = 'none';
+                resultContent.style.display = 'block';
+                let commentText = '';
+                if (s2 === null && s3 === null) {
+                    commentText = 'Укажите, состоит ли объект на учёте (условие 2) и есть ли риск превышения за границей (условие 3).';
+                } else if (s2 === null) {
+                    commentText = 'Укажите статус постановки на учёт (условие 2).';
+                } else { // s3 === null
+                    commentText = 'Укажите, есть ли риск превышения 0,1 ПДК / ПДУ за границами (условие 3).';
+                }
+                resultContent.innerHTML = `
+                    <div class="verdict warning">⏳ Ожидайте полного набора</div>
+                    <div class="comment">
+                        <strong>Условие 1 выполнено.</strong> Для окончательного решения необходимы данные по условиям 2 и 3.<br>
+                        <span style="color:#4d627c;">${commentText}</span>
+                    </div>
+                `;
+                return;
+            }
+
+            // --- Все три условия выбраны (s1='yes', s2, s3) ---
+            // Проверяем комбинации:
+
+            // СЛУЧАЙ: 1=ДА, 2=ДА, 3=ДА  -> СЗЗ НУЖНА
+            if (s2 === 'yes' && s3 === 'yes') {
+                placeholder.style.display = 'none';
+                resultContent.style.display = 'block';
+                resultContent.innerHTML = `
+                    <div class="verdict positive">🔴 СЗЗ предприятию НУЖНА</div>
+                    <div class="comment">
+                        <strong>Все три условия выполнены:</strong> объект капитальный, стоит на учёте, и есть риск превышения 0,1 ПДК/ПДУ за границами площадки.<br>
+                        Требуется разработка проекта СЗЗ и её установление в соответствии с СанПиН 2.2.1/2.1.1.1200-03.
+                    </div>
+                `;
+                return;
+            }
+
+            // СЛУЧАЙ: 1=ДА, 2=ДА, 3=НЕТ  -> СЗЗ НЕ НУЖНА (при условии подтверждения замерами)
+            if (s2 === 'yes' && s3 === 'no') {
+                placeholder.style.display = 'none';
+                resultContent.style.display = 'block';
+                resultContent.innerHTML = `
+                    <div class="verdict neutral">🟢 СЗЗ, скорее всего, не требуется</div>
+                    <div class="comment">
+                        <strong>Условия 1 и 2 выполнены, но условие 3 — нет.</strong> 
+                        Однако <span style="font-weight:600;">отсутствие превышения за границей площадки нужно доказать замерами</span>. 
+                        Если по результатам натурных/расчётных замеров будет подтверждено, что воздействие не превышает 0,1 ПДК/ПДУ на границе СЗЗ (и за ней), то СЗЗ не устанавливается.
+                        <br><br>
+                        <span style="background:#eef3fc; padding:4px 12px; border-radius:40px;">Рекомендация: проведите замеры и оформите протокол.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            // СЛУЧАЙ: 1=ДА, 2=НЕТ, 3=ДА  -> СЗЗ не нужна, т.к. объект не стоит на учёте
+            if (s2 === 'no' && s3 === 'yes') {
+                placeholder.style.display = 'none';
+                resultContent.style.display = 'block';
+                resultContent.innerHTML = `
+                    <div class="verdict neutral">🟢 СЗЗ не требуется</div>
+                    <div class="comment">
+                        <strong>Условие 2 не выполнено</strong> — объект не стоит на учёте (не присвоена категория). 
+                        Даже при наличии риска превышения (условие 3) и наличии капстроительства (условие 1), 
+                        для объектов, не подлежащих постановке на учёт, требование СЗЗ не применяется.<br>
+                        <span style="color:#4d627c;">(Согласно 52-ФЗ и СанПиН)</span>
+                    </div>
+                `;
+                return;
+            }
+
+            // СЛУЧАЙ: 1=ДА, 2=НЕТ, 3=НЕТ  -> СЗЗ не нужна
+            if (s2 === 'no' && s3 === 'no') {
+                placeholder.style.display = 'none';
+                resultContent.style.display = 'block';
+                resultContent.innerHTML = `
+                    <div class="verdict neutral">🟢 СЗЗ не требуется</div>
+                    <div class="comment">
+                        <strong>Условия 2 и 3 не выполнены.</strong> Объект не стоит на учёте, и нет риска превышения за границей. 
+                        СЗЗ не устанавливается.
+                    </div>
+                `;
+                return;
+            }
+
+            // fallback (на всякий случай)
+            placeholder.style.display = 'none';
+            resultContent.style.display = 'block';
+            resultContent.innerHTML = `<div class="comment">⚠️ Нестандартная комбинация. Проверьте ввод.</div>`;
+        }
+
+        // Обработчик кликов по кнопкам
+        toggleBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const cond = parseInt(this.dataset.cond, 10);
+                const value = this.dataset.value;
+
+                // Если кнопка disabled (заблокирована) — игнорируем
+                if (this.classList.contains('disabled')) return;
+
+                // Если мы нажимаем на уже активную кнопку — снимаем выбор (toggle)
+                if (state[cond] === value) {
+                    state[cond] = null;
+                } else {
+                    state[cond] = value;
+                }
+
+                // Если условие 1 изменилось и стало 'no' — сбрасываем 2 и 3
+                if (cond === 1 && state[1] === 'no') {
+                    state[2] = null;
+                    state[3] = null;
+                }
+
+                // Если условие 1 было установлено в 'yes', но мы сняли — чистим 2 и 3
+                if (cond === 1 && state[1] === null) {
+                    state[2] = null;
+                    state[3] = null;
+                }
+
+                updateUI();
+            });
+        });
+
+        // Инициализация
+        updateUI();
+    })();
+</script>
+</body>
+</html>
