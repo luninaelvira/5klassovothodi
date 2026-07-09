@@ -23,89 +23,94 @@
     }
 
     .container {
-      max-width: 1100px;
-      width: 100%;
+      width: 560px;
+      height: 800px;
       background: rgba(255, 250, 245, 0.8);
       backdrop-filter: blur(2px);
-      border-radius: 48px;
-      padding: 30px 30px 40px;
+      border-radius: 32px;
+      padding: 20px 20px 20px;
       box-shadow: 0 20px 40px rgba(180, 160, 150, 0.15);
       border: 1px solid #f0e8e0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
     h1 {
-      font-size: 1.6rem;
+      font-size: 1.2rem;
       font-weight: 500;
       color: #5a4f48;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       display: flex;
       align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
     h1 i {
       color: #9bb8b0;
-      font-size: 2rem;
+      font-size: 1.4rem;
     }
 
     .subtitle {
       color: #8f8078;
-      font-size: 0.95rem;
-      padding-bottom: 18px;
+      font-size: 0.75rem;
+      padding-bottom: 10px;
       border-bottom: 2px dashed #e2d6ce;
-      margin-bottom: 28px;
+      margin-bottom: 12px;
       display: flex;
-      gap: 24px;
+      gap: 12px;
       flex-wrap: wrap;
+      flex-shrink: 0;
     }
 
     .subtitle i {
-      margin-right: 6px;
+      margin-right: 4px;
       color: #b7aaa2;
     }
 
     .waste-pool {
       background: #faf7f4;
-      border-radius: 40px;
-      padding: 20px 24px;
-      margin-bottom: 32px;
+      border-radius: 24px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
       border: 2px solid #eee5de;
       box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);
+      flex-shrink: 0;
     }
 
     .pool-title {
-      font-size: 0.9rem;
+      font-size: 0.7rem;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: #a5968c;
-      margin-bottom: 16px;
+      margin-bottom: 10px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .pool-title i {
-      font-size: 1.1rem;
+      font-size: 0.9rem;
     }
 
     .waste-grid {
       display: flex;
       flex-wrap: wrap;
-      gap: 14px 20px;
+      gap: 8px 10px;
       align-items: center;
-      min-height: 70px;
+      min-height: 50px;
     }
 
     .waste-tag {
       background: #f0edea;
-      padding: 10px 24px 10px 20px;
-      border-radius: 50px;
-      font-size: 0.95rem;
+      padding: 5px 14px 5px 12px;
+      border-radius: 30px;
+      font-size: 0.7rem;
       color: #4a403b;
       display: inline-flex;
       align-items: center;
-      gap: 14px;
+      gap: 8px;
       border: 1.5px solid #e5dbd3;
       box-shadow: 0 2px 6px rgba(0,0,0,0.02);
       cursor: grab;
@@ -114,8 +119,8 @@
     }
 
     .waste-tag i {
-      font-size: 1.15rem;
-      width: 1.6rem;
+      font-size: 0.85rem;
+      width: 1.2rem;
       text-align: center;
     }
 
@@ -137,42 +142,43 @@
 
     .operators-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-      margin-top: 6px;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      flex: 1;
+      min-height: 0;
     }
 
     .operator-zone {
       background: #fcf9f7;
-      border-radius: 32px;
-      padding: 16px 18px 20px;
+      border-radius: 20px;
+      padding: 10px 12px 12px;
       border: 2px solid #efe7e0;
       transition: 0.2s;
-      min-height: 180px;
       display: flex;
       flex-direction: column;
+      min-height: 0;
     }
 
     .operator-zone.drag-over {
       background: #f3efe9;
       border-color: #b7a99e;
-      box-shadow: 0 0 0 4px rgba(180, 165, 155, 0.15);
+      box-shadow: 0 0 0 3px rgba(180, 165, 155, 0.15);
     }
 
     .operator-header {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
     }
 
     .operator-header i {
-      font-size: 1.6rem;
-      width: 42px;
-      height: 42px;
+      font-size: 1.1rem;
+      width: 28px;
+      height: 28px;
       background: #f0eae4;
-      border-radius: 30px;
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -180,7 +186,6 @@
       flex-shrink: 0;
     }
 
-    /* Специальный стиль для иконки НО РАО — такой же как у класса Д */
     .operator-zone[data-operator="rao"] .operator-header i {
       color: #d4a84a;
       background: #f5efe6;
@@ -188,84 +193,88 @@
 
     .operator-title {
       font-weight: 600;
-      font-size: 1.05rem;
+      font-size: 0.7rem;
       color: #4f4a45;
       line-height: 1.2;
+      flex: 1;
     }
 
     .operator-badge {
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       background: #ede6df;
-      padding: 2px 14px;
-      border-radius: 40px;
+      padding: 1px 10px;
+      border-radius: 30px;
       color: #8a7c72;
-      margin-left: auto;
       white-space: nowrap;
       font-weight: 500;
+      flex-shrink: 0;
     }
 
     .dropzone {
       flex: 1;
-      min-height: 80px;
+      min-height: 40px;
       background: #f8f4f0;
-      border-radius: 24px;
-      padding: 12px 16px;
+      border-radius: 16px;
+      padding: 8px 10px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       align-content: center;
-      gap: 10px 14px;
+      gap: 6px 8px;
       border: 2px dashed #dccfc6;
       transition: background 0.2s;
+      overflow-y: auto;
     }
 
     .dropzone .empty-hint {
       color: #bbafa6;
-      font-size: 0.9rem;
-      padding: 6px 4px;
+      font-size: 0.7rem;
+      padding: 2px 4px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 6px;
       width: 100%;
       justify-content: center;
     }
 
     .dropzone .empty-hint i {
       opacity: 0.5;
+      font-size: 0.8rem;
     }
 
     .dropzone .waste-tag {
       background: #f3eeea;
       border-color: #dcd0c7;
-      font-size: 0.9rem;
-      padding: 6px 18px 6px 16px;
+      font-size: 0.65rem;
+      padding: 4px 12px 4px 10px;
     }
 
     .dropzone .waste-tag i {
-      font-size: 1rem;
-      width: 1.4rem;
+      font-size: 0.75rem;
+      width: 1rem;
     }
 
     .actions {
       display: flex;
-      gap: 16px;
-      margin-top: 32px;
-      flex-wrap: wrap;
-      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      flex-shrink: 0;
     }
 
     .btn {
       border: none;
-      padding: 12px 32px;
-      border-radius: 60px;
-      font-size: 1rem;
+      padding: 8px 18px;
+      border-radius: 40px;
+      font-size: 0.75rem;
       font-weight: 500;
       display: inline-flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
       cursor: pointer;
       transition: 0.15s;
       border: 1px solid transparent;
+      flex: 1;
+      justify-content: center;
     }
 
     .btn-reset {
@@ -296,24 +305,26 @@
     }
 
     .result-block {
-      margin-top: 20px;
-      border-radius: 32px;
+      margin-top: 10px;
+      border-radius: 20px;
       overflow: hidden;
       max-height: 0;
       opacity: 0;
-      transition: max-height 0.6s ease, opacity 0.5s ease, padding 0.4s ease, margin 0.3s ease;
-      padding: 0 20px;
+      transition: max-height 0.5s ease, opacity 0.4s ease, padding 0.3s ease;
+      padding: 0 12px;
       background: transparent;
       pointer-events: none;
+      flex-shrink: 0;
     }
 
     .result-block.visible {
-      max-height: 1000px;
+      max-height: 300px;
       opacity: 1;
-      padding: 20px 24px;
+      padding: 12px 14px;
       background: #fcf9f7;
       border: 2px solid #efe7e0;
       pointer-events: auto;
+      overflow-y: auto;
     }
 
     .result-block.success {
@@ -329,14 +340,14 @@
     .result-content {
       display: flex;
       align-items: flex-start;
-      gap: 16px;
-      font-size: 0.95rem;
-      line-height: 1.6;
+      gap: 12px;
+      font-size: 0.8rem;
+      line-height: 1.5;
       color: #4a403b;
     }
 
     .result-content i {
-      font-size: 1.6rem;
+      font-size: 1.2rem;
       flex-shrink: 0;
       margin-top: 2px;
     }
@@ -351,10 +362,11 @@
 
     .result-text {
       flex: 1;
+      font-size: 0.75rem;
     }
 
     .result-text .error-item {
-      padding: 4px 0;
+      padding: 3px 0;
       border-bottom: 1px solid #f0e8e0;
     }
 
@@ -372,28 +384,43 @@
     }
 
     .footer-note {
-      margin-top: 20px;
-      font-size: 0.9rem;
+      margin-top: 10px;
+      font-size: 0.6rem;
       color: #a5988f;
       display: flex;
-      gap: 20px;
+      gap: 12px;
       flex-wrap: wrap;
       justify-content: center;
       border-top: 1px solid #e6ddd6;
-      padding-top: 22px;
+      padding-top: 10px;
+      flex-shrink: 0;
     }
 
     .footer-note i {
-      margin-right: 6px;
+      margin-right: 4px;
     }
 
-    @media (max-width: 700px) {
-      .container { padding: 20px; }
-      .operators-grid { grid-template-columns: 1fr; }
-      .operator-badge { margin-left: 0; }
-      .actions { flex-direction: column; align-items: stretch; }
-      .result-block.visible { padding: 16px; }
-      .result-content { flex-direction: column; align-items: center; text-align: center; }
+    /* Стили для скролла */
+    .dropzone::-webkit-scrollbar,
+    .result-block.visible::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .dropzone::-webkit-scrollbar-track,
+    .result-block.visible::-webkit-scrollbar-track {
+      background: #f0ece8;
+      border-radius: 4px;
+    }
+
+    .dropzone::-webkit-scrollbar-thumb,
+    .result-block.visible::-webkit-scrollbar-thumb {
+      background: #d5cbc2;
+      border-radius: 4px;
+    }
+
+    .dropzone::-webkit-scrollbar-thumb:hover,
+    .result-block.visible::-webkit-scrollbar-thumb:hover {
+      background: #c5b9af;
     }
   </style>
 </head>
@@ -406,23 +433,23 @@
     Эколог клиники · сортировка отходов
   </h1>
   <div class="subtitle">
-    <span><i class="fas fa-arrows-alt"></i> Перетащите карточку в нужного оператора</span>
-    <span><i class="fas fa-tag"></i> Медотходы классов А · Б · В · Г · Д</span>
+    <span><i class="fas fa-arrows-alt"></i> Перетащите карточку</span>
+    <span><i class="fas fa-tag"></i> А · Б/В · Г · ОПВК · Д</span>
   </div>
 
   <div class="waste-pool">
     <div class="pool-title">
-      <i class="fas fa-cubes"></i> Карточки отходов (перетащите в ячейки ниже)
+      <i class="fas fa-cubes"></i> Карточки отходов
     </div>
     <div class="waste-grid" id="wastePool">
       <div class="waste-tag class-a" draggable="true" data-class="a" data-label="Бумага, пищевые отходы (Класс А)">
-        <i class="fas fa-paper-plane"></i> Бумага, пищевые отходы 
+        <i class="fas fa-paper-plane"></i> Бумага, пищевые отходы
       </div>
       <div class="waste-tag class-bv" draggable="true" data-class="bv" data-label="Использованные системы, перевязочный материал (Класс Б и В)">
         <i class="fas fa-syringe"></i> Использованные системы, перевязочный материал
       </div>
       <div class="waste-tag class-g" draggable="true" data-class="g" data-label="Просроченные лекарства и остатки цитостатиков (Класс Г)">
-        <i class="fas fa-capsules"></i> Просроченные лекарства и остатки цитостатиков
+        <i class="fas fa-capsules"></i> Просроченные лекарства, остатки цитостатиков
       </div>
       <div class="waste-tag class-opvk" draggable="true" data-class="opvk" data-label="Ртутные лампы (Класс Г, ОПВК)">
         <i class="fas fa-lightbulb"></i> Ртутные лампы
@@ -438,33 +465,33 @@
     <div class="operator-zone" data-operator="tko">
       <div class="operator-header">
         <i class="fas fa-recycle"></i>
-        <span class="operator-title">Региональный оператор по ТКО</span>
+        <span class="operator-title">Региональный оператор</span>
         <span class="operator-badge">!</span>
       </div>
       <div class="dropzone" id="drop-tko">
-        <div class="empty-hint"><i class="fas fa-arrow-down"></i></div>
+        <div class="empty-hint"><i class="fas fa-arrow-down"></i> Класс А</div>
       </div>
     </div>
 
     <div class="operator-zone" data-operator="spec">
       <div class="operator-header">
         <i class="fas fa-biohazard"></i>
-        <span class="operator-title">Организация из спецреестра</span>
+        <span class="operator-title">Организации из спецреестра</span>
         <span class="operator-badge">!</span>
       </div>
       <div class="dropzone" id="drop-spec">
-        <div class="empty-hint"><i class="fas fa-arrow-down"></i></div>
+        <div class="empty-hint"><i class="fas fa-arrow-down"></i> Б, В, Г</div>
       </div>
     </div>
 
     <div class="operator-zone" data-operator="feo">
       <div class="operator-header">
         <i class="fas fa-flag"></i>
-        <span class="operator-title">Федеральный экологический оператор (ФЭО)</span>
+        <span class="operator-title">Федеральный экологический оператор</span>
         <span class="operator-badge">!</span>
       </div>
       <div class="dropzone" id="drop-feo">
-        <div class="empty-hint"><i class="fas fa-arrow-down"></i> </div>
+        <div class="empty-hint"><i class="fas fa-arrow-down"></i> ОПВК</div>
       </div>
     </div>
 
@@ -475,15 +502,15 @@
         <span class="operator-badge">!</span>
       </div>
       <div class="dropzone" id="drop-rao">
-        <div class="empty-hint"><i class="fas fa-arrow-down"></i> </div>
+        <div class="empty-hint"><i class="fas fa-arrow-down"></i> Класс Д</div>
       </div>
     </div>
 
   </div>
 
   <div class="actions">
-    <button class="btn btn-reset" id="resetBtn"><i class="fas fa-undo-alt"></i> Вернуть все наверх</button>
-    <button class="btn btn-check" id="checkBtn"><i class="fas fa-check"></i> Проверить ответ</button>
+    <button class="btn btn-reset" id="resetBtn"><i class="fas fa-undo-alt"></i> Сброс</button>
+    <button class="btn btn-check" id="checkBtn"><i class="fas fa-check"></i> Проверить</button>
   </div>
 
   <div class="result-block" id="resultBlock">
@@ -494,8 +521,8 @@
   </div>
 
   <div class="footer-note">
-    <span><i class="fas fa-check-circle" style="color:#95b8a8;"></i> Перетащите карточки, затем нажмите «Проверить»</span>
-    <span><i class="fas fa-mouse-pointer"></i> Для сброса нажмите «Вернуть все наверх»</span>
+    <span><i class="fas fa-check-circle" style="color:#95b8a8;"></i> Перетащите → Проверьте</span>
+    <span><i class="fas fa-mouse-pointer"></i> Сброс</span>
   </div>
 </div>
 
@@ -517,10 +544,10 @@
     };
 
     const operatorNames = {
-      'tko': 'Региональный оператор ТКО',
-      'spec': 'Организация из спецреестра',
-      'feo': 'Федеральный экологический оператор (ФЭО)',
-      'rao': 'Национальный оператор по обращению с радиоактивными отходами (НО РАО)'
+      'tko': 'Рег. оператор ТКО',
+      'spec': 'Спецреестр',
+      'feo': 'ФЭО',
+      'rao': 'НО РАО'
     };
 
     document.querySelectorAll('.waste-tag').forEach(tag => {
@@ -584,7 +611,7 @@
       resultBlock.classList.remove('visible', 'success', 'error');
       resultBlock.style.maxHeight = '0';
       resultBlock.style.opacity = '0';
-      resultBlock.style.padding = '0 20px';
+      resultBlock.style.padding = '0 12px';
       setTimeout(() => {
         if (!resultBlock.classList.contains('visible')) {
           resultText.innerHTML = '';
@@ -635,22 +662,22 @@
       const cardsInPool = wastePool.querySelectorAll('.waste-tag');
 
       if (cardsInPool.length > 0) {
-        showResult('error', '⚠️ <b>Не все карточки распределены!</b><br>Перетащите все отходы в ячейки операторов.');
+        showResult('error', '⚠️ <b>Не все карточки распределены!</b><br>Перетащите все отходы в ячейки.');
         return;
       }
 
       if (totalCards === 0) {
-        showResult('error', '⚠️ <b>Ни одна карточка не распределена.</b><br>Перетащите отходы в ячейки операторов.');
+        showResult('error', '⚠️ <b>Ни одна карточка не распределена.</b><br>Перетащите отходы в ячейки.');
         return;
       }
 
       if (errors.length === 0) {
         showResult('success', '✅ <b>Отлично!</b> Все отходы переданы правильным операторам!');
       } else {
-        let html = '❌ <b>Найдены ошибки в распределении:</b><br><br>';
+        let html = '❌ <b>Найдены ошибки:</b><br>';
         errors.forEach((err, idx) => {
           html += `<div class="error-item">${idx+1}. «${err.card}»<br>`;
-          html += `&nbsp;&nbsp;→ <b>${err.actual}</b> (должен быть <span class="expected">${err.expected}</span>)</div>`;
+          html += `→ <b>${err.actual}</b> (должен: <span class="expected">${err.expected}</span>)</div>`;
         });
         showResult('error', html);
       }
@@ -686,7 +713,7 @@
     dropZones.forEach(zone => updateHint(zone));
     hideResult();
 
-    console.log('✅ Проверка работает! Добавлен класс Д и НО РАО с иконкой радиоактивности.');
+    console.log('✅ Готово! Размер 560x800, ячейки по 2 в ряду.');
   })();
 </script>
 
