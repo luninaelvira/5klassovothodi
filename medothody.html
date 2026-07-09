@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Эколог клиники — сортировка отходов</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: #f5f0ec;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1100px;
+      width: 100%;
+      background: rgba(255, 250, 245, 0.8);
+      backdrop-filter: blur(2px);
+      border-radius: 48px;
+      padding: 30px 30px 40px;
+      box-shadow: 0 20px 40px rgba(180, 160, 150, 0.15);
+      border: 1px solid #f0e8e0;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: #5a4f48;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    h1 i {
+      color: #9bb8b0;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      color: #8f8078;
+      font-size: 0.95rem;
+      padding-bottom: 18px;
+      border-bottom: 2px dashed #e2d6ce;
+      margin-bottom: 28px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .subtitle i {
+      margin-right: 6px;
+      color: #b7aaa2;
+    }
+
+    .waste-pool {
+      background: #faf7f4;
+      border-radius: 40px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      border: 2px solid #eee5de;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .pool-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #a5968c;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pool-title i {
+      font-size: 1.1rem;
+    }
+
+    .waste-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 20px;
+      align-items: center;
+      min-height: 70px;
+    }
+
+    .waste-tag {
+      background: #f0edea;
+      padding: 10px 24px 10px 20px;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      color: #4a403b;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      border: 1.5px solid #e5dbd3;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      cursor: grab;
+      transition: 0.1s ease;
+      user-select: none;
+    }
+
+    .waste-tag i {
+      font-size: 1.15rem;
+      width: 1.6rem;
+      text-align: center;
+    }
+
+    .waste-tag:active {
+      cursor: grabbing;
+      opacity: 0.6;
+    }
+
+    .waste-tag.dragging {
+      opacity: 0.25;
+      transform: scale(0.96);
+    }
+
+    .waste-tag.class-a i { color: #9bb89a; }
+    .waste-tag.class-bv i { color: #c4a8a0; }
+    .waste-tag.class-g i { color: #b0a6c0; }
+    .waste-tag.class-opvk i { color: #a8b8a8; }
+    .waste-tag.class-d i { color: #d4a84a; }
+
+    .operators-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 6px;
+    }
+
+    .operator-zone {
+      background: #fcf9f7;
+      border-radius: 32px;
+      padding: 16px 18px 20px;
+      border: 2px solid #efe7e0;
+      transition: 0.2s;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .operator-zone.drag-over {
+      background: #f3efe9;
+      border-color: #b7a99e;
+      box-shadow: 0 0 0 4px rgba(180, 165, 155, 0.15);
+    }
+
+    .operator-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .operator-header i {
+      font-size: 1.6rem;
+      width: 42px;
+      height: 42px;
+      background: #f0eae4;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #7f8f89;
+      flex-shrink: 0;
+    }
+
+    /* Специальный стиль для иконки НО РАО — такой же как у класса Д */
+    .operator-zone[data-operator="rao"] .operator-header i {
+      color: #d4a84a;
+      background: #f5efe6;
+    }
+
+    .operator-title {
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: #4f4a45;
+      line-height: 1.2;
+    }
+
+    .operator-badge {
+      font-size: 0.7rem;
+      background: #ede6df;
+      padding: 2px 14px;
+      border-radius: 40px;
+      color: #8a7c72;
+      margin-left: auto;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .dropzone {
+      flex: 1;
+      min-height: 80px;
+      background: #f8f4f0;
+      border-radius: 24px;
+      padding: 12px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      align-content: center;
+      gap: 10px 14px;
+      border: 2px dashed #dccfc6;
+      transition: background 0.2s;
+    }
+
+    .dropzone .empty-hint {
+      color: #bbafa6;
+      font-size: 0.9rem;
+      padding: 6px 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .dropzone .empty-hint i {
+      opacity: 0.5;
+    }
+
+    .dropzone .waste-tag {
+      background: #f3eeea;
+      border-color: #dcd0c7;
+      font-size: 0.9rem;
+      padding: 6px 18px 6px 16px;
+    }
+
+    .dropzone .waste-tag i {
+      font-size: 1rem;
+      width: 1.4rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 16px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      border: none;
+      padding: 12px 32px;
+      border-radius: 60px;
+      font-size: 1rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: 0.15s;
+      border: 1px solid transparent;
+    }
+
+    .btn-reset {
+      background: #e7dfd8;
+      color: #4d443e;
+      border-color: #dbd0c8;
+    }
+
+    .btn-reset:hover {
+      background: #ddd2c9;
+      border-color: #cbbfb5;
+      transform: scale(0.97);
+    }
+
+    .btn-check {
+      background: #d4e0da;
+      color: #3d5a4e;
+      border-color: #c0d2c8;
+    }
+
+    .btn-check:hover {
+      background: #c7d6ce;
+      transform: scale(0.97);
+    }
+
+    .btn-check i {
+      color: #5a7a6a;
+    }
+
+    .result-block {
+      margin-top: 20px;
+      border-radius: 32px;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.6s ease, opacity 0.5s ease, padding 0.4s ease, margin 0.3s ease;
+      padding: 0 20px;
+      background: transparent;
+      pointer-events: none;
+    }
+
+    .result-block.visible {
+      max-height: 1000px;
+      opacity: 1;
+      padding: 20px 24px;
+      background: #fcf9f7;
+      border: 2px solid #efe7e0;
+      pointer-events: auto;
+    }
+
+    .result-block.success {
+      border-color: #b8d5c4;
+      background: #f0f8f2;
+    }
+
+    .result-block.error {
+      border-color: #e8cdc4;
+      background: #f8f0ec;
+    }
+
+    .result-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #4a403b;
+    }
+
+    .result-content i {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .result-content .icon-success {
+      color: #3d7a5a;
+    }
+
+    .result-content .icon-error {
+      color: #b05a4a;
+    }
+
+    .result-text {
+      flex: 1;
+    }
+
+    .result-text .error-item {
+      padding: 4px 0;
+      border-bottom: 1px solid #f0e8e0;
+    }
+
+    .result-text .error-item:last-child {
+      border-bottom: none;
+    }
+
+    .result-text .error-item b {
+      color: #8a4a3a;
+    }
+
+    .result-text .error-item .expected {
+      color: #3d7a5a;
+      font-weight: 600;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #a5988f;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      border-top: 1px solid #e6ddd6;
+      padding-top: 22px;
+    }
+
+    .footer-note i {
+      margin-right: 6px;
+    }
+
+    @media (max-width: 700px) {
+      .container { padding: 20px; }
+      .operators-grid { grid-template-columns: 1fr; }
+      .operator-badge { margin-left: 0; }
+      .actions { flex-direction: column; align-items: stretch; }
+      .result-block.visible { padding: 16px; }
+      .result-content { flex-direction: column; align-items: center; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>
+    <i class="fas fa-leaf"></i> 
+    Эколог клиники · сортировка отходов
+  </h1>
+  <div class="subtitle">
+    <span><i class="fas fa-arrows-alt"></i> Перетащите карточку в нужного оператора</span>
+    <span><i class="fas fa-tag"></i> Класс А · Б+В · Г (цитостатики) · Г (ОПВК) · Д</span>
+  </div>
+
+  <div class="waste-pool">
+    <div class="pool-title">
+      <i class="fas fa-cubes"></i> Карточки отходов (перетащите в ячейки ниже)
+    </div>
+    <div class="waste-grid" id="wastePool">
+      <div class="waste-tag class-a" draggable="true" data-class="a" data-label="Бумага, пищевые отходы (Класс А)">
+        <i class="fas fa-paper-plane"></i> Бумага, пищевые отходы (Класс А)
+      </div>
+      <div class="waste-tag class-bv" draggable="true" data-class="bv" data-label="Использованные системы, перевязочный материал (Класс Б и В)">
+        <i class="fas fa-syringe"></i> Использованные системы, перевязочный материал (Класс Б и В)
+      </div>
+      <div class="waste-tag class-g" draggable="true" data-class="g" data-label="Просроченные лекарства и остатки цитостатиков (Класс Г)">
+        <i class="fas fa-capsules"></i> Просроченные лекарства и остатки цитостатиков (Класс Г)
+      </div>
+      <div class="waste-tag class-opvk" draggable="true" data-class="opvk" data-label="Ртутные лампы (Класс Г, ОПВК)">
+        <i class="fas fa-lightbulb"></i> Ртутные лампы (Класс Г, ОПВК)
+      </div>
+      <div class="waste-tag class-d" draggable="true" data-class="d" data-label="Неиспользованные остатки радиофармпрепаратов (Класс Д)">
+        <i class="fas fa-radiation"></i> Неиспользованные остатки радиофармпрепаратов (Класс Д)
+      </div>
+    </div>
+  </div>
+
+  <div class="operators-grid">
+
+    <div class="operator-zone" data-operator="tko">
+      <div class="operator-header">
+        <i class="fas fa-recycle"></i>
+        <span class="operator-title">Региональный оператор по ТКО</span>
+        <span class="operator-badge">52-ФЗ</span>
+      </div>
+      <div class="dropzone" id="drop-tko">
+        <div class="empty-hint"><i class="fas fa-arrow-down"></i> Сюда класс А</div>
+      </div>
+    </div>
+
+    <div class="operator-zone" data-operator="spec">
+      <div class="operator-header">
+        <i class="fas fa-biohazard"></i>
+        <span class="operator-title">Организация из спецреестра</span>
+        <span class="operator-badge">медотходы</span>
+      </div>
+      <div class="dropzone" id="drop-spec">
+        <div class="empty-hint"><i class="fas fa-arrow-down"></i> Сюда классы Б, В и Г (цитостатики)</div>
+      </div>
+    </div>
+
+    <div class="operator-zone" data-operator="feo">
+      <div class="operator-header">
+        <i class="fas fa-flag"></i>
+        <span class="operator-title">Федеральный экологический оператор (ФЭО)</span>
+        <span class="operator-badge">ОПВК</span>
+      </div>
+      <div class="dropzone" id="drop-feo">
+        <div class="empty-hint"><i class="fas fa-arrow-down"></i> Сюда ртутные лампы (ОПВК)</div>
+      </div>
+    </div>
+
+    <div class="operator-zone" data-operator="rao">
+      <div class="operator-header">
+        <i class="fas fa-radiation"></i>
+        <span class="operator-title">Национальный оператор по обращению с радиоактивными отходами (НО РАО)</span>
+        <span class="operator-badge">РАО</span>
+      </div>
+      <div class="dropzone" id="drop-rao">
+        <div class="empty-hint"><i class="fas fa-arrow-down"></i> Сюда класс Д (радиофармпрепараты)</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-reset" id="resetBtn"><i class="fas fa-undo-alt"></i> Вернуть все наверх</button>
+    <button class="btn btn-check" id="checkBtn"><i class="fas fa-check"></i> Проверить ответ</button>
+  </div>
+
+  <div class="result-block" id="resultBlock">
+    <div class="result-content" id="resultContent">
+      <i id="resultIcon" class="fas"></i>
+      <div class="result-text" id="resultText"></div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <span><i class="fas fa-check-circle" style="color:#95b8a8;"></i> Перетащите карточки, затем нажмите «Проверить»</span>
+    <span><i class="fas fa-mouse-pointer"></i> Для сброса нажмите «Вернуть все наверх»</span>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const dropZones = document.querySelectorAll('.dropzone');
+    const wastePool = document.getElementById('wastePool');
+    const resultBlock = document.getElementById('resultBlock');
+    const resultText = document.getElementById('resultText');
+    const resultIcon = document.getElementById('resultIcon');
+    let draggedElement = null;
+
+    const correctMap = {
+      'a': 'tko',
+      'bv': 'spec',
+      'g': 'spec',
+      'opvk': 'feo',
+      'd': 'rao'
+    };
+
+    const operatorNames = {
+      'tko': 'Региональный оператор ТКО',
+      'spec': 'Организация из спецреестра',
+      'feo': 'Федеральный экологический оператор (ФЭО)',
+      'rao': 'Национальный оператор по обращению с радиоактивными отходами (НО РАО)'
+    };
+
+    document.querySelectorAll('.waste-tag').forEach(tag => {
+      tag.addEventListener('dragstart', function(e) {
+        draggedElement = this;
+        this.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', this.dataset.label || '');
+      });
+
+      tag.addEventListener('dragend', function(e) {
+        this.classList.remove('dragging');
+      });
+    });
+
+    dropZones.forEach(zone => {
+      zone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        this.closest('.operator-zone')?.classList.add('drag-over');
+      });
+
+      zone.addEventListener('dragleave', function(e) {
+        this.closest('.operator-zone')?.classList.remove('drag-over');
+      });
+
+      zone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.closest('.operator-zone')?.classList.remove('drag-over');
+
+        if (!draggedElement) return;
+        if (!draggedElement.classList.contains('waste-tag')) return;
+
+        const currentParent = draggedElement.parentNode;
+        if (currentParent === this) {
+          draggedElement = null;
+          return;
+        }
+
+        this.appendChild(draggedElement);
+
+        updateHint(this);
+        if (currentParent.classList.contains('dropzone')) {
+          updateHint(currentParent);
+        }
+
+        hideResult();
+
+        draggedElement = null;
+      });
+    });
+
+    function updateHint(zone) {
+      const hint = zone.querySelector('.empty-hint');
+      if (!hint) return;
+      const hasCards = zone.querySelector('.waste-tag') !== null;
+      hint.style.display = hasCards ? 'none' : 'flex';
+    }
+
+    function hideResult() {
+      resultBlock.classList.remove('visible', 'success', 'error');
+      resultBlock.style.maxHeight = '0';
+      resultBlock.style.opacity = '0';
+      resultBlock.style.padding = '0 20px';
+      setTimeout(() => {
+        if (!resultBlock.classList.contains('visible')) {
+          resultText.innerHTML = '';
+        }
+      }, 100);
+    }
+
+    function showResult(type, htmlContent) {
+      resultBlock.classList.remove('visible', 'success', 'error');
+      resultBlock.style.maxHeight = '0';
+      resultBlock.style.opacity = '0';
+      
+      resultIcon.className = `fas ${type === 'success' ? 'fa-check-circle icon-success' : 'fa-exclamation-circle icon-error'}`;
+      resultText.innerHTML = htmlContent;
+      
+      setTimeout(() => {
+        resultBlock.classList.add('visible', type);
+        resultBlock.style.maxHeight = '';
+        resultBlock.style.opacity = '';
+        resultBlock.style.padding = '';
+      }, 20);
+    }
+
+    function checkAnswer() {
+      const allDropZones = document.querySelectorAll('.dropzone');
+      let errors = [];
+      let totalCards = 0;
+
+      allDropZones.forEach(zone => {
+        const operator = zone.closest('.operator-zone')?.dataset.operator;
+        const cards = zone.querySelectorAll('.waste-tag');
+
+        cards.forEach(card => {
+          totalCards++;
+          const cardClass = card.dataset.class;
+          const expectedOperator = correctMap[cardClass];
+
+          if (operator !== expectedOperator) {
+            errors.push({
+              card: card.dataset.label || card.textContent.trim(),
+              actual: operatorNames[operator] || operator,
+              expected: operatorNames[expectedOperator] || expectedOperator
+            });
+          }
+        });
+      });
+
+      const cardsInPool = wastePool.querySelectorAll('.waste-tag');
+
+      if (cardsInPool.length > 0) {
+        showResult('error', '⚠️ <b>Не все карточки распределены!</b><br>Перетащите все отходы в ячейки операторов.');
+        return;
+      }
+
+      if (totalCards === 0) {
+        showResult('error', '⚠️ <b>Ни одна карточка не распределена.</b><br>Перетащите отходы в ячейки операторов.');
+        return;
+      }
+
+      if (errors.length === 0) {
+        showResult('success', '✅ <b>Отлично!</b> Все отходы переданы правильным операторам!');
+      } else {
+        let html = '❌ <b>Найдены ошибки в распределении:</b><br><br>';
+        errors.forEach((err, idx) => {
+          html += `<div class="error-item">${idx+1}. «${err.card}»<br>`;
+          html += `&nbsp;&nbsp;→ <b>${err.actual}</b> (должен быть <span class="expected">${err.expected}</span>)</div>`;
+        });
+        showResult('error', html);
+      }
+    }
+
+    function resetAll() {
+      const allDropZones = document.querySelectorAll('.dropzone');
+      const cardsToMove = [];
+
+      allDropZones.forEach(zone => {
+        const cards = zone.querySelectorAll('.waste-tag');
+        cards.forEach(card => {
+          cardsToMove.push(card);
+        });
+      });
+
+      cardsToMove.forEach(card => {
+        wastePool.appendChild(card);
+      });
+
+      allDropZones.forEach(zone => {
+        const hint = zone.querySelector('.empty-hint');
+        if (hint) hint.style.display = 'flex';
+      });
+
+      document.querySelectorAll('.operator-zone').forEach(z => z.classList.remove('drag-over'));
+      hideResult();
+    }
+
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+    document.getElementById('checkBtn').addEventListener('click', checkAnswer);
+
+    dropZones.forEach(zone => updateHint(zone));
+    hideResult();
+
+    console.log('✅ Проверка работает! Добавлен класс Д и НО РАО с иконкой радиоактивности.');
+  })();
+</script>
+
+</body>
+</html>
