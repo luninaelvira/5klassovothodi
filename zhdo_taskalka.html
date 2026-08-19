@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактив: Журнал движения отходов</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8edf5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 1100px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 35px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #1a365d;
+            text-align: center;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #2b6cb0;
+            font-weight: 500;
+            background: #ebf8ff;
+            padding: 10px 20px;
+            border-radius: 60px;
+            margin-bottom: 20px;
+            border: 2px solid #bee3f8;
+            font-size: 16px;
+        }
+
+        .task-text {
+            background: #f7fafc;
+            padding: 16px 22px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            border-left: 6px solid #4299e1;
+            font-size: 16px;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        .task-text strong {
+            color: #2b6cb0;
+        }
+
+        .cards-pool {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 25px 20px;
+            background: #f7fafc;
+            border-radius: 24px;
+            min-height: 100px;
+            margin-bottom: 25px;
+            border: 3px dashed #cbd5e0;
+            transition: all 0.3s;
+        }
+
+        .cards-pool.drag-over {
+            background: #edf2f7;
+            border-color: #4299e1;
+            border-style: solid;
+        }
+
+        .cards-pool .empty-hint {
+            color: #a0aec0;
+            font-style: italic;
+            font-size: 15px;
+        }
+
+        .card {
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: grab;
+            border: 3px solid #cbd5e0;
+            background: white;
+            color: #2d3748;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            user-select: none;
+            text-align: center;
+            touch-action: none;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+            border-color: #90cdf4;
+        }
+
+        .card:active {
+            cursor: grabbing;
+        }
+
+        .card.dragging {
+            opacity: 0.3;
+            transform: scale(0.95);
+        }
+
+        .drop-zones {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 10px 0 25px;
+        }
+
+        .drop-zone {
+            flex: 1;
+            min-width: 250px;
+            min-height: 180px;
+            background: #f7fafc;
+            border-radius: 20px;
+            padding: 20px 18px;
+            border: 4px dashed #cbd5e0;
+            transition: all 0.3s ease;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #4299e1;
+            background: #ebf8ff;
+            transform: scale(1.01);
+            border-style: solid;
+        }
+
+        .drop-zone.zone-true {
+            border-color: #68d391;
+        }
+
+        .drop-zone.zone-true.drag-over {
+            background: #f0fff4;
+            border-color: #38a169;
+        }
+
+        .drop-zone.zone-false {
+            border-color: #fc8181;
+        }
+
+        .drop-zone.zone-false.drag-over {
+            background: #fff5f5;
+            border-color: #e53e3e;
+        }
+
+        .drop-zone h3 {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+
+        .drop-zone.zone-true h3 {
+            color: #276749;
+        }
+
+        .drop-zone.zone-false h3 {
+            color: #9b2c2c;
+        }
+
+        .drop-zone .zone-placeholder {
+            color: #a0aec0;
+            text-align: center;
+            font-size: 14px;
+            padding: 20px 0;
+            font-style: italic;
+        }
+
+        .drop-zone .card {
+            display: inline-block;
+            margin: 6px 8px 6px 0;
+            cursor: grab;
+            font-size: 13px;
+            padding: 8px 18px;
+            border-width: 3px;
+        }
+
+        .drop-zone .card.in-true {
+            background: #c6f6d5;
+            border-color: #38a169;
+            color: #22543d;
+        }
+
+        .drop-zone .card.in-true:hover {
+            background: #9ae6b4;
+            border-color: #276749;
+        }
+
+        .drop-zone .card.in-false {
+            background: #fed7d7;
+            border-color: #e53e3e;
+            color: #9b2c2c;
+        }
+
+        .drop-zone .card.in-false:hover {
+            background: #feb2b2;
+            border-color: #c53030;
+        }
+
+        .drop-zone .card:active {
+            cursor: grabbing;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 36px;
+            border: none;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .btn:active {
+            transform: translateY(0px);
+        }
+
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3182ce;
+        }
+
+        .btn-danger {
+            background: #fc8181;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-warning {
+            background: #ed8936;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #dd6b20;
+        }
+
+        /* РЕЗУЛЬТАТ — СВЕТЛЫЙ, БЕЗ СТАТИСТИКИ */
+        .result-box {
+            margin-top: 25px;
+            background: #f7fafc;
+            border-radius: 20px;
+            padding: 24px 28px;
+            border: 3px solid #e2e8f0;
+            display: none;
+            line-height: 1.6;
+            font-size: 15px;
+            color: #2d3748;
+            transition: all 0.3s;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .result-box.success {
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+
+        .result-box.error {
+            border-color: #fc8181;
+            background: #fff5f5;
+        }
+
+        .result-box.hint {
+            border-color: #ed8936;
+            background: #fffbeb;
+        }
+
+        .result-box .result-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .result-box.success .result-title {
+            color: #276749;
+        }
+
+        .result-box.error .result-title {
+            color: #9b2c2c;
+        }
+
+        .result-box.hint .result-title {
+            color: #975a16;
+        }
+
+        .result-box .result-detail {
+            margin-top: 12px;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 14px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .result-box .result-detail ul {
+            padding-left: 24px;
+            margin: 6px 0;
+        }
+
+        .result-box .result-detail li {
+            margin: 4px 0;
+        }
+
+        .result-box .hint-block {
+            margin-top: 12px;
+            background: #fffbeb;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 2px solid #f6e05e;
+            font-size: 14px;
+        }
+
+        .result-box .error-list {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .result-box .error-list li {
+            margin: 4px 0;
+        }
+
+        .footnote {
+            text-align: center;
+            margin-top: 18px;
+            color: #718096;
+            font-size: 13px;
+            background: #f7fafc;
+            padding: 8px 16px;
+            border-radius: 40px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card.highlight-correct {
+            border-color: #38a169 !important;
+            background: #c6f6d5 !important;
+            box-shadow: 0 0 0 4px #9ae6b4;
+        }
+
+        .card.highlight-wrong {
+            border-color: #e53e3e !important;
+            background: #fed7d7 !important;
+            box-shadow: 0 0 0 4px #feb2b2;
+        }
+
+        @media (max-width: 700px) {
+            .game-container { padding: 16px; }
+            .card { font-size: 12px; padding: 8px 14px; }
+            .btn { padding: 10px 18px; font-size: 14px; }
+            .drop-zone { min-width: 100%; }
+            h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>
+        <span style="font-size: 30px;">📋</span> Журнал движения отходов
+    </h1>
+    <div class="subtitle">🎯 Перетащи карточки мышкой в нужную колонку</div>
+
+    <div class="task-text">
+        <strong>📌 Задание:</strong> Перед тобой 8 карточек с названиями отчётов.<br>
+        <strong>Перетащи мышкой</strong> те отчёты, для которых используются <strong>данные из журнала движения отходов</strong>, в колонку <strong>«✅ НУЖЕН журнал»</strong>.<br>
+        Остальные — в колонку <strong>«❌ НЕ нужен журнал»</strong>.
+        <br><span style="font-size: 13px; color: #718096;">💡 Дважды кликни по карточке в колонке, чтобы вернуть её обратно в центр.</span>
+    </div>
+
+    <!-- Пул карточек -->
+    <div id="cardsPool" class="cards-pool"></div>
+
+    <!-- Две колонки -->
+    <div class="drop-zones">
+        <div class="drop-zone zone-true" id="trueZone" data-zone="true">
+            <h3>✅ НУЖЕН журнал</h3>
+            <div id="trueZoneContent" class="zone-placeholder">Перетащи сюда карточки...</div>
+        </div>
+        <div class="drop-zone zone-false" id="falseZone" data-zone="false">
+            <h3>❌ НЕ нужен журнал</h3>
+            <div id="falseZoneContent" class="zone-placeholder">Перетащи сюда карточки...</div>
+        </div>
+    </div>
+
+    <!-- Кнопки -->
+    <div class="btn-group">
+        <button class="btn btn-primary" id="checkBtn">🔍 Проверить</button>
+        <button class="btn btn-danger" id="resetBtn">🔄 Сбросить всё</button>
+        <button class="btn btn-warning" id="hintBtn">💡 Подсказка</button>
+    </div>
+
+    <!-- Результат -->
+    <div id="resultBox" class="result-box"></div>
+
+    <div class="footnote">
+        🖱️ <strong>Как работать:</strong> зажми карточку левой кнопкой мыши и перетащи в нужную колонку.
+    </div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // ДАННЫЕ
+    // --------------------------------------------------------------
+    const allCards = [
+        { id: 'c1', label: 'Расчет платы за НВОС', correct: true },
+        { id: 'c2', label: 'Отчет 2-ТП (отходы)', correct: true },
+        { id: 'c3', label: 'НООЛР для КЭР', correct: true },
+        { id: 'c4', label: 'Объем/масса отходов для ДВОС', correct: true },
+        { id: 'c5', label: 'Отчет ПЭК', correct: true },
+        { id: 'c6', label: 'Отчет 2-ТП (водхоз)', correct: false },
+        { id: 'c7', label: 'Отчет 4-ОС', correct: false },
+        { id: 'c8', label: 'Отчет 4-ЛС', correct: false }  // недра, а не лес!
+    ];
+
+    let cardLocation = {};
+    allCards.forEach(c => cardLocation[c.id] = 'pool');
+
+    const poolEl = document.getElementById('cardsPool');
+    const trueZoneEl = document.getElementById('trueZoneContent');
+    const falseZoneEl = document.getElementById('falseZoneContent');
+    const resultBox = document.getElementById('resultBox');
+    const trueZone = document.getElementById('trueZone');
+    const falseZone = document.getElementById('falseZone');
+
+    let draggedCardId = null;
+
+    // --------------------------------------------------------------
+    // Рендеринг
+    // --------------------------------------------------------------
+    function render() {
+        poolEl.innerHTML = '';
+        const poolCards = allCards.filter(c => cardLocation[c.id] === 'pool');
+        if (poolCards.length === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'empty-hint';
+            emptyMsg.textContent = '✨ Все карточки распределены!';
+            poolEl.appendChild(emptyMsg);
+        } else {
+            poolCards.forEach(card => {
+                const div = createCardElement(card, 'pool');
+                poolEl.appendChild(div);
+            });
+        }
+
+        trueZoneEl.innerHTML = '';
+        const trueCards = allCards.filter(c => cardLocation[c.id] === 'true');
+        if (trueCards.length === 0) {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'zone-placeholder';
+            placeholder.textContent = '📥 Перетащи сюда карточки...';
+            trueZoneEl.appendChild(placeholder);
+        } else {
+            trueCards.forEach(card => {
+                const span = createCardElement(card, 'true');
+                trueZoneEl.appendChild(span);
+            });
+        }
+
+        falseZoneEl.innerHTML = '';
+        const falseCards = allCards.filter(c => cardLocation[c.id] === 'false');
+        if (falseCards.length === 0) {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'zone-placeholder';
+            placeholder.textContent = '📥 Перетащи сюда карточки...';
+            falseZoneEl.appendChild(placeholder);
+        } else {
+            falseCards.forEach(card => {
+                const span = createCardElement(card, 'false');
+                falseZoneEl.appendChild(span);
+            });
+        }
+
+        resultBox.classList.remove('show');
+        resultBox.className = 'result-box';
+        resultBox.innerHTML = '';
+    }
+
+    // --------------------------------------------------------------
+    // Создание карточки
+    // --------------------------------------------------------------
+    function createCardElement(card, location) {
+        const el = document.createElement('div');
+        el.className = 'card';
+        if (location === 'true') el.classList.add('in-true');
+        if (location === 'false') el.classList.add('in-false');
+
+        if (location === 'true') {
+            el.textContent = '✅ ' + card.label;
+        } else if (location === 'false') {
+            el.textContent = '❌ ' + card.label;
+        } else {
+            el.textContent = card.label;
+        }
+
+        el.dataset.id = card.id;
+        el.draggable = true;
+
+        el.addEventListener('dragstart', function(e) {
+            draggedCardId = card.id;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', card.id);
+        });
+
+        el.addEventListener('dragend', function(e) {
+            this.classList.remove('dragging');
+        });
+
+        if (location !== 'pool') {
+            el.addEventListener('dblclick', function(e) {
+                e.stopPropagation();
+                cardLocation[card.id] = 'pool';
+                render();
+            });
+        }
+
+        return el;
+    }
+
+    // --------------------------------------------------------------
+    // Настройка drop-зон
+    // --------------------------------------------------------------
+    function setupDropZone(zoneElement, targetLocation) {
+        zoneElement.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            this.classList.add('drag-over');
+        });
+
+        zoneElement.addEventListener('dragleave', function(e) {
+            this.classList.remove('drag-over');
+        });
+
+        zoneElement.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+
+            const cardId = e.dataTransfer.getData('text/plain');
+            if (!cardId) return;
+
+            const card = allCards.find(c => c.id === cardId);
+            if (!card) return;
+
+            cardLocation[cardId] = targetLocation;
+            draggedCardId = null;
+            render();
+        });
+    }
+
+    poolEl.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        this.classList.add('drag-over');
+    });
+
+    poolEl.addEventListener('dragleave', function(e) {
+        this.classList.remove('drag-over');
+    });
+
+    poolEl.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+
+        const cardId = e.dataTransfer.getData('text/plain');
+        if (!cardId) return;
+
+        const card = allCards.find(c => c.id === cardId);
+        if (!card) return;
+
+        cardLocation[cardId] = 'pool';
+        draggedCardId = null;
+        render();
+    });
+
+    setupDropZone(trueZone, 'true');
+    setupDropZone(falseZone, 'false');
+
+    // --------------------------------------------------------------
+    // Проверка (без статистики)
+    // --------------------------------------------------------------
+    function checkAnswers() {
+        let correctTrue = 0;
+        let correctFalse = 0;
+        let wrongTrue = 0;
+        let wrongFalse = 0;
+
+        allCards.forEach(card => {
+            const loc = cardLocation[card.id];
+            if (loc === 'true' && card.correct === true) correctTrue++;
+            if (loc === 'false' && card.correct === false) correctFalse++;
+            if (loc === 'true' && card.correct === false) wrongTrue++;
+            if (loc === 'false' && card.correct === true) wrongFalse++;
+        });
+
+        const totalCorrect = allCards.filter(c => c.correct === true).length;
+        const totalWrong = allCards.filter(c => c.correct === false).length;
+        const allGood = (correctTrue === totalCorrect && correctFalse === totalWrong);
+
+        resultBox.classList.add('show');
+
+        // Убираем старые подсветки
+        document.querySelectorAll('.card.highlight-correct, .card.highlight-wrong').forEach(el => {
+            el.classList.remove('highlight-correct', 'highlight-wrong');
+        });
+
+        if (allGood) {
+            resultBox.className = 'result-box show success';
+            resultBox.innerHTML = `
+                <div class="result-title">🎉 Отлично! Всё верно!</div>
+                <div style="font-size: 17px;">Ты правильно распределил все 8 карточек. Молодец! 👏</div>
+                <div class="result-detail">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span style="font-size: 20px;">✅</span>
+                        <strong style="color: #276749;">Журнал нужен для:</strong>
+                    </div>
+                    <ul style="color: #22543d;">
+                        <li>Расчёт платы за НВОС</li>
+                        <li>Отчет 2-ТП (отходы)</li>
+                        <li>НООЛР для КЭР</li>
+                        <li>Объем/масса отходов для ДВОС</li>
+                        <li>Отчет ПЭК</li>
+                    </ul>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px; margin-bottom: 8px;">
+                        <span style="font-size: 20px;">❌</span>
+                        <strong style="color: #9b2c2c;">Журнал НЕ нужен для:</strong>
+                    </div>
+                    <ul style="color: #9b2c2c;">
+                        <li><strong>Отчет 2-ТП (водхоз)</strong> — это отчёт по водному хозяйству</li>
+                        <li><strong>Отчет 4-ОС</strong> — это отчёт о выбросах в атмосферу</li>
+                        <li><strong>Отчет 4-ЛС</strong> — это отчёт по недрам (лицензионные соглашения)</li>
+                    </ul>
+                    <div class="hint-block">
+                        💡 <strong>Почему?</strong> Журнал движения отходов содержит данные о массе и объёме отходов — это основа для экологических платежей, статистики, лимитов и контроля. Отчёты по воде, воздуху и недрам к нему отношения не имеют.
+                    </div>
+                </div>
+            `;
+        } else {
+            resultBox.className = 'result-box show error';
+
+            // Собираем ошибки
+            let errors = [];
+            let wrongCards = [];
+
+            allCards.forEach(card => {
+                const loc = cardLocation[card.id];
+                if (loc === 'true' && !card.correct) {
+                    wrongCards.push({ label: card.label, where: 'в «НУЖЕН»', should: 'НЕ нужен' });
+                }
+                if (loc === 'false' && card.correct) {
+                    wrongCards.push({ label: card.label, where: 'в «НЕ НУЖЕН»', should: 'нужен' });
+                }
+                if (loc === 'pool') {
+                    // Не распределённые карточки
+                    if (card.correct) {
+                        wrongCards.push({ label: card.label, where: 'не распределена', should: 'нужен' });
+                    } else {
+                        wrongCards.push({ label: card.label, where: 'не распределена', should: 'НЕ нужен' });
+                    }
+                }
+            });
+
+            // Подсвечиваем ошибки на карточках
+            allCards.forEach(card => {
+                const loc = cardLocation[card.id];
+                const isCorrect = card.correct;
+                document.querySelectorAll(`.card[data-id="${card.id}"]`).forEach(el => {
+                    if ((loc === 'true' && isCorrect) || (loc === 'false' && !isCorrect)) {
+                        el.classList.add('highlight-correct');
+                    } else if (loc !== 'pool') {
+                        el.classList.add('highlight-wrong');
+                    } else {
+                        // Не распределённые — тоже подсвечиваем как ошибку
+                        el.classList.add('highlight-wrong');
+                    }
+                });
+            });
+
+            let errorHtml = '';
+            if (wrongCards.length > 0) {
+                errorHtml = '<ul class="error-list">';
+                wrongCards.forEach(err => {
+                    errorHtml += `<li><strong>«${err.label}»</strong> — ${err.where}, а должен быть ${err.should}</li>`;
+                });
+                errorHtml += '</ul>';
+            }
+
+            resultBox.innerHTML = `
+                <div class="result-title">❌ Есть ошибки</div>
+                <div style="font-size: 17px; margin-bottom: 6px;">Внимательно посмотри на подсветку карточек:</div>
+                <div style="display: flex; gap: 16px; margin: 8px 0; flex-wrap: wrap;">
+                    <span style="background: #c6f6d5; padding: 4px 14px; border-radius: 30px; font-size: 14px;">🟢 Зелёное — правильно</span>
+                    <span style="background: #fed7d7; padding: 4px 14px; border-radius: 30px; font-size: 14px;">🔴 Красное — ошибка</span>
+                </div>
+                ${errorHtml}
+                <div class="hint-block">
+                    💡 <strong>Подсказка:</strong> Журнал отходов — это про <u>массу и движение отходов</u>.<br>
+                    Отчёты по <strong>воде</strong> (2-ТП водхоз), <strong>воздуху</strong> (4-ОС) и <strong>недрам</strong> (4-ЛС) к нему отношения не имеют.
+                </div>
+            `;
+        }
+    }
+
+    // --------------------------------------------------------------
+    // Сброс
+    // --------------------------------------------------------------
+    function resetGame() {
+        allCards.forEach(c => cardLocation[c.id] = 'pool');
+        resultBox.classList.remove('show');
+        resultBox.className = 'result-box';
+        resultBox.innerHTML = '';
+        document.querySelectorAll('.card.highlight-correct, .card.highlight-wrong').forEach(el => {
+            el.classList.remove('highlight-correct', 'highlight-wrong');
+        });
+        render();
+    }
+
+    // --------------------------------------------------------------
+    // Подсказка
+    // --------------------------------------------------------------
+    function showHint() {
+        resultBox.classList.add('show');
+        resultBox.className = 'result-box show hint';
+        resultBox.innerHTML = `
+            <div class="result-title">💡 Подсказка</div>
+            <div style="font-size: 17px;">Задай себе эти вопросы:</div>
+            <div class="result-detail">
+                <ul style="list-style-type: disc; padding-left: 24px;">
+                    <li>В каких отчётах нужно указывать <strong>массу или объём отходов</strong>?</li>
+                    <li>Для чего ведётся <strong>журнал движения отходов</strong>? (учёт образования, использования, размещения)</li>
+                    <li>Какие отчёты связаны с <strong>водой</strong>, <strong>воздухом</strong> или <strong>недрами</strong>? — Они точно НЕ про отходы!</li>
+                </ul>
+                <div class="hint-block" style="margin-top: 12px;">
+                    ⚡ <strong>Ключ:</strong> Отчёты, в названии которых есть слово «отходы» — скорее всего нужны. Но не все! Думай логически.
+                </div>
+            </div>
+        `;
+    }
+
+    // --------------------------------------------------------------
+    // Кнопки
+    // --------------------------------------------------------------
+    document.getElementById('checkBtn').addEventListener('click', checkAnswers);
+    document.getElementById('resetBtn').addEventListener('click', resetGame);
+    document.getElementById('hintBtn').addEventListener('click', showHint);
+
+    // --------------------------------------------------------------
+    // Старт
+    // --------------------------------------------------------------
+    render();
+</script>
+
+</body>
+</html>
