@@ -304,38 +304,39 @@
 
         /* ===== КНОПКИ ВЫБОРА ===== */
         .choice-area {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 18px;
-            justify-content: center;
-        }
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+    justify-content: center;
+}
 
-        .choice-btn {
-            background: #f0f6ee;
-            border: 2px solid #d1dfcc;
-            border-radius: 60px;
-            padding: 12px 22px;
-            font-weight: 600;
-            font-size: 15px;
-            color: #1d3f30;
-            cursor: pointer;
-            transition: all 0.15s;
-            flex: 1;
-            min-width: 120px;
-            text-align: center;
-        }
+.choice-btn {
+    background: #f0f6ee;
+    border: 2px solid #d1dfcc;
+    border-radius: 60px;
+    padding: 12px 22px;
+    font-weight: 600;
+    font-size: 15px;
+    color: #1d3f30;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex: 1 1 auto;
+    min-width: 100px;
+    max-width: 100%;
+    text-align: center;
+}
 
-        .choice-btn:hover {
-            background: #e1ede0;
-            border-color: #a4bfa0;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,30,10,0.06);
-        }
+.choice-btn:hover {
+    background: #e1ede0;
+    border-color: #a4bfa0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,30,10,0.06);
+}
 
-        .choice-btn:active {
-            transform: translateY(0px);
-        }
+.choice-btn:active {
+    transform: translateY(0px);
+}
 
         /* ===== РЕЗУЛЬТАТ ОТВЕТА ===== */
         .answer-feedback {
