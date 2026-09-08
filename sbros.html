@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Дело №42/ЭКО — Расследование</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #e8ece6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 650px;
+            max-width: 100%;
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 28px 30px 34px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        /* ===== ШАПКА ===== */
+        .case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #eef2ec;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .case-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a2e25;
+            letter-spacing: -0.2px;
+        }
+
+        .case-header h1 small {
+            font-weight: 400;
+            font-size: 14px;
+            color: #6a7f70;
+        }
+
+        /* ===== СЧЁТЧИК В ПРАВОМ УГЛУ ===== */
+        .score-badge {
+            background: #f0f5ef;
+            padding: 6px 18px 6px 16px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 17px;
+            color: #1d3f30;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1.5px solid #d3e0d0;
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.02);
+            flex-shrink: 0;
+        }
+
+        .score-badge .num {
+            background: #1d3f30;
+            color: #f0f8ef;
+            padding: 0 12px;
+            border-radius: 30px;
+            font-size: 18px;
+            line-height: 30px;
+            min-width: 44px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .score-badge .label {
+            font-weight: 400;
+            color: #4d6b58;
+            font-size: 14px;
+        }
+
+        /* ===== ПРОГРЕСС-ТОЧКИ ===== */
+        .progress-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .progress-dots {
+            display: flex;
+            gap: 10px;
+        }
+
+        .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 30px;
+            background: #d5dfd2;
+            transition: all 0.35s;
+            border: 1.5px solid #c0cebb;
+        }
+
+        .dot.done {
+            background: #2d8a55;
+            border-color: #1f6a3e;
+            box-shadow: 0 0 0 2px #e1f0e0;
+        }
+
+        .dot.active {
+            background: #e8b83a;
+            border-color: #c9971f;
+            box-shadow: 0 0 0 3px #f5eec0;
+            transform: scale(1.25);
+        }
+
+        .dot.wrong {
+            background: #c4513f;
+            border-color: #9c3829;
+            box-shadow: 0 0 0 2px #f0ddd6;
+        }
+
+        .step-counter {
+            font-weight: 600;
+            color: #3a5947;
+            font-size: 14px;
+            background: #f0f6ed;
+            padding: 4px 18px;
+            border-radius: 40px;
+            border: 1px solid #d1dfcc;
+        }
+
+        /* ===== КАРТОЧКА ===== */
+        .case-card {
+            background: #fbfdfa;
+            border-radius: 24px;
+            padding: 20px 22px 26px;
+            border: 1.5px solid #e5ede2;
+            margin-bottom: 16px;
+            transition: opacity 0.2s;
+        }
+
+        .case-card .factory-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0a261d;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2px;
+        }
+
+        .case-card .factory-name .emoji-big {
+            font-size: 30px;
+        }
+
+        .case-card .subhead {
+            color: #4a6a56;
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #edf3ea;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 14px;
+        }
+
+        .case-card .subhead span {
+            background: #ecf3e8;
+            padding: 2px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #2a4d38;
+        }
+
+        .case-card .subhead .status-label {
+            background: transparent;
+            padding: 0;
+            font-weight: 600;
+            color: #4f6f5b;
+        }
+
+        /* ===== УЛИКИ ===== */
+        .evidence-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .evidence-photo {
+            background: #eef3ec;
+            border-radius: 18px;
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #dde6da;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .evidence-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .evidence-analytics {
+            background: #f5f9f4;
+            border-radius: 18px;
+            padding: 14px 16px;
+            border: 2px solid #e0ebe0;
+        }
+
+        .evidence-analytics .label {
+            font-weight: 700;
+            font-size: 12px;
+            color: #2d4a3a;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 6px;
+        }
+
+        .evidence-analytics .row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            padding: 5px 0;
+            border-bottom: 1px dashed #dbe6d7;
+        }
+
+        .evidence-analytics .row:last-child {
+            border-bottom: none;
+        }
+
+        .evidence-analytics .row .key {
+            color: #3f5f4b;
+            font-weight: 500;
+        }
+
+        .evidence-analytics .row .value {
+            font-weight: 700;
+            color: #07261b;
+        }
+
+        .value.high {
+            color: #c4513f;
+        }
+        .value.mid {
+            color: #c9902a;
+        }
+
+        /* ===== ПОДСКАЗКА ===== */
+        .hint-toggle {
+            background: #edf4ea;
+            border: 1.5px solid #d2e0cd;
+            border-radius: 60px;
+            padding: 6px 18px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #1a3a2b;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hint-toggle:hover {
+            background: #dde8d7;
+        }
+
+        .hint-content {
+            background: #f8fbf6;
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-top: 12px;
+            border-left: 5px solid #8aae8a;
+            font-size: 14px;
+            line-height: 1.6;
+            display: none;
+            color: #1a3227;
+        }
+
+        .hint-content.open {
+            display: block;
+        }
+
+        /* ===== КНОПКИ ВЫБОРА ===== */
+        .choice-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+            justify-content: center;
+        }
+
+        .choice-btn {
+            background: #f0f6ee;
+            border: 2px solid #d1dfcc;
+            border-radius: 60px;
+            padding: 12px 22px;
+            font-weight: 600;
+            font-size: 15px;
+            color: #1d3f30;
+            cursor: pointer;
+            transition: all 0.15s;
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .choice-btn:hover {
+            background: #e1ede0;
+            border-color: #a4bfa0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,30,10,0.06);
+        }
+
+        .choice-btn:active {
+            transform: translateY(0px);
+        }
+
+        /* ===== РЕЗУЛЬТАТ ОТВЕТА ===== */
+        .answer-feedback {
+            margin-top: 18px;
+            padding: 14px 20px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.6;
+            border-left: 6px solid #2d8a55;
+            background: #edf7ef;
+            color: #0c2e1d;
+        }
+
+        .answer-feedback.error {
+            border-left-color: #c4513f;
+            background: #f7ece8;
+            color: #54221a;
+        }
+
+        .answer-feedback .chosen-badge {
+            display: inline-block;
+            margin-top: 4px;
+            font-size: 13px;
+            opacity: 0.7;
+            font-weight: 500;
+        }
+
+        /* ===== КНОПКИ НАВИГАЦИИ ===== */
+        .action-area {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+            justify-content: space-between;
+        }
+
+        .btn-nav {
+            background: #f0f6ed;
+            border: 1.5px solid #d1dfcc;
+            border-radius: 60px;
+            padding: 11px 28px;
+            font-weight: 600;
+            font-size: 15px;
+            color: #1d3f30;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-nav:hover:not(:disabled) {
+            background: #e2ede0;
+            border-color: #a4bfa0;
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-primary {
+            background: #1d3f30;
+            color: #f2faf2;
+            border-color: #1d3f30;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #2a5741;
+            border-color: #2a5741;
+        }
+
+        /* ===== КНОПКА СБРОСА ВНИЗУ ПО ЦЕНТРУ ===== */
+        .reset-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 2px solid #eef2ec;
+        }
+
+        .reset-btn {
+            background: transparent;
+            border: 2px solid #d1dfcc;
+            border-radius: 60px;
+            padding: 10px 34px;
+            font-weight: 600;
+            font-size: 15px;
+            color: #3a5a48;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .reset-btn:hover {
+            background: #edf4ea;
+            border-color: #a4bfa0;
+        }
+
+        /* ===== АДАПТИВ ===== */
+        @media (max-width: 680px) {
+            .container {
+                width: 100%;
+                padding: 18px 14px 24px;
+                border-radius: 20px;
+            }
+            .evidence-grid {
+                grid-template-columns: 1fr;
+            }
+            .case-card {
+                padding: 14px 16px 20px;
+            }
+            .case-card .factory-name {
+                font-size: 20px;
+            }
+            .choice-btn {
+                font-size: 13px;
+                padding: 10px 14px;
+                min-width: 80px;
+            }
+            .action-area {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn-nav {
+                text-align: center;
+            }
+            .score-badge {
+                font-size: 14px;
+                padding: 4px 12px 4px 10px;
+            }
+            .score-badge .num {
+                font-size: 15px;
+                line-height: 26px;
+                min-width: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+    <!-- ===== ШАПКА ===== -->
+    <div class="case-header">
+        <h1>📋 Дело №42/ЭКО <small>«Загрязнение реки»</small></h1>
+        <!-- СЧЁТЧИК В ПРАВОМ УГЛУ -->
+        <div class="score-badge">
+            <span class="label">баллы</span>
+            <span class="num" id="scoreDisplay">0/3</span>
+        </div>
+    </div>
+
+    <!-- ===== ПРОГРЕСС ===== -->
+    <div class="progress-section">
+        <div class="progress-dots" id="dotsContainer">
+            <div class="dot active" data-step="0"></div>
+            <div class="dot" data-step="1"></div>
+            <div class="dot" data-step="2"></div>
+        </div>
+        <span class="step-counter" id="stepCounter">1 / 3</span>
+    </div>
+
+    <!-- ===== КАРТОЧКА ТЕКУЩЕГО ПРЕДПРИЯТИЯ ===== -->
+    <div id="cardContainer">
+        <!-- Вставляется JS -->
+    </div>
+
+    <!-- ===== КНОПКИ НАВИГАЦИИ ===== -->
+    <div class="action-area" id="navButtons">
+        <button class="btn-nav" id="prevBtn" disabled>← Назад</button>
+        <button class="btn-nav btn-primary" id="nextBtn">Далее →</button>
+    </div>
+
+    <!-- ===== КНОПКА СБРОСА (ВНИЗУ ПО ЦЕНТРУ) ===== -->
+    <div class="reset-wrapper">
+        <button class="reset-btn" id="resetBtn">🔄 Начать заново</button>
+    </div>
+</div>
+
+<script>
+    // ================================================================
+    // ДАННЫЕ С ВАШИМИ ФОТО
+    // ================================================================
+    const cases = [
+        {
+            id: 0,
+            name: 'Свиноферма «Зелёный луг»',
+            emoji: '🐖',
+            tags: ['животноводство', 'органические отходы'],
+            photoFile: 'ферма-стоки.png',
+            analytics: [
+                { key: 'БПК₅', value: '2450 мг/л', cls: 'high' },
+                { key: 'Взвешенные вещества', value: '3200 мг/л', cls: 'high' },
+                { key: 'Азот аммонийный', value: '380 мг/л', cls: 'high' },
+                { key: 'Нефтепродукты', value: '0,8 мг/л', cls: 'mid' },
+                { key: 'pH', value: '7,2', cls: '' }
+            ],
+            correctAnswer: 'Б',
+            explanationCorrect: '✅ Органика, навоз, корма — это хозяйственно-бытовые стоки (Б). Высокое БПК и азот — прямое подтверждение.',
+            explanationWrong: '❌ Нефтепродукты здесь не главное. Огромное БПК и взвешенные вещества указывают на органику (Б).'
+        },
+        {
+            id: 1,
+            name: 'АЗС «Трасса-Ойл»',
+            emoji: '⛽',
+            tags: ['нефтепродукты', 'ливневка'],
+            photoFile: 'азс-стоки.png',
+            analytics: [
+                { key: 'Нефтепродукты', value: '18,4 мг/л', cls: 'high' },
+                { key: 'Взвешенные вещества', value: '450 мг/л', cls: 'mid' },
+                { key: 'БПК₅', value: '62 мг/л', cls: 'mid' },
+                { key: 'СПАВ', value: '3,1 мг/л', cls: 'mid' },
+                { key: 'pH', value: '6,9', cls: '' }
+            ],
+            correctAnswer: 'В',
+            explanationCorrect: '✅ Ливневые стоки с нефтепродуктами (В) — главная проблема АЗС. Радужная плёнка и высокие нефтепродукты — ключ.',
+            explanationWrong: '❌ На АЗС главное — не бытовая органика, а дождевые стоки, смывающие нефть и песок. Ответ В.'
+        },
+        {
+            id: 2,
+            name: 'Текстильная фабрика «Принт-Текс»',
+            emoji: '🧵',
+            tags: ['красители', 'химия'],
+            photoFile: 'текстиль-стоки.png',
+            analytics: [
+                { key: 'ХПК', value: '1850 мг/л', cls: 'high' },
+                { key: 'Цветность', value: '3400 °', cls: 'high' },
+                { key: 'СПАВ', value: '28 мг/л', cls: 'high' },
+                { key: 'Сульфаты', value: '620 мг/л', cls: 'mid' },
+                { key: 'pH', value: '10,4', cls: 'high' }
+            ],
+            correctAnswer: 'А',
+            explanationCorrect: '✅ Производственные стоки с красителями, ПАВ и щелочью (А). Химический профиль не оставляет сомнений.',
+            explanationWrong: '❌ Цветность, ХПК и щелочная среда — это технологические загрязнители текстиля. Ответ А.'
+        }
+    ];
+
+    // ================================================================
+    // СОСТОЯНИЕ
+    // ================================================================
+    let currentStep = 0;
+    let results = cases.map(() => null);      // 'correct' или 'wrong'
+    let userChoices = cases.map(() => null);  // 'А', 'Б', 'В'
+
+    function resetState() {
+        currentStep = 0;
+        results = cases.map(() => null);
+        userChoices = cases.map(() => null);
+    }
+
+    // ================================================================
+    // DOM
+    // ================================================================
+    const container = document.getElementById('cardContainer');
+    const dotsContainer = document.getElementById('dotsContainer');
+    const stepCounter = document.getElementById('stepCounter');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // ================================================================
+    // ВСПОМОГАТЕЛЬНЫЕ
+    // ================================================================
+    function countCorrect() {
+        return results.filter(r => r === 'correct').length;
+    }
+
+    function updateScore() {
+        const total = cases.length;
+        const correct = countCorrect();
+        scoreDisplay.textContent = `${correct}/${total}`;
+    }
+
+    function isAllAnswered() {
+        return results.every(r => r !== null);
+    }
+
+    // ================================================================
+    // РЕНДЕР ШАГА
+    // ================================================================
+    function renderStep() {
+        const data = cases[currentStep];
+        const choice = userChoices[currentStep];
+        const result = results[currentStep];
+        const isDone = result !== null;
+
+        // --- Прогресс-точки ---
+        document.querySelectorAll('.dot').forEach((dot, idx) => {
+            dot.classList.remove('active', 'done', 'wrong');
+            if (idx === currentStep) {
+                dot.classList.add('active');
+            } else if (results[idx] === 'correct') {
+                dot.classList.add('done');
+            } else if (results[idx] === 'wrong') {
+                dot.classList.add('wrong');
+            }
+        });
+        stepCounter.textContent = `${currentStep + 1} / ${cases.length}`;
+        updateScore();
+
+        // --- Статус в подзаголовке ---
+        let statusText = '⏳ требует экспертизы';
+        if (isDone) {
+            statusText = result === 'correct' ? '✅ идентифицировано' : '❌ ошибка';
+        }
+
+        // --- Формируем путь к фото (в той же папке, что и HTML) ---
+        const photoPath = data.photoFile;
+
+        // --- Строим HTML ---
+        let html = `
+            <div class="case-card">
+                <div class="factory-name">
+                    <span class="emoji-big">${data.emoji}</span>
+                    ${data.name}
+                </div>
+                <div class="subhead">
+                    <span>🏷️ ${data.tags.join(' · ')}</span>
+                    <span class="status-label">${statusText}</span>
+                </div>
+
+                <div class="evidence-grid">
+                    <!-- ФОТО (без подписи) -->
+                    <div class="evidence-photo">
+                        <img src="${photoPath}" alt="${data.name}" loading="lazy" />
+                    </div>
+
+                    <!-- АНАЛИТИКА -->
+                    <div class="evidence-analytics">
+                        <div class="label">🧪 Анализ проб воды</div>
+                        ${data.analytics.map(item => `
+                            <div class="row">
+                                <span class="key">${item.key}</span>
+                                <span class="value ${item.cls}">${item.value}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- ПОДСКАЗКА -->
+                <button class="hint-toggle" id="hintToggle">💡 Показать подсказку</button>
+                <div class="hint-content" id="hintContent">
+                    <strong>🧐 На что обратить внимание:</strong><br>
+                    ${data.id === 0 ? 'Огромное БПК и взвешенные вещества — классика органических стоков.' :
+                      data.id === 1 ? 'Нефтепродукты зашкаливают — это ливневка с АЗС.' :
+                      'Цветность, ХПК и щелочная среда — типичные производственные стоки текстиля.'}
+                </div>
+        `;
+
+        // --- Блок выбора (если ещё не отвечено) ---
+        if (!isDone) {
+            html += `
+                <div class="choice-area">
+                    <button class="choice-btn" data-letter="А">А. Производственные</button>
+                    <button class="choice-btn" data-letter="Б">Б. Хозбытовые</button>
+                    <button class="choice-btn" data-letter="В">В. Ливневые</button>
+                </div>
+            `;
+        } else {
+            // --- Обратная связь после ответа ---
+            const isCorrect = result === 'correct';
+            const explanation = isCorrect ? data.explanationCorrect : data.explanationWrong;
+            html += `
+                <div class="answer-feedback ${isCorrect ? '' : 'error'}">
+                    <strong>${isCorrect ? '✅ Верно!' : '❌ Неверно.'}</strong>
+                    ${explanation}
+                    <div class="chosen-badge">Вы выбрали: <strong>${choice}</strong></div>
+                </div>
+            `;
+        }
+
+        html += `</div>`; // закрываем .case-card
+        container.innerHTML = html;
+
+        // --- Обработчики ---
+        // Подсказка
+        const hintToggle = document.getElementById('hintToggle');
+        const hintContent = document.getElementById('hintContent');
+        if (hintToggle) {
+            hintToggle.addEventListener('click', () => {
+                const isOpen = hintContent.classList.toggle('open');
+                hintToggle.textContent = isOpen ? '🙈 Скрыть подсказку' : '💡 Показать подсказку';
+            });
+        }
+
+        // Кнопки выбора
+        document.querySelectorAll('.choice-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (results[currentStep] !== null) return;
+                const letter = e.currentTarget.dataset.letter;
+                makeChoice(letter);
+            });
+        });
+
+        // --- Навигация ---
+        prevBtn.disabled = currentStep === 0;
+        const isLast = currentStep === cases.length - 1;
+        nextBtn.textContent = isLast ? '📊 Итог' : 'Далее →';
+        nextBtn.disabled = results[currentStep] === null;
+    }
+
+    // ================================================================
+    // ВЫБОР ОТВЕТА
+    // ================================================================
+    function makeChoice(letter) {
+        if (results[currentStep] !== null) return;
+        const data = cases[currentStep];
+        const isCorrect = (letter === data.correctAnswer);
+        userChoices[currentStep] = letter;
+        results[currentStep] = isCorrect ? 'correct' : 'wrong';
+
+        renderStep();
+        updateScore();
+    }
+
+    // ================================================================
+    // НАВИГАЦИЯ
+    // ================================================================
+    function goToStep(step) {
+        if (step < 0 || step >= cases.length) return;
+        currentStep = step;
+        renderStep();
+    }
+
+    prevBtn.addEventListener('click', () => {
+        if (currentStep > 0) goToStep(currentStep - 1);
+    });
+
+    nextBtn.addEventListener('click', () => {
+        // Если на последнем шаге — просто подсвечиваем счётчик
+        if (currentStep === cases.length - 1) {
+            if (isAllAnswered()) {
+                // Все отвечено — подсветка счётчика
+                scoreDisplay.style.background = '#2d8a55';
+                scoreDisplay.style.color = 'white';
+                setTimeout(() => {
+                    scoreDisplay.style.background = '';
+                    scoreDisplay.style.color = '';
+                }, 800);
+                return;
+            } else {
+                alert('Сначала ответьте на вопрос по этому предприятию!');
+                return;
+            }
+        }
+        if (results[currentStep] !== null) {
+            goToStep(currentStep + 1);
+        } else {
+            alert('Сначала выберите тип сточных вод!');
+        }
+    });
+
+    // ================================================================
+    // СБРОС
+    // ================================================================
+    resetBtn.addEventListener('click', () => {
+        resetState();
+        scoreDisplay.style.background = '';
+        scoreDisplay.style.color = '';
+        goToStep(0);
+    });
+
+    // ================================================================
+    // СТАРТ
+    // ================================================================
+    goToStep(0);
+</script>
+
+</body>
+</html>
