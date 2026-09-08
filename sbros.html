@@ -764,28 +764,40 @@
     });
 
     nextBtn.addEventListener('click', () => {
-        // Если на последнем шаге — просто подсвечиваем счётчик
+        // Если на последнем шаге — показываем итоговое окно
         if (currentStep === cases.length - 1) {
-            if (isAllAnswered()) {
-                // Все отвечено — подсветка счётчика
-                scoreDisplay.style.background = '#2d8a55';
-                scoreDisplay.style.color = 'white';
-                setTimeout(() => {
-                    scoreDisplay.style.background = '';
-                    scoreDisplay.style.color = '';
-                }, 800);
-                return;
+        if (isAllAnswered()) {
+            const correct = countCorrect();
+            let message = '';
+            if (correct === 3) {
+                message = '🎉 Вы спасли все три реки!';
+            } else if (correct === 2) {
+                message = '✅ Вы спасли две реки из трёх!';
+            } else if (correct === 1) {
+                message = '⚠️ Вы спасли одну реку из трёх.';
             } else {
-                alert('Сначала ответьте на вопрос по этому предприятию!');
-                return;
+                message = '❌ Вы не спасли ни одной реки. Изучите пояснения и попробуйте снова!';
             }
-        }
-        if (results[currentStep] !== null) {
-            goToStep(currentStep + 1);
+            alert(message);
+            // Подсветка счётчика
+            scoreDisplay.style.background = '#2d8a55';
+            scoreDisplay.style.color = 'white';
+            setTimeout(() => {
+                scoreDisplay.style.background = '';
+                scoreDisplay.style.color = '';
+            }, 1000);
+            return;
         } else {
-            alert('Сначала выберите тип сточных вод!');
+            alert('Сначала ответьте на вопрос по этому предприятию!');
+            return;
         }
-    });
+    }
+    if (results[currentStep] !== null) {
+        goToStep(currentStep + 1);
+    } else {
+        alert('Сначала выберите тип сточных вод!');
+    }
+});
 
     // ================================================================
     // СБРОС
