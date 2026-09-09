@@ -304,39 +304,39 @@
 
         /* ===== КНОПКИ ВЫБОРА ===== */
         .choice-area {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 18px;
-    justify-content: center;
-}
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+            justify-content: center;
+        }
 
-.choice-btn {
-    background: #f0f6ee;
-    border: 2px solid #d1dfcc;
-    border-radius: 60px;
-    padding: 12px 22px;
-    font-weight: 600;
-    font-size: 15px;
-    color: #1d3f30;
-    cursor: pointer;
-    transition: all 0.15s;
-    flex: 1 1 auto;
-    min-width: 100px;
-    max-width: 100%;
-    text-align: center;
-}
+        .choice-btn {
+            background: #f0f6ee;
+            border: 2px solid #d1dfcc;
+            border-radius: 60px;
+            padding: 12px 22px;
+            font-weight: 600;
+            font-size: 15px;
+            color: #1d3f30;
+            cursor: pointer;
+            transition: all 0.15s;
+            flex: 1 1 auto;
+            min-width: 100px;
+            max-width: 100%;
+            text-align: center;
+        }
 
-.choice-btn:hover {
-    background: #e1ede0;
-    border-color: #a4bfa0;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,30,10,0.06);
-}
+        .choice-btn:hover {
+            background: #e1ede0;
+            border-color: #a4bfa0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,30,10,0.06);
+        }
 
-.choice-btn:active {
-    transform: translateY(0px);
-}
+        .choice-btn:active {
+            transform: translateY(0px);
+        }
 
         /* ===== РЕЗУЛЬТАТ ОТВЕТА ===== */
         .answer-feedback {
@@ -433,6 +433,95 @@
             border-color: #a4bfa0;
         }
 
+        /* ===== МОДАЛЬНОЕ ОКНО ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 40px 36px 32px;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-box .modal-icon {
+            font-size: 52px;
+            margin-bottom: 8px;
+        }
+
+        .modal-box .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0a261d;
+            margin-bottom: 8px;
+        }
+
+        .modal-box .modal-sub {
+            font-size: 16px;
+            color: #3d5a49;
+            line-height: 1.5;
+            margin-bottom: 6px;
+        }
+
+        .modal-box .modal-score {
+            font-size: 14px;
+            color: #6a7f70;
+            margin-bottom: 20px;
+        }
+
+        .modal-box .modal-btn {
+            background: #1d3f30;
+            border: none;
+            border-radius: 60px;
+            padding: 12px 40px;
+            font-weight: 700;
+            font-size: 16px;
+            color: #f2faf2;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .modal-box .modal-btn:hover {
+            background: #2a5741;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 40, 20, 0.15);
+        }
+
+        .modal-box .modal-btn:active {
+            transform: translateY(0px);
+        }
+
         /* ===== АДАПТИВ ===== */
         @media (max-width: 680px) {
             .container {
@@ -471,94 +560,6 @@
                 min-width: 36px;
             }
         }
-        /* ===== МОДАЛЬНОЕ ОКНО ===== */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: 20px;
-}
-
-.modal-overlay.show {
-    display: flex;
-}
-
-.modal-box {
-    background: #ffffff;
-    border-radius: 28px;
-    padding: 40px 36px 32px;
-    max-width: 460px;
-    width: 100%;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
-    text-align: center;
-    animation: modalFadeIn 0.3s ease;
-}
-
-@keyframes modalFadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9) translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-}
-
-.modal-box .modal-icon {
-    font-size: 52px;
-    margin-bottom: 8px;
-}
-
-.modal-box .modal-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: #0a261d;
-    margin-bottom: 8px;
-}
-
-.modal-box .modal-sub {
-    font-size: 16px;
-    color: #3d5a49;
-    line-height: 1.5;
-    margin-bottom: 6px;
-}
-
-.modal-box .modal-score {
-    font-size: 14px;
-    color: #6a7f70;
-    margin-bottom: 20px;
-}
-
-.modal-box .modal-btn {
-    background: #1d3f30;
-    border: none;
-    border-radius: 60px;
-    padding: 12px 40px;
-    font-weight: 700;
-    font-size: 16px;
-    color: #f2faf2;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.modal-box .modal-btn:hover {
-    background: #2a5741;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(0, 40, 20, 0.15);
-}
-
-.modal-box .modal-btn:active {
-    transform: translateY(0px);
-}
     </style>
 </head>
 <body>
@@ -598,6 +599,17 @@
     <!-- ===== КНОПКА СБРОСА (ВНИЗУ ПО ЦЕНТРУ) ===== -->
     <div class="reset-wrapper">
         <button class="reset-btn" id="resetBtn">🔄 Начать заново</button>
+    </div>
+</div>
+
+<!-- ===== МОДАЛЬНОЕ ОКНО ===== -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+        <div class="modal-icon" id="modalIcon">🎉</div>
+        <div class="modal-title" id="modalTitle">Вы спасли все три реки!</div>
+        <div class="modal-sub" id="modalSub">Отличная работа!</div>
+        <div class="modal-score" id="modalScore">Правильных ответов: 3 из 3</div>
+        <button class="modal-btn" id="modalBtn">✅ Отлично!</button>
     </div>
 </div>
 
@@ -725,9 +737,6 @@
 
         // --- Статус в подзаголовке ---
         let statusText = '⏳ поторопитесь, а то это все попадет в водоем';
-        if (isDone) {
-            statusText = result === 'correct' ? '✅ идентифицировано' : '❌ ошибка';
-        }
 
         // --- Формируем путь к фото (в той же папке, что и HTML) ---
         const photoPath = data.photoFile;
@@ -852,29 +861,30 @@
     });
 
     nextBtn.addEventListener('click', () => {
-    // Если на последнем шаге — показываем модальное окно
-    if (currentStep === cases.length - 1) {
-        if (isAllAnswered()) {
-            showResultModal();
-            // Подсветка счётчика
-            scoreDisplay.style.background = '#2d8a55';
-            scoreDisplay.style.color = 'white';
-            setTimeout(() => {
-                scoreDisplay.style.background = '';
-                scoreDisplay.style.color = '';
-            }, 1000);
-            return;
-        } else {
-            alert('Сначала ответьте на вопрос по этому предприятию!');
-            return;
+        // Если на последнем шаге — показываем модальное окно
+        if (currentStep === cases.length - 1) {
+            if (isAllAnswered()) {
+                showResultModal();
+                // Подсветка счётчика
+                scoreDisplay.style.background = '#2d8a55';
+                scoreDisplay.style.color = 'white';
+                setTimeout(() => {
+                    scoreDisplay.style.background = '';
+                    scoreDisplay.style.color = '';
+                }, 1000);
+                return;
+            } else {
+                alert('Сначала ответьте на вопрос по этому предприятию!');
+                return;
+            }
         }
-    }
-    if (results[currentStep] !== null) {
-        goToStep(currentStep + 1);
-    } else {
-        alert('Сначала выберите тип сточных вод!');
-    }
-});
+        if (results[currentStep] !== null) {
+            goToStep(currentStep + 1);
+        } else {
+            alert('Сначала выберите тип сточных вод!');
+        }
+    });
+
     // ================================================================
     // СБРОС
     // ================================================================
@@ -886,82 +896,73 @@
     });
 
     // ================================================================
+    // МОДАЛЬНОЕ ОКНО С РЕЗУЛЬТАТОМ
+    // ================================================================
+    function showResultModal() {
+        const correct = countCorrect();
+        const total = cases.length;
+
+        const overlay = document.getElementById('modalOverlay');
+        const icon = document.getElementById('modalIcon');
+        const title = document.getElementById('modalTitle');
+        const sub = document.getElementById('modalSub');
+        const score = document.getElementById('modalScore');
+        const btn = document.getElementById('modalBtn');
+
+        let iconEmoji, titleText, subText, btnText;
+
+        if (correct === 3) {
+            iconEmoji = '🎉';
+            titleText = 'Вы спасли все три реки!';
+            subText = 'Идеальная экологическая экспертиза! 🏆';
+            btnText = '🌟 Отлично!';
+        } else if (correct === 2) {
+            iconEmoji = '✅';
+            titleText = 'Вы спасли две реки из трёх!';
+            subText = 'Хороший результат, но есть над чем поработать.';
+            btnText = '✅ Понятно';
+        } else if (correct === 1) {
+            iconEmoji = '⚠️';
+            titleText = 'Вы спасли одну реку из трёх.';
+            subText = 'Внимательнее изучайте анализы и фото стоков.';
+            btnText = '🔄 Попробовать снова';
+        } else {
+            iconEmoji = '❌';
+            titleText = 'Вы не спасли ни одной реки.';
+            subText = 'Изучите пояснения под каждым шагом и попробуйте снова.';
+            btnText = '🔄 Начать заново';
+        }
+
+        icon.textContent = iconEmoji;
+        title.textContent = titleText;
+        sub.textContent = subText;
+        score.textContent = `Правильных ответов: ${correct} из ${total}`;
+        btn.textContent = btnText;
+
+        overlay.classList.add('show');
+
+        btn.onclick = function() {
+            overlay.classList.remove('show');
+            if (correct === 0 || correct === 1) {
+                resetState();
+                scoreDisplay.style.background = '';
+                scoreDisplay.style.color = '';
+                goToStep(0);
+            }
+        };
+    }
+
+    // Закрытие по клику на фон
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('show');
+        }
+    });
+
+    // ================================================================
     // СТАРТ
     // ================================================================
-    // ================================================================
-// МОДАЛЬНОЕ ОКНО С РЕЗУЛЬТАТОМ
-// ================================================================
-function showResultModal() {
-    const correct = countCorrect();
-    const total = cases.length;
-    
-    const overlay = document.getElementById('modalOverlay');
-    const icon = document.getElementById('modalIcon');
-    const title = document.getElementById('modalTitle');
-    const sub = document.getElementById('modalSub');
-    const score = document.getElementById('modalScore');
-    const btn = document.getElementById('modalBtn');
-    
-    let iconEmoji, titleText, subText, btnText;
-    
-    if (correct === 3) {
-        iconEmoji = '🎉';
-        titleText = 'Вы спасли все три реки!';
-        subText = 'Идеальная экологическая экспертиза! 🏆';
-        btnText = '🌟 Отлично!';
-    } else if (correct === 2) {
-        iconEmoji = '✅';
-        titleText = 'Вы спасли две реки из трёх!';
-        subText = 'Хороший результат, но есть над чем поработать.';
-        btnText = '📖 Изучить ошибки';
-    } else if (correct === 1) {
-        iconEmoji = '⚠️';
-        titleText = 'Вы спасли одну реку из трёх.';
-        subText = 'Внимательнее изучайте анализы и фото стоков.';
-        btnText = '🔄 Попробовать снова';
-    } else {
-        iconEmoji = '❌';
-        titleText = 'Вы не спасли ни одной реки.';
-        subText = 'Изучите пояснения под каждым шагом и попробуйте снова.';
-        btnText = '🔄 Начать заново';
-    }
-    
-    icon.textContent = iconEmoji;
-    title.textContent = titleText;
-    sub.textContent = subText;
-    score.textContent = `Правильных ответов: ${correct} из ${total}`;
-    btn.textContent = btnText;
-    
-    overlay.classList.add('show');
-    
-    btn.onclick = function() {
-        overlay.classList.remove('show');
-        if (correct === 0 || correct === 1) {
-            resetState();
-            scoreDisplay.style.background = '';
-            scoreDisplay.style.color = '';
-            goToStep(0);
-        }
-    };
-}
-
-// Закрытие по клику на фон
-document.getElementById('modalOverlay').addEventListener('click', function(e) {
-    if (e.target === this) {
-        this.classList.remove('show');
-    }
-});
     goToStep(0);
 </script>
-<!-- ===== МОДАЛЬНОЕ ОКНО ===== -->
-<div class="modal-overlay" id="modalOverlay">
-    <div class="modal-box">
-        <div class="modal-icon" id="modalIcon">🎉</div>
-        <div class="modal-title" id="modalTitle">Вы спасли все три реки!</div>
-        <div class="modal-sub" id="modalSub">Отличная работа!</div>
-        <div class="modal-score" id="modalScore">Правильных ответов: 3 из 3</div>
-        <button class="modal-btn" id="modalBtn">✅ Отлично!</button>
-    </div>
-</div>
 </body>
 </html>
