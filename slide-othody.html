@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Сравнение До и После</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f4f4f9;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      position: relative;
+      width: 90%;
+      max-width: 1000px;
+      aspect-ratio: 1024 / 683; /* Соотношение сторон ваших изображений */
+      overflow: hidden;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      user-select: none;
+    }
+
+    /* Нижнее изображение (ПОСЛЕ) */
+    .img-after {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Верхнее изображение (ДО), обрезаемое ползунком */
+    .img-before-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50%; /* Начальное положение 50% */
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .img-before-wrapper img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      max-width: none;
+    }
+
+    /* Ползунок разделителя */
+    .slider-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 3px;
+      background-color: #ffffff;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+    }
+
+    .slider-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+      font-weight: bold;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    /* Невидимый инпут-диапазон поверх всего контейнера */
+    .range-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: ew-resize;
+      margin: 0;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="comparison-container">
+    <!-- Изображение "ПОСЛЕ" на заднем плане -->
+    <img src="ПОСЛЕ.jpg" alt="После" class="img-after">[cite: 1]
+
+    <!-- Изображение "ДО" с динамической шириной контейнера -->
+    <div class="img-before-wrapper" id="before-wrapper">
+      <img src="ДО.jpg" alt="До" id="before-img">[cite: 2]
+    </div>
+
+    <!-- Разделительная линия и кнопка-хэндл -->
+    <div class="slider-line" id="slider-line">
+      <div class="slider-button">↔</div>
+    </div>
+
+    <!-- Невидимый ползунок управления -->
+    <input type="range" min="0" max="100" value="50" class="range-input" id="slider">
+  </div>
+
+  <script>
+    const container = document.getElementById('comparison-container');
+    const beforeWrapper = document.getElementById('before-wrapper');
+    const beforeImg = document.getElementById('before-img');
+    const sliderLine = document.getElementById('slider-line');
+    const slider = document.getElementById('slider');
+
+    // Функция синхронизации ширины внутреннего изображения с контейнером
+    function updateImageWidth() {
+      beforeImg.style.width = container.offsetWidth + 'px';
+    }
+
+    // Обработчик движения ползунка
+    slider.addEventListener('input', (e) => {
+      const value = e.target.value;
+      beforeWrapper.style.width = `${value}%`;
+      sliderLine.style.left = `${value}%`;
+    });
+
+    // Обновление при изменении размера окна
+    window.addEventListener('resize', updateImageWidth);
+    updateImageWidth();
+  </script>
+
+</body>
+</html>
