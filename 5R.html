@@ -55,18 +55,18 @@
 
     .scheme {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;        /* не переносим на новую строку */
       justify-content: center;
-      gap: 18px;
+      gap: 12px;
       margin-bottom: 30px;
+      width: 100%;
     }
 
     .card {
-      flex: 1 1 160px;
-      min-width: 150px;
-      max-width: 200px;
-      border-radius: 32px 32px 24px 24px;
-      padding: 22px 12px 18px;
+      flex: 1 1 0;              /* все карточки растягиваются равномерно */
+      min-width: 0;             /* разрешаем сжиматься меньше контента */
+      border-radius: 28px 28px 20px 20px;
+      padding: 18px 6px 14px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -95,9 +95,9 @@
     }
 
     .card .icon {
-      font-size: 3.6rem;
+      font-size: 2.8rem;
       line-height: 1;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
       filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.2));
       transition: transform 0.2s;
     }
@@ -107,7 +107,7 @@
     }
 
     .card .letter {
-      font-size: 2.2rem;
+      font-size: 1.8rem;
       font-weight: 800;
       line-height: 1.2;
       letter-spacing: 1px;
@@ -116,17 +116,17 @@
     }
 
     .card .rname {
-      font-size: 1.1rem;
+      font-size: 0.85rem;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
       background: rgba(255, 255, 255, 0.25);
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 40px;
-      margin-top: 6px;
+      margin-top: 4px;
       width: fit-content;
       backdrop-filter: blur(2px);
-      font-size: 0.85rem;
+      white-space: nowrap;
     }
 
     /* Индивидуальные цвета */
@@ -211,20 +211,44 @@
       font-size: 2rem;
     }
 
-    /* Адаптив */
-    @media (max-width: 750px) {
-      h1 { font-size: 1.8rem; }
-      .card { min-width: 130px; padding: 16px 8px; }
-      .card .icon { font-size: 2.8rem; }
-      .card .letter { font-size: 1.8rem; }
-      .card .rname { font-size: 0.75rem; }
-      .detail-title { font-size: 1.4rem; }
-      .detail-text { font-size: 1.05rem; padding: 14px 16px; }
+    /* Адаптив: при 700px и меньше всё ещё в один ряд, но компактнее */
+    @media (max-width: 700px) {
+      .scheme {
+        gap: 6px;
+      }
+      .card {
+        border-radius: 20px 20px 16px 16px;
+        padding: 12px 3px 10px;
+        border-width: 1.5px;
+      }
+      .card .icon {
+        font-size: 2rem;
+        margin-bottom: 2px;
+      }
+      .card .letter {
+        font-size: 1.2rem;
+        letter-spacing: 0;
+      }
+      .card .rname {
+        font-size: 0.6rem;
+        padding: 2px 4px;
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+      h1 { font-size: 1.6rem; }
+      .subhead { font-size: 0.9rem; padding: 0.2rem 1rem; margin-bottom: 1.5rem; }
+      .detail-title { font-size: 1.4rem; gap: 8px; }
+      .detail-title .big-icon { font-size: 2.2rem; }
+      .detail-text { font-size: 1rem; padding: 12px 14px; }
+      .detail-panel { padding: 18px 16px; border-radius: 32px; }
     }
 
-    @media (max-width: 500px) {
-      .scheme { gap: 10px; }
-      .card { flex: 1 1 120px; min-width: 110px; }
+    @media (max-width: 450px) {
+      .scheme { gap: 4px; }
+      .card { padding: 8px 2px 6px; border-width: 1px; }
+      .card .icon { font-size: 1.5rem; }
+      .card .letter { font-size: 0.9rem; }
+      .card .rname { font-size: 0.5rem; padding: 1px 2px; }
     }
 
     /* Анимация появления деталей */
@@ -361,26 +385,20 @@
         </div>
       `;
 
-      // Небольшая визуальная подсветка активной карточки (опционально)
-      cards.forEach(c => c.style.opacity = '0.9');
-      const activeCard = document.querySelector(`.card[data-r="${key}"]`);
-      if (activeCard) {
-        activeCard.style.opacity = '1';
-        activeCard.style.transform = 'translateY(-6px)';
-        // Убираем эффект через 300ms? Нет, оставим, но при клике на другую карточку сбросим.
-        // Сброс предыдущих выделений сделаем перед этим.
-      }
-      // Сбросим у всех карточек состояние "приподнятости", потом выделим активную
+      // Сброс выделения у всех карточек
       cards.forEach(c => {
         c.style.transform = 'translateY(0)';
         c.style.opacity = '1';
       });
+
+      // Выделяем активную карточку
+      const activeCard = document.querySelector(`.card[data-r="${key}"]`);
       if (activeCard) {
         activeCard.style.transform = 'translateY(-6px)';
         activeCard.style.opacity = '1';
       }
 
-      // Прокрутить к панели, если нужно (на маленьких экранах)
+      // Прокрутить к панели на маленьких экранах
       if (window.innerWidth < 700) {
         detailPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
@@ -402,17 +420,6 @@
         }
       });
     });
-
-    // Сброс выделения при клике вне карточек? Не обязательно. Но можно убрать выделение при клике на пустое место,
-    // но лучше оставить как есть, чтобы пользователь видел активную карточку.
-    // Добавим сброс при повторном клике на ту же карточку? Не будем усложнять.
-
-    // Также можно добавить обработку клика по фону, чтобы снять выделение, но не требуется.
-
-    // При загрузке показываем пустое состояние (уже задано)
-
-    // Проверим, что у всех карточек есть data-r
-    // Для доступности можно добавить подсказку при фокусе
   })();
 </script>
 </body>
