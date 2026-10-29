@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Принцип 5R — интерактивная схема</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: linear-gradient(145deg, #f0f9f0 0%, #daeed8 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      font-weight: 600;
+      font-size: 2.4rem;
+      color: #1e4a2b;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+      text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .subhead {
+      text-align: center;
+      font-size: 1.1rem;
+      color: #2e6b3a;
+      margin-bottom: 2.5rem;
+      font-weight: 400;
+      background: rgba(255, 255, 255, 0.5);
+      display: inline-block;
+      padding: 0.3rem 1.5rem;
+      border-radius: 40px;
+      backdrop-filter: blur(2px);
+      margin-left: auto;
+      margin-right: auto;
+      width: fit-content;
+    }
+
+    .scheme {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      flex: 1 1 160px;
+      min-width: 150px;
+      max-width: 200px;
+      border-radius: 32px 32px 24px 24px;
+      padding: 22px 12px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(255, 255, 255, 0.7) inset;
+      color: white;
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(1px);
+      user-select: none;
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      transform: translateY(0);
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 25px -8px rgba(0, 0, 0, 0.35), 0 0 0 3px white inset;
+    }
+
+    .card:active {
+      transform: translateY(1px);
+      box-shadow: 0 8px 15px -5px rgba(0, 0, 0, 0.3), 0 0 0 3px white inset;
+    }
+
+    .card .icon {
+      font-size: 3.6rem;
+      line-height: 1;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.2));
+      transition: transform 0.2s;
+    }
+
+    .card:hover .icon {
+      transform: scale(1.08);
+    }
+
+    .card .letter {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+      margin-bottom: 2px;
+    }
+
+    .card .rname {
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(255, 255, 255, 0.25);
+      padding: 4px 10px;
+      border-radius: 40px;
+      margin-top: 6px;
+      width: fit-content;
+      backdrop-filter: blur(2px);
+      font-size: 0.85rem;
+    }
+
+    /* Индивидуальные цвета */
+    .card[data-r="refuse"] {
+      background: linear-gradient(145deg, #b83b3b, #9e2a2a);
+    }
+    .card[data-r="reduce"] {
+      background: linear-gradient(145deg, #d98e2b, #b86d1a);
+    }
+    .card[data-r="reuse"] {
+      background: linear-gradient(145deg, #2f8f5b, #1e6b42);
+    }
+    .card[data-r="recycle"] {
+      background: linear-gradient(145deg, #2a6f9e, #1a4f75);
+    }
+    .card[data-r="rot"] {
+      background: linear-gradient(145deg, #6b4e2e, #4d3820);
+    }
+
+    /* Контейнер для деталей */
+    .detail-panel {
+      background: #ffffffdd;
+      backdrop-filter: blur(10px);
+      border-radius: 48px;
+      padding: 28px 30px;
+      margin-top: 25px;
+      box-shadow: 0 25px 35px -10px rgba(0, 0, 0, 0.3), 0 0 0 3px white, 0 0 0 5px rgba(120, 180, 120, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+      min-height: 180px;
+      color: #1e3a1e;
+    }
+
+    .detail-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 3px dashed rgba(60, 100, 60, 0.3);
+      letter-spacing: -0.3px;
+      flex-wrap: wrap;
+    }
+
+    .detail-title .big-icon {
+      font-size: 2.8rem;
+      line-height: 1;
+    }
+
+    .detail-text {
+      font-size: 1.25rem;
+      line-height: 1.6;
+      color: #1e3a1e;
+      font-weight: 400;
+      background: #f9fff9;
+      padding: 18px 22px;
+      border-radius: 32px;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .detail-text strong {
+      font-weight: 700;
+      color: #0e3b1e;
+    }
+
+    .empty-message {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: #557a55;
+      font-size: 1.25rem;
+      font-style: italic;
+      text-align: center;
+      padding: 20px;
+      opacity: 0.8;
+    }
+
+    .empty-message span {
+      font-size: 2rem;
+    }
+
+    /* Адаптив */
+    @media (max-width: 750px) {
+      h1 { font-size: 1.8rem; }
+      .card { min-width: 130px; padding: 16px 8px; }
+      .card .icon { font-size: 2.8rem; }
+      .card .letter { font-size: 1.8rem; }
+      .card .rname { font-size: 0.75rem; }
+      .detail-title { font-size: 1.4rem; }
+      .detail-text { font-size: 1.05rem; padding: 14px 16px; }
+    }
+
+    @media (max-width: 500px) {
+      .scheme { gap: 10px; }
+      .card { flex: 1 1 120px; min-width: 110px; }
+    }
+
+    /* Анимация появления деталей */
+    .fade-in {
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* маленькая подсказка */
+    .hint {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.95rem;
+      color: #446644;
+      letter-spacing: 0.3px;
+      opacity: 0.9;
+    }
+
+    .hint i {
+      font-style: normal;
+      background: #e3f0e3;
+      padding: 2px 10px;
+      border-radius: 30px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🌿 Принцип 5R</h1>
+  <div style="text-align: center;">
+    <div class="subhead">Иерархия обращения с отходами — нажми на карточку, чтобы узнать подробнее</div>
+  </div>
+
+  <div class="scheme" id="scheme">
+    <!-- REFUSE -->
+    <div class="card" data-r="refuse" tabindex="0" role="button" aria-label="Откажись">
+      <div class="icon">🚫</div>
+      <div class="letter">R</div>
+      <div class="rname">Refuse</div>
+    </div>
+    <!-- REDUCE -->
+    <div class="card" data-r="reduce" tabindex="0" role="button" aria-label="Сократи">
+      <div class="icon">📉</div>
+      <div class="letter">R</div>
+      <div class="rname">Reduce</div>
+    </div>
+    <!-- REUSE -->
+    <div class="card" data-r="reuse" tabindex="0" role="button" aria-label="Повторно используй">
+      <div class="icon">🔄</div>
+      <div class="letter">R</div>
+      <div class="rname">Reuse</div>
+    </div>
+    <!-- RECYCLE -->
+    <div class="card" data-r="recycle" tabindex="0" role="button" aria-label="Переработай">
+      <div class="icon">♻️</div>
+      <div class="letter">R</div>
+      <div class="rname">Recycle</div>
+    </div>
+    <!-- ROT -->
+    <div class="card" data-r="rot" tabindex="0" role="button" aria-label="Компостируй">
+      <div class="icon">🌱</div>
+      <div class="letter">R</div>
+      <div class="rname">Rot</div>
+    </div>
+  </div>
+
+  <!-- Панель с деталями -->
+  <div class="detail-panel" id="detailPanel">
+    <div class="empty-message" id="emptyMessage">
+      <span>👆</span> Нажми на любую карточку, чтобы увидеть описание
+    </div>
+    <div id="detailContent" style="display: none;"></div>
+  </div>
+  <div class="hint"><i>5R — от самого эффективного (Refuse) к наименее желательному (Rot)</i></div>
+</div>
+
+<script>
+  (function() {
+    // Данные для каждого шага
+    const R_DATA = {
+      refuse: {
+        title: 'Refuse — Откажись',
+        icon: '🚫',
+        description: 'Самый эффективный шаг: <strong>не создавать отходы вообще</strong>. Откажитесь от одноразовых пакетов, пластиковых трубочек, лишней упаковки. Покупайте только то, что действительно нужно. Если можно не брать — не берите.'
+      },
+      reduce: {
+        title: 'Reduce — Сократи',
+        icon: '📉',
+        description: 'Уменьшите количество потребляемого и производимых отходов. <strong>Покупайте меньше, выбирайте товары с долгим сроком службы</strong> и минимальной упаковкой. Предпочитайте качество количеству, планируйте покупки.'
+      },
+      reuse: {
+        title: 'Reuse — Повторно используй',
+        icon: '🔄',
+        description: 'Используйте вещи многократно: <strong>многоразовые бутылки, сумки, контейнеры</strong>. Ремонтируйте вместо выбрасывания, передавайте вещи другим, используйте тару повторно. Продлевайте жизнь предметам.'
+      },
+      recycle: {
+        title: 'Recycle — Переработай',
+        icon: '♻️',
+        description: 'Сдавайте материалы (бумагу, стекло, пластик, металл) в переработку, <strong>когда первые три шага уже не сработали</strong>. Сортируйте отходы и относитесь к переработке ответственно — это экономит ресурсы и энергию.'
+      },
+      rot: {
+        title: 'Rot — Компостируй',
+        icon: '🌱',
+        description: 'Органические отходы (остатки еды, растительные отходы) превращайте в <strong>компост</strong>, а не отправляйте на свалку. Компостирование возвращает питательные вещества в почву и сокращает выбросы метана.'
+      }
+    };
+
+    const cards = document.querySelectorAll('.card');
+    const detailPanel = document.getElementById('detailPanel');
+    const detailContent = document.getElementById('detailContent');
+    const emptyMessage = document.getElementById('emptyMessage');
+
+    // Функция отображения деталей
+    function showDetail(key) {
+      const data = R_DATA[key];
+      if (!data) return;
+
+      // Скрываем пустое сообщение, показываем контент
+      emptyMessage.style.display = 'none';
+      detailContent.style.display = 'block';
+
+      // Заполняем контент с анимацией
+      detailContent.innerHTML = `
+        <div class="detail-title fade-in">
+          <span class="big-icon">${data.icon}</span>
+          <span>${data.title}</span>
+        </div>
+        <div class="detail-text fade-in">
+          ${data.description}
+        </div>
+      `;
+
+      // Небольшая визуальная подсветка активной карточки (опционально)
+      cards.forEach(c => c.style.opacity = '0.9');
+      const activeCard = document.querySelector(`.card[data-r="${key}"]`);
+      if (activeCard) {
+        activeCard.style.opacity = '1';
+        activeCard.style.transform = 'translateY(-6px)';
+        // Убираем эффект через 300ms? Нет, оставим, но при клике на другую карточку сбросим.
+        // Сброс предыдущих выделений сделаем перед этим.
+      }
+      // Сбросим у всех карточек состояние "приподнятости", потом выделим активную
+      cards.forEach(c => {
+        c.style.transform = 'translateY(0)';
+        c.style.opacity = '1';
+      });
+      if (activeCard) {
+        activeCard.style.transform = 'translateY(-6px)';
+        activeCard.style.opacity = '1';
+      }
+
+      // Прокрутить к панели, если нужно (на маленьких экранах)
+      if (window.innerWidth < 700) {
+        detailPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    // Обработчик клика по карточке
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        const key = card.dataset.r;
+        showDetail(key);
+      });
+
+      // Поддержка клавиатуры (Enter / Space)
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const key = card.dataset.r;
+          showDetail(key);
+        }
+      });
+    });
+
+    // Сброс выделения при клике вне карточек? Не обязательно. Но можно убрать выделение при клике на пустое место,
+    // но лучше оставить как есть, чтобы пользователь видел активную карточку.
+    // Добавим сброс при повторном клике на ту же карточку? Не будем усложнять.
+
+    // Также можно добавить обработку клика по фону, чтобы снять выделение, но не требуется.
+
+    // При загрузке показываем пустое состояние (уже задано)
+
+    // Проверим, что у всех карточек есть data-r
+    // Для доступности можно добавить подсказку при фокусе
+  })();
+</script>
+</body>
+</html>
