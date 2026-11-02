@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Виды проверок Росприроднадзора — тренажёр</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #eef2f6; display: flex; justify-content: center; align-items: center;
+    min-height: 100vh; padding: 10px;
+  }
+  .app {
+    width: 700px; height: 500px; background: #fff; border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.12); padding: 18px 22px;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .topbar { display: flex; justify-content: space-between; font-size: 13px;
+    color: #64748b; margin-bottom: 8px; flex: 0 0 auto; }
+  .topbar b { color: #0f172a; }
+  h1 { font-size: 17px; color: #0f172a; margin-bottom: 10px; flex: 0 0 auto; }
+  .case {
+    font-size: 14px; line-height: 1.4; color: #1e293b;
+    background: #f8fafc; border-left: 4px solid #3b82f6; border-radius: 6px;
+    padding: 10px 12px; margin-bottom: 10px; flex: 0 0 auto; max-height: 140px; overflow: auto;
+  }
+  .question { font-size: 14px; font-weight: 600; color: #0f172a; margin-bottom: 8px; flex: 0 0 auto; }
+  .options { display: flex; flex-direction: column; gap: 6px; flex: 0 0 auto; }
+  .opt {
+    text-align: left; font-size: 14px; padding: 8px 12px; border: 1.5px solid #cbd5e1;
+    background: #fff; border-radius: 8px; cursor: pointer; transition: .15s;
+    color: #1e293b; font-family: inherit;
+  }
+  .opt:hover:not(:disabled) { border-color: #3b82f6; background: #f0f7ff; }
+  .opt:disabled { cursor: default; }
+  .opt.correct { border-color: #16a34a; background: #f0fdf4; color: #166534; font-weight: 600; }
+  .opt.wrong { border-color: #dc2626; background: #fef2f2; color: #991b1b; }
+  .feedback { margin-top: 8px; font-size: 13px; line-height: 1.35; padding: 8px 12px;
+    border-radius: 8px; flex: 0 0 auto; max-height: 82px; overflow: auto; }
+  .feedback.ok { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  .feedback.no { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+  .feedback b { display: block; margin-bottom: 2px; }
+  .spacer { flex: 1 1 auto; min-height: 0; }
+  .btn {
+    align-self: flex-end; font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 9px 20px; border: none; border-radius: 8px; cursor: pointer;
+    background: #3b82f6; color: #fff; transition: .15s; flex: 0 0 auto;
+  }
+  .btn:hover { background: #2563eb; }
+  .hidden { display: none !important; }
+  .result { display: flex; flex-direction: column; height: 100%; }
+  .result h2 { font-size: 20px; color: #0f172a; margin-bottom: 8px; flex: 0 0 auto; }
+  .score { font-size: 15px; color: #334155; margin-bottom: 6px; flex: 0 0 auto; }
+  .score span { font-weight: 700; color: #0f172a; }
+  .bar { height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; margin: 8px 0 10px; flex: 0 0 auto; }
+  .bar div { height: 100%; background: #3b82f6; border-radius: 6px; transition: width .4s; }
+  .verdict { font-size: 13px; line-height: 1.38; padding: 10px 12px; border-radius: 10px; flex: 0 0 auto; }
+  .verdict.pass { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  .verdict.fail { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+  .verdict b { display: block; margin-bottom: 4px; font-size: 14px; }
+  .verdict ul { margin: 4px 0 0 16px; padding: 0; }
+  .verdict li { margin-bottom: 3px; }
+  .verdict li b { display: inline; font-size: 13px; margin: 0; }
+  .scrollbox { flex: 1 1 auto; min-height: 0; overflow: auto; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+const TASKS = [
+  {
+    caseText: "Инспектор приехал на предприятие в первый год его работы. Объект отнесён к высокой категории риска. Инспектор провёл беседу, рассказал об обязательных требованиях и дал рекомендации. Штрафовать и выдавать предписание он не стал.",
+    question: "Какое мероприятие проведено?",
+    options: [
+      "Профилактический визит",
+      "Инспекционный визит",
+      "Выездная проверка",
+      "Выездное обследование"
+    ],
+    correct: 0,
+    comment: "Первая проверка в первый год работы объекта высокой категории риска, беседа и рекомендации без штрафов и предписаний — это профилактический визит (ст. 52 Закона № 248-ФЗ)."
+  },
+  {
+    caseText: "Организация не знала о проверке. Инспектор посетил общедоступные территории, отобрал пробы сточных вод и почвы, проверил качество воздуха, сделал видеозапись. С проверяемым лицом он не взаимодействовал.",
+    question: "Какое мероприятие проведено?",
+    options: [
+      "Выездная проверка",
+      "Выездное обследование",
+      "Инспекционный визит",
+      "Рейдовый осмотр"
+    ],
+    correct: 1,
+    comment: "Осмотр общедоступных территорий, отбор проб и видеозапись без взаимодействия с организацией — выездное обследование (ст. 75 Закона № 248-ФЗ)."
+  },
+  {
+    caseText: "Инспектор приехал на объект без предварительного уведомления и вручил уведомление о начале проверки в день визита. Он опросил работников, осмотрел оборудование и истребовал обязательные документы. Всё заняло один рабочий день.",
+    question: "Какое мероприятие проведено?",
+    options: [
+      "Профилактический визит",
+      "Выездное обследование",
+      "Инспекционный визит",
+      "Документарная проверка"
+    ],
+    correct: 2,
+    comment: "Выезд без предварительного уведомления, уведомление в день визита, опрос работников и истребование документов, срок — один рабочий день. Это инспекционный визит (ст. 70 Закона № 248-ФЗ)."
+  },
+  {
+    caseText: "Инспектор запросил у организации документы и письменные пояснения. Документы можно направить по почте или привезти нарочно. На объект инспектор не выезжает. Проверка длится не более 10 дней.",
+    question: "Какое мероприятие проведено?",
+    options: [
+      "Выездная проверка",
+      "Документарная проверка",
+      "Наблюдение за соблюдением обязательных требований",
+      "Рейдовый осмотр"
+    ],
+    correct: 1,
+    comment: "Запрос документов и пояснений без выезда на объект, срок до 10 дней — документарная проверка (п. 70 положения об экологическом надзоре)."
+  },
+  {
+    caseText: "Инспектор без взаимодействия с организацией собрал и проанализировал данные из её отчётов, разрешений, лицензий, а также из интернета и запросов в другие госорганы. Организация об этом могла даже не узнать. По итогам инспектор направил предостережение.",
+    question: "Какое мероприятие проведено?",
+    options: [
+      "Документарная проверка",
+      "Выездное обследование",
+      "Наблюдение за соблюдением обязательных требований (мониторинг безопасности)",
+      "Профилактический визит"
+    ],
+    correct: 2,
+    comment: "Сбор и анализ данных без взаимодействия с организацией, без запросов пояснений, с возможным предостережением — наблюдение за соблюдением обязательных требований, или мониторинг безопасности (ст. 74 Закона № 248-ФЗ)."
+  },
+  {
+    caseText: "Росприроднадзор проверяет сразу несколько компаний, работающих в одном морском порту. Поводом стали жалобы на угольную пыль. Инспекторы осматривают территорию порта, взаимодействие с каждой организацией — не более одного рабочего дня, общий срок — 10 рабочих дней.",
+    question: "Какое мероприятие проведено?",
+    options: [
+      "Выездная проверка",
+      "Рейдовый осмотр",
+      "Инспекционный визит",
+      "Выездное обследование"
+    ],
+    correct: 1,
+    comment: "Проверка сразу нескольких организаций на одной территории (порт, индустриальный парк, ОЭЗ) с осмотром и ограничением по одному дню на организацию — рейдовый осмотр (ст. 71 Закона № 248-ФЗ)."
+  },
+  {
+    caseText: "Инспектор приехал на предприятие по жалобе гражданина на неприятный запах. Уведомление вручили в день начала. Инспектор осмотрел промплощадку, отобрал пробы, опросил эколога и запросил документы. Проверка длится 10 рабочих дней.",
+    question: "Какое мероприятие проведено?",
+    options: [
+      "Инспекционный визит",
+      "Выездное обследование",
+      "Выездная проверка",
+      "Профилактический визит"
+    ],
+    correct: 2,
+    comment: "Выезд по жалобе с осмотром, отбором проб, опросом и запросом документов, срок 10 рабочих дней — выездная проверка (ст. 73 Закона № 248-ФЗ)."
+  }
+];
+
+const app = document.getElementById('app');
+let current = 0;
+let wrongCount = 0;
+let answered = false;
+
+function renderTask() {
+  const t = TASKS[current];
+  answered = false;
+  app.innerHTML = `
+    <div class="topbar">
+      <span>Задание <b>${current + 1}</b> из <b>${TASKS.length}</b></span>
+      <span>Ошибок: <b>${wrongCount}</b></span>
+    </div>
+    <h1>Определи вид проверки Росприроднадзора</h1>
+    <div class="case">${t.caseText}</div>
+    <div class="question">${t.question}</div>
+    <div class="options" id="options">
+      ${t.options.map((o, i) => `<button class="opt" data-i="${i}">${o}</button>`).join('')}
+    </div>
+    <div class="feedback hidden" id="feedback"></div>
+    <div class="spacer"></div>
+    <button class="btn hidden" id="nextBtn"></button>
+  `;
+  document.querySelectorAll('.opt').forEach(btn => {
+    btn.addEventListener('click', () => choose(parseInt(btn.dataset.i)));
+  });
+  document.getElementById('nextBtn').addEventListener('click', next);
+}
+
+function choose(i) {
+  if (answered) return;
+  answered = true;
+  const t = TASKS[current];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(b => b.disabled = true);
+  opts[t.correct].classList.add('correct');
+
+  const ok = i === t.correct;
+  if (!ok) {
+    opts[i].classList.add('wrong');
+    wrongCount++;
+  }
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback ' + (ok ? 'ok' : 'no');
+  fb.innerHTML = `<b>${ok ? 'Верно!' : 'Неверно.'}</b>${t.comment}`;
+  fb.classList.remove('hidden');
+
+  document.querySelector('.topbar').innerHTML =
+    `<span>Задание <b>${current + 1}</b> из <b>${TASKS.length}</b></span><span>Ошибок: <b>${wrongCount}</b></span>`;
+
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.textContent = current === TASKS.length - 1 ? 'Показать результат' : 'Следующее задание →';
+  nextBtn.classList.remove('hidden');
+}
+
+function next() {
+  current++;
+  if (current < TASKS.length) renderTask();
+  else renderResult();
+}
+
+function renderResult() {
+  const total = TASKS.length;
+  const correct = total - wrongCount;
+  const passed = wrongCount <= 2;
+
+  app.innerHTML = `
+    <div class="result">
+      <h2>Результат</h2>
+      <div class="score">Правильных ответов: <span>${correct} из ${total}</span> · ошибок: <span>${wrongCount}</span></div>
+      <div class="bar"><div style="width:${Math.round(correct/total*100)}%"></div></div>
+      <div class="scrollbox">
+        <div class="verdict ${passed ? 'pass' : 'fail'}">
+          ${passed
+            ? '<b>Хороший результат!</b>'
+            : '<b>Стоит пройти заново: больше двух ошибок.</b>'}
+          <div style="margin-top:6px">Коротко о каждом виде мероприятия:</div>
+          <ul>
+            <li><b>Профилактический визит</b> — первая проверка в первый год работы объекта высокой категории риска (чрезвычайно высокой, высокой, значительной). Инспектор беседует, разъясняет обязательные требования и даёт рекомендации. Штрафовать и выдавать предписание он не вправе. Проводится на объекте или по видео-конференц-связи, длится до 10 рабочих дней. От обязательного визита отказаться нельзя.</li>
+            <li><b>Выездное обследование</b> — осмотр общедоступных территорий и помещений без взаимодействия с организацией. Инспектор может отбирать пробы сточных вод и почв, проверять качество воздуха, вести видеозапись, проводить испытания. Организация о нём не знает. Длится один рабочий день. По итогам возможен штраф, предостережение или инициирование внеплановой проверки, но предписание не выдаётся.</li>
+            <li><b>Инспекционный визит</b> — выезд без предварительного уведомления: уведомление вручают в день визита. Инспектор опрашивает работников, осматривает объекты, истребует обязательные документы. Длится не более одного рабочего дня на объект. Оснований семь: жалоба, информация о нарушении, поручение Президента или Правительства, требование прокурора, истечение срока предписания, срок по ежегодному плану, срок по программе проверок.</li>
+            <li><b>Документарная проверка</b> — запрос документов и письменных пояснений без выезда на объект (исключение — документы, составляющие гостайну). Длится не более 10 дней. Проводится, когда нет угрозы причинения вреда. Часто применяется при выдаче лицензии на транспортирование отходов III–IV классов опасности.</li>
+            <li><b>Наблюдение за соблюдением обязательных требований (мониторинг безопасности)</b> — дистанционный сбор и анализ данных из отчётов организации, разрешений, лицензий, интернета и запросов в другие госорганы. Без взаимодействия с организацией и без запроса пояснений. Срок не ограничен. По итогам — предостережение или инициирование внеплановой проверки.</li>
+            <li><b>Рейдовый осмотр</b> — проверка сразу нескольких организаций на одной территории: индустриальный парк, порт, особая экономическая зона. Число проверяемых организаций не ограничено, взаимодействие с каждой — не более одного рабочего дня, общий срок — 10 рабочих дней. Может проводиться межведомственно.</li>
+            <li><b>Выездная проверка</b> — самая сложная: посещение объектов, отбор проб с привлечением лаборатории ЦЛАТИ, опрос работников, запрос документов. Длится 10 рабочих дней (до 2 месяцев с продлением и межрегиональными нюансами). О плановой предупреждают за 3 рабочих дня, о внеплановой — за 24 часа. По итогам возможны штраф, предписание, приостановление деятельности через суд.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" id="restartBtn" style="align-self:flex-start">Пройти заново</button>
+    </div>
+  `;
+  document.getElementById('restartBtn').addEventListener('click', restart);
+}
+
+function restart() {
+  current = 0;
+  wrongCount = 0;
+  answered = false;
+  renderTask();
+}
+
+renderTask();
+</script>
+</body>
+</html>
