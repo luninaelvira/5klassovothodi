@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Уровни надзора: строящиеся предприятия — тренажёр</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #eef2f6; display: flex; justify-content: center; align-items: center;
+    min-height: 100vh; padding: 10px;
+  }
+  .app {
+    width: 700px; height: 500px; background: #fff; border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.12); padding: 18px 22px;
+    display: flex; flex-direction: column; overflow: hidden; position: relative;
+  }
+  .topbar { display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; color: #64748b; margin-bottom: 8px; flex: 0 0 auto; }
+  .topbar b { color: #0f172a; }
+  h1 { font-size: 17px; color: #0f172a; margin-bottom: 10px; flex: 0 0 auto; }
+  .case {
+    font-size: 14px; line-height: 1.42; color: #1e293b;
+    background: #f8fafc; border-left: 4px solid #3b82f6; border-radius: 6px;
+    padding: 10px 12px; margin-bottom: 10px; flex: 0 0 auto; max-height: 150px; overflow: auto;
+  }
+  .question { font-size: 13.5px; font-weight: 600; color: #0f172a; margin-bottom: 8px; flex: 0 0 auto; }
+  .options { display: flex; flex-direction: column; gap: 7px; flex: 0 0 auto; }
+  .opt {
+    text-align: left; font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1;
+    background: #fff; border-radius: 8px; cursor: pointer; transition: .15s;
+    color: #1e293b; font-family: inherit;
+  }
+  .opt:hover:not(:disabled) { border-color: #3b82f6; background: #f0f7ff; }
+  .opt:disabled { cursor: default; }
+  .opt.correct { border-color: #16a34a; background: #f0fdf4; color: #166534; font-weight: 600; }
+  .opt.wrong { border-color: #dc2626; background: #fef2f2; color: #991b1b; }
+  .feedback { margin-top: 10px; font-size: 13px; line-height: 1.4; padding: 9px 12px;
+    border-radius: 8px; flex: 0 0 auto; max-height: 92px; overflow: auto; }
+  .feedback.ok { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  .feedback.no { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+  .feedback b { display: block; margin-bottom: 2px; }
+  .spacer { flex: 1 1 auto; min-height: 0; }
+  .btn {
+    align-self: flex-end; font-family: inherit; font-size: 13.5px; font-weight: 600;
+    padding: 9px 20px; border: none; border-radius: 8px; cursor: pointer;
+    background: #3b82f6; color: #fff; transition: .15s; flex: 0 0 auto;
+  }
+  .btn:hover { background: #2563eb; }
+  .hidden { display: none !important; }
+  .result { display: flex; flex-direction: column; height: 100%; }
+  .result h2 { font-size: 20px; color: #0f172a; margin-bottom: 10px; }
+  .score { font-size: 15px; color: #334155; margin-bottom: 6px; }
+  .score span { font-weight: 700; color: #0f172a; }
+  .bar { height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; margin: 12px 0 16px; }
+  .bar div { height: 100%; background: #3b82f6; border-radius: 6px; transition: width .4s; }
+  .verdict { font-size: 14px; line-height: 1.45; padding: 12px 14px; border-radius: 10px; }
+  .verdict.pass { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  .verdict.fail { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+  .verdict b { display: block; margin-bottom: 4px; font-size: 15px; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+const TASKS = [
+  {
+    caseText: "ООО «Балт-Терминал» строит складской комплекс в Ленинградской области. Площадка находится на землях промышленности, вне ООПТ. После ввода объект будет относиться к III категории НВОС. Работы ведутся на суше, вдали от моря.",
+    question: "Какой уровень надзора за стройкой?",
+    options: [
+      "Федеральный — Росприроднадзор",
+      "Региональный — орган Ленинградской области",
+      "Федеральный — центральный аппарат Росприроднадзора"
+    ],
+    correct: 1,
+    comment: "Ни один из четырёх «строительных» федеральных критериев (шельф/морские воды, ООПТ, искусственный участок на водном объекте, будущая I категория) не выполняется. Значит — региональный надзор."
+  },
+  {
+    caseText: "АО «Каспий-Порт» строит гидротехническое сооружение в российской части Каспийского моря. После ввода объект будет относиться к II категории НВОС.",
+    question: "Какой уровень надзора за стройкой?",
+    options: [
+      "Региональный — орган субъекта, где зарегистрирована компания",
+      "Федеральный — Росприроднадзор",
+      "Региональный — так как будущая категория всего II"
+    ],
+    correct: 1,
+    comment: "Работы в российской части Каспийского моря — прямой федеральный критерий для стройки (п. 8 Положения ПП № 1096). Категория будущего объекта здесь уже не решает."
+  },
+  {
+    caseText: "ООО «ЭкоПарк» строит гостиничный комплекс на участке, который расположен в границах национального парка (ООПТ). После ввода объект будет относиться к III категории НВОС.",
+    question: "Какой уровень надзора за стройкой?",
+    options: [
+      "Региональный — объект III категории",
+      "Федеральный — работы в границах ООПТ",
+      "Региональный — ООПТ находится в ведении субъекта РФ"
+    ],
+    correct: 1,
+    comment: "Работы в границах ООПТ — федеральный критерий для строительства. Будущая III категория на это не влияет."
+  },
+  {
+    caseText: "ПАО «Металл-Восток» реконструирует завод в Челябинской области. Площадка на землях промышленности, вне ООПТ, не на водном объекте. После ввода объект будет соответствовать критериям I категории НВОС.",
+    question: "Какой уровень надзора за стройкой?",
+    options: [
+      "Региональный — надзор по месту стройки",
+      "Федеральный — будущий объект I категории",
+      "Региональный — пока объект не введён, категория не действует"
+    ],
+    correct: 1,
+    comment: "Если объект на момент ввода будет соответствовать критериям I категории НВОС — это федеральный критерий для стройки. Надзор — Росприроднадзор."
+  }
+];
+
+const app = document.getElementById('app');
+let current = 0;
+let wrongCount = 0;
+let answered = false;
+
+function renderTask() {
+  const t = TASKS[current];
+  answered = false;
+  app.innerHTML = `
+    <div class="topbar">
+      <span>Задание <b>${current + 1}</b> из <b>${TASKS.length}</b></span>
+      <span>Ошибок: <b>${wrongCount}</b></span>
+    </div>
+    <h1>Строящееся предприятие: определи уровень надзора</h1>
+    <div class="case">${t.caseText}</div>
+    <div class="question">${t.question}</div>
+    <div class="options" id="options">
+      ${t.options.map((o, i) => `<button class="opt" data-i="${i}">${o}</button>`).join('')}
+    </div>
+    <div class="feedback hidden" id="feedback"></div>
+    <div class="spacer"></div>
+    <button class="btn hidden" id="nextBtn"></button>
+  `;
+  document.querySelectorAll('.opt').forEach(btn => {
+    btn.addEventListener('click', () => choose(parseInt(btn.dataset.i)));
+  });
+  document.getElementById('nextBtn').addEventListener('click', next);
+}
+
+function choose(i) {
+  if (answered) return;
+  answered = true;
+  const t = TASKS[current];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(b => b.disabled = true);
+  opts[t.correct].classList.add('correct');
+
+  const ok = i === t.correct;
+  if (!ok) {
+    opts[i].classList.add('wrong');
+    wrongCount++;
+  }
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback ' + (ok ? 'ok' : 'no');
+  fb.innerHTML = `<b>${ok ? 'Верно!' : 'Неверно.'}</b>${t.comment}`;
+  fb.classList.remove('hidden');
+
+  document.querySelector('.topbar').innerHTML =
+    `<span>Задание <b>${current + 1}</b> из <b>${TASKS.length}</b></span><span>Ошибок: <b>${wrongCount}</b></span>`;
+
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.textContent = current === TASKS.length - 1 ? 'Показать результат' : 'Следующее задание →';
+  nextBtn.classList.remove('hidden');
+}
+
+function next() {
+  current++;
+  if (current < TASKS.length) renderTask();
+  else renderResult();
+}
+
+function renderResult() {
+  const total = TASKS.length;
+  const correct = total - wrongCount;
+  const passed = wrongCount <= 2;
+  const pct = Math.round(correct / total * 100);
+
+  app.innerHTML = `
+    <div class="result">
+      <h2>Результат</h2>
+      <div class="score">Правильных ответов: <span>${correct} из ${total}</span> · ошибок: <span>${wrongCount}</span></div>
+      <div class="bar"><div style="width:${pct}%; background:${passed ? '#3b82f6' : '#f59e0b'}"></div></div>
+      <div class="verdict ${passed ? 'pass' : 'fail'}">
+        ${passed
+          ? '<b>Отличная работа!</b>Вы помните: для стройки федеральный уровень дают четыре критерия — шельф/морские воды/Каспий, ООПТ, искусственный участок на водном объекте и будущая I категория НВОС. Если ни один не выполняется — региональный надзор.'
+          : '<b>Стоит пройти заново.</b>Больше двух ошибок. Запомните четыре «строительных» федеральных критерия: работы в исключительной экономической зоне/на шельфе/в морских водах/в российской части Каспия; работы в границах ООПТ; работы на искусственных земельных участках на водных объектах; будущая I категория НВОС. Всё остальное — региональный надзор.'}
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" id="restartBtn" style="align-self:flex-start">Пройти заново</button>
+    </div>
+  `;
+  document.getElementById('restartBtn').addEventListener('click', restart);
+}
+
+function restart() {
+  current = 0;
+  wrongCount = 0;
+  answered = false;
+  renderTask();
+}
+
+renderTask();
+</script>
+</body>
+</html>
