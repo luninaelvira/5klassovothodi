@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Уровни экологического надзора — тренажёр</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #eef2f6; display: flex; justify-content: center; align-items: center;
+    min-height: 100vh; padding: 10px;
+  }
+  .app {
+    width: 700px; height: 500px; background: #fff; border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.12); padding: 18px 22px;
+    display: flex; flex-direction: column; overflow: hidden; position: relative;
+  }
+  .topbar { display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; color: #64748b; margin-bottom: 8px; flex: 0 0 auto; }
+  .topbar b { color: #0f172a; }
+  h1 { font-size: 17px; color: #0f172a; margin-bottom: 10px; flex: 0 0 auto; }
+  .case {
+    font-size: 14px; line-height: 1.42; color: #1e293b;
+    background: #f8fafc; border-left: 4px solid #3b82f6; border-radius: 6px;
+    padding: 10px 12px; margin-bottom: 10px; flex: 0 0 auto; max-height: 150px; overflow: auto;
+  }
+  .question { font-size: 13.5px; font-weight: 600; color: #0f172a; margin-bottom: 8px; flex: 0 0 auto; }
+  .options { display: flex; flex-direction: column; gap: 7px; flex: 0 0 auto; }
+  .opt {
+    text-align: left; font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1;
+    background: #fff; border-radius: 8px; cursor: pointer; transition: .15s;
+    color: #1e293b; font-family: inherit;
+  }
+  .opt:hover:not(:disabled) { border-color: #3b82f6; background: #f0f7ff; }
+  .opt:disabled { cursor: default; }
+  .opt.correct { border-color: #16a34a; background: #f0fdf4; color: #166534; font-weight: 600; }
+  .opt.wrong { border-color: #dc2626; background: #fef2f2; color: #991b1b; }
+  .feedback { margin-top: 10px; font-size: 13px; line-height: 1.4; padding: 9px 12px;
+    border-radius: 8px; flex: 0 0 auto; max-height: 92px; overflow: auto; }
+  .feedback.ok { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  .feedback.no { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+  .feedback b { display: block; margin-bottom: 2px; }
+  .spacer { flex: 1 1 auto; min-height: 0; }
+  .btn {
+    align-self: flex-end; font-family: inherit; font-size: 13.5px; font-weight: 600;
+    padding: 9px 20px; border: none; border-radius: 8px; cursor: pointer;
+    background: #3b82f6; color: #fff; transition: .15s; flex: 0 0 auto;
+  }
+  .btn:hover { background: #2563eb; }
+  .hidden { display: none !important; }
+  /* Экран результатов */
+  .result { display: flex; flex-direction: column; height: 100%; }
+  .result h2 { font-size: 20px; color: #0f172a; margin-bottom: 10px; }
+  .score { font-size: 15px; color: #334155; margin-bottom: 6px; }
+  .score span { font-weight: 700; color: #0f172a; }
+  .bar { height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; margin: 12px 0 16px; }
+  .bar div { height: 100%; background: #3b82f6; border-radius: 6px; transition: width .4s; }
+  .verdict { font-size: 14px; line-height: 1.45; padding: 12px 14px; border-radius: 10px; }
+  .verdict.pass { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  .verdict.fail { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+  .verdict b { display: block; margin-bottom: 4px; font-size: 15px; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+const TASKS = [
+  {
+    caseText: "ООО «Северная ягода» зарегистрировано в Вологде. У него один объект НВОС III категории — консервный цех в Вологде. Объект не воздействует на федеральные водные объекты, не расположен на особо охраняемой территории и не является объектом накопленного вреда.",
+    question: "Какой уровень контроля у организации?",
+    options: [
+      "Федеральный — Росприроднадзор",
+      "Региональный — орган Вологодской области",
+      "Федеральный — центральный аппарат Росприроднадзора"
+    ],
+    correct: 1,
+    comment: "Объект III категории без федеральных критериев — региональный. Значит, и вся организация регионального уровня (п. 8 Положения ПП № 1096)."
+  },
+  {
+    caseText: "ПАО «Восток-Металл» имеет три завода: в Екатеринбурге (II категория, федеральных критериев нет), в Челябинске (III категория, федеральных критериев нет) и в Перми (I категория, сброс сточных вод в Каму — федеральный водный объект).",
+    question: "Какой уровень контроля у организации в целом?",
+    options: [
+      "Региональный — каждый завод подчиняется своему региональному органу",
+      "Федеральный — вся организация, включая уральские заводы",
+      "Смешанный: пермский завод — федеральный, остальные — региональные"
+    ],
+    correct: 1,
+    comment: "Сброс в Каму — федеральный критерий. По ч. 4 ст. 65 Закона №7-ФЗ одного федерального объекта достаточно, чтобы вся организация стала федеральной."
+  },
+  {
+    caseText: "ООО «Юг-Агро» зарегистрировано в Краснодаре, а все производственные объекты — в Ростовской области. Все объекты III категории, федеральных критериев нет, но один из них арендует участок на территории государственного природного заповедника.",
+    question: "Какой уровень контроля у организации?",
+    options: [
+      "Региональный — объекты III категории, регистрация не важна",
+      "Федеральный — из-за объекта на территории с особым статусом",
+      "Региональный — заповедник относится к ведению Минприроды, а не к НВОС"
+    ],
+    correct: 1,
+    comment: "Расположение на территории с особым статусом — одно из четырёх федеральных оснований (п. 8 Положения). Один такой объект делает федеральной всю организацию."
+  },
+  {
+    caseText: "АО «ХимПром» имеет объект в Московской области (III категория), объект в Москве (II категория, без федеральных критериев) и полигон в Тверской области, отнесённый к объектам накопленного вреда федерального значения.",
+    question: "Кто будет осуществлять надзор за организацией?",
+    options: [
+      "Три региональных органа — по месту каждого объекта",
+      "Росприроднадзор, в том числе Верхне-Волжское межрегиональное управление",
+      "Только центральный аппарат Росприроднадзора"
+    ],
+    correct: 1,
+    comment: "Полигон — объект накопленного вреда федерального значения, значит вся организация федеральная. Тверскую область курирует Верхне-Волжское межрегиональное управление Росприроднадзора."
+  },
+  {
+    caseText: "Организация зарегистрирована в Москве, но все её объекты находятся в Ярославской, Костромской и Тверской областях и относятся к региональному уровню.",
+    question: "Какой уровень контроля у организации?",
+    options: [
+      "Федеральный — по месту регистрации в Москве",
+      "Региональный — по региональным органам трёх областей",
+      "Федеральный — Верхне-Волжское управление Росприроднадзора"
+    ],
+    correct: 1,
+    comment: "Уровень определяется по объектам, а не по адресу регистрации. Все объекты региональные — значит, надзирают региональные органы Ярославской, Костромской и Тверской областей."
+  },
+  {
+    caseText: "ПАО «Арктик-Нефть» ведёт добычу на континентальном шельфе. Головной офис — в Санкт-Петербурге, там же офисный объект III категории.",
+    question: "Кто контролирует шельфовый объект?",
+    options: [
+      "Территориальный орган Росприроднадзора по Санкт-Петербургу",
+      "Центральный аппарат Росприроднадзора",
+      "Региональный орган Санкт-Петербурга"
+    ],
+    correct: 1,
+    comment: "Сложнейшие объекты и крупнейшие компании, например нефтегаз на шельфе, курирует центральный аппарат Росприроднадзора. Вся организация при этом федеральная."
+  }
+];
+
+const app = document.getElementById('app');
+let current = 0;
+let wrongCount = 0;
+let answered = false;
+
+function renderTask() {
+  const t = TASKS[current];
+  answered = false;
+  app.innerHTML = `
+    <div class="topbar">
+      <span>Задание <b>${current + 1}</b> из <b>${TASKS.length}</b></span>
+      <span>Ошибок: <b>${wrongCount}</b></span>
+    </div>
+    <h1>Определи уровень экологического надзора</h1>
+    <div class="case">${t.caseText}</div>
+    <div class="question">${t.question}</div>
+    <div class="options" id="options">
+      ${t.options.map((o, i) => `<button class="opt" data-i="${i}">${o}</button>`).join('')}
+    </div>
+    <div class="feedback hidden" id="feedback"></div>
+    <div class="spacer"></div>
+    <button class="btn hidden" id="nextBtn"></button>
+  `;
+  document.querySelectorAll('.opt').forEach(btn => {
+    btn.addEventListener('click', () => choose(parseInt(btn.dataset.i)));
+  });
+  document.getElementById('nextBtn').addEventListener('click', next);
+}
+
+function choose(i) {
+  if (answered) return;
+  answered = true;
+  const t = TASKS[current];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(b => b.disabled = true);
+  opts[t.correct].classList.add('correct');
+
+  const ok = i === t.correct;
+  if (!ok) {
+    opts[i].classList.add('wrong');
+    wrongCount++;
+  }
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback ' + (ok ? 'ok' : 'no');
+  fb.innerHTML = `<b>${ok ? 'Верно!' : 'Неверно.'}</b>${t.comment}`;
+  fb.classList.remove('hidden');
+
+  document.querySelector('.topbar').innerHTML =
+    `<span>Задание <b>${current + 1}</b> из <b>${TASKS.length}</b></span><span>Ошибок: <b>${wrongCount}</b></span>`;
+
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.textContent = current === TASKS.length - 1 ? 'Показать результат' : 'Следующее задание →';
+  nextBtn.classList.remove('hidden');
+}
+
+function next() {
+  current++;
+  if (current < TASKS.length) renderTask();
+  else renderResult();
+}
+
+function renderResult() {
+  const total = TASKS.length;
+  const correct = total - wrongCount;
+  const passed = wrongCount <= 2;
+  const pct = Math.round(correct / total * 100);
+
+  app.innerHTML = `
+    <div class="result">
+      <h2>Результат</h2>
+      <div class="score">Правильных ответов: <span>${correct} из ${total}</span> · ошибок: <span>${wrongCount}</span></div>
+      <div class="bar"><div style="width:${pct}%; background:${passed ? '#3b82f6' : '#f59e0b'}"></div></div>
+      <div class="verdict ${passed ? 'pass' : 'fail'}">
+        ${passed
+          ? '<b>Отличная работа!</b>Вы уверенно определяете уровень надзора: смотрите на объекты, а не на адрес регистрации, и помните правило «один федеральный объект — вся организация федеральная».'
+          : '<b>Стоит пройти заново.</b>Больше двух ошибок. Вспомните два ключевых правила: уровень определяется по каждому объекту, а один федеральный объект (федеральный водный объект, особый статус территории, высокая мощность/опасность, накопленный вред федерального значения) делает федеральной всю организацию.'}
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" id="restartBtn" style="align-self:flex-start">Пройти заново</button>
+    </div>
+  `;
+  document.getElementById('restartBtn').addEventListener('click', restart);
+}
+
+function restart() {
+  current = 0;
+  wrongCount = 0;
+  answered = false;
+  renderTask();
+}
+
+renderTask();
+</script>
+</body>
+</html>
