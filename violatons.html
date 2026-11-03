@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Тренажер «Взгляд с высоты»</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: #f4f4f4;
+    color: #222;
+    line-height: 1.5;
+    padding: 20px 10px;
+  }
+  .wrap {
+    max-width: 650px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: max-width 0.3s;
+  }
+  .wrap.wide { max-width: 95%; }
+  
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  h1 { font-size: 18px; }
+  
+  .disclaimer-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid #f0a500;
+    background: #fff8e7;
+    color: #f0a500;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .disclaimer-btn:hover { background: #f0a500; color: #fff; }
+  
+  .disclaimer-tooltip {
+    display: none;
+    position: absolute;
+    top: 32px;
+    left: 0;
+    background: #fff8e7;
+    border: 1px solid #f0a500;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: normal;
+    color: #222;
+    width: 240px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 10;
+  }
+  .disclaimer-btn.active .disclaimer-tooltip { display: block; }
+  
+  .progress {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .progress-dot {
+    flex: 1;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+  }
+  .progress-dot.done { background: #2a6db5; }
+  
+  .map-container {
+    position: relative;
+    width: 100%;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+  }
+  .map-container img { width: 100%; display: block; }
+  
+  .zone {
+    position: absolute;
+    cursor: pointer;
+  }
+  .zone svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .zone path {
+    fill: transparent;
+    stroke: transparent;
+    stroke-width: 3;
+    stroke-linejoin: round;
+    transition: all 0.2s;
+  }
+  .zone:hover path {
+    fill: rgba(230, 57, 70, 0.15);
+    stroke: rgba(230, 57, 70, 0.6);
+  }
+  .zone.done path {
+    fill: rgba(42, 157, 143, 0.1);
+    stroke: rgba(42, 157, 143, 0.4);
+    cursor: default;
+  }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  
+  .modal {
+    background: #fff;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 24px;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .modal-close {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 32px; height: 32px;
+    border: none;
+    background: #f0f0f0;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-close:hover { background: #e0e0e0; }
+  
+  .question-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #1a1a1a; }
+  .question-text { margin-bottom: 14px; font-size: 14px; }
+  
+  .options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .option {
+    padding: 10px 12px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.15s;
+  }
+  .option:hover { background: #f0f6ff; border-color: #2a6db5; }
+  .option.correct { background: #e6f7f0; border-color: #2a9d8f; }
+  .option.wrong { background: #fdecea; border-color: #e63946; }
+  .option.disabled { cursor: default; }
+
+  .explanation {
+    padding: 12px;
+    background: #fff8e7;
+    border-left: 3px solid #f0a500;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .explanation h3 { font-size: 14px; margin-bottom: 6px; color: #8a5a00; }
+  .explanation p { margin-bottom: 6px; }
+  .explanation ul { padding-left: 18px; margin-bottom: 6px; }
+  .explanation li { margin-bottom: 3px; font-size: 12px; }
+
+  .btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #2a6db5;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-top: 10px;
+    margin-right: 8px;
+  }
+  .btn:hover { background: #1f5490; }
+  .btn.secondary { background: #6c757d; }
+  .btn.secondary:hover { background: #545b62; }
+  .btn.success { background: #2a9d8f; }
+  .btn.success:hover { background: #1f7a6f; }
+
+  .final {
+    padding: 14px;
+    background: #e6f7f0;
+    border-left: 3px solid #2a9d8f;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .final h2 { font-size: 15px; color: #1a6b5a; margin-bottom: 8px; }
+  .final ul { padding-left: 18px; margin: 8px 0; }
+  .final li { margin-bottom: 4px; }
+  .final .zone-summary { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #c8e6d9; }
+  .final .zone-summary:last-of-type { border-bottom: none; }
+  .final .zone-summary b { color: #1a6b5a; }
+
+  .summary-btn-container {
+    text-align: center;
+    margin-top: 16px;
+    display: none;
+  }
+  .summary-btn-container.visible { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+
+  <div class="header">
+    <h1>Тренажер «Взгляд с высоты»</h1>
+    <button class="disclaimer-btn" id="disclaimerBtn" aria-label="Дисклеймер">
+      !
+      <div class="disclaimer-tooltip">Иллюстрация нарушений используется исключительно в обучающих целях. Все ситуации смоделированы.</div>
+    </button>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="progress-dot" data-i="0"></div>
+    <div class="progress-dot" data-i="1"></div>
+    <div class="progress-dot" data-i="2"></div>
+    <div class="progress-dot" data-i="3"></div>
+  </div>
+
+  <div class="map-container" id="map">
+    <img src="satellite-violations.jpg" alt="Снимок предприятия">
+    
+    <!-- Зона 0: Задымление на полигоне (правый верх) -->
+    <div class="zone" data-point="0" style="left: 62%; top: 29%; width: 9%; height: 10%;">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path d="M 33.5,0 Q 56,0 78,25 L 89,75 Q 78,100 50,100 L 11,75 Q 0,50 5.5,25 Q 11,0 33.5,0 Z"/>
+      </svg>
+    </div>
+    
+    <!-- Зона 1а: Борщевик верхний (левая часть) -->
+    <div class="zone" data-point="1" style="left: 15%; top: 49%; width: 17%; height: 11%;">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path d="M 23.5,18 Q 47,0 70.5,0 L 97,22.5 Q 100,45 76.5,68 L 29.5,95.5 Q 6,100 3,68 Q 0,36 23.5,18 Z"/>
+      </svg>
+    </div>
+    
+    <!-- Зона 1б: Борщевик нижний (левая часть, большое пятно) -->
+    <div class="zone" data-point="1" style="left: 20%; top: 59%; width: 18%; height: 25%;">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path d="M 22,32 Q 44,12 61,6 L 89,8 Q 100,16 100,38 L 91.5,74 Q 83,88 55.5,94 L 14,76 Q 0,52 22,32 Z"/>
+      </svg>
+    </div>
+    
+    <!-- Зона 2: Автотранспорт у кромки воды (левый нижний мыс) -->
+    <div class="zone" data-point="2" style="left: 14%; top: 76%; width: 11%; height: 13%;">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path d="M 27.5,4 Q 55,0 73,23 L 95.5,65.5 Q 100,85 63.5,92.5 L 13.5,81 Q 0,62 0,35 Q 0,8 27.5,4 Z"/>
+      </svg>
+    </div>
+    
+    <!-- Зона 3: Радужная пленка у берега (правый нижний берег) -->
+    <div class="zone" data-point="3" style="left: 72%; top: 82%; width: 11%; height: 17%;">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path d="M 27.5,3 Q 55,6 77.5,23.5 L 95.5,61.5 Q 91,82 63.5,91 L 18,76.5 Q 0,53 0,26.5 Q 0,0 27.5,3 Z"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="summary-btn-container" id="summaryBtnContainer">
+    <button class="btn success" id="summaryBtn">Итоговый разбор</button>
+    <button class="btn secondary" id="restartBtn">Пройти заново</button>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+const pointsData = [
+  {
+    title: "Зона 1. Задымление на полигоне",
+    question: "Какой триггер нарушения зафиксировал БПЛА и к каким последствиям это приведет?",
+    options: [
+      { text: "Дрон автоматически выпишет штраф предприятию без участия инспектора.", correct: false },
+      { text: "ИИ-агент распознает термическую аномалию как признак несанкционированного возгорания отходов. Это станет основанием для внеплановой проверки.", correct: true },
+      { text: "Нарушение считается зафиксированным только после личного выезда инспектора на место.", correct: false },
+      { text: "Дрон только направит компании предостережение, проверка не последует.", correct: false }
+    ],
+    explanation: {
+      status: "ИИ-агент распознал термическую аномалию на открытой площадке. Согласно приложению 2 к Положению № 1096, наличие несанкционированных свалок и возгораний отходов входит в перечень признаков, фиксируемых дистанционно. Снимок загружается в ЕРКНМ Генпрокуратуры.",
+      risks: "Снимок становится самостоятельным основанием для внеплановой проверки без предварительного уведомления. Дополнительно рассчитывается вред окружающей среде от горения отходов. Судебная практика подтверждает допустимость снимков с БПЛА как доказательств.",
+      actions: [
+        "Оперативно ликвидируйте очаг возгорания",
+        "Зафиксируйте факт тушения на фото с геопривязкой, датой и временем",
+        "Подготовьте технологический регламент площадки хранения отходов",
+        "Соберите защитную папку: акт о ликвидации, журнал учета отходов, фото до и после"
+      ]
+    }
+  },
+  {
+    title: "Зона 2. Заросли борщевика",
+    question: "Какой триггер нарушения зафиксировал БПЛА и к каким последствиям это приведет?",
+    options: [
+      { text: "Инвазивные виды растений не относятся к компетенции экологического контроля.", correct: false },
+      { text: "Наличие инвазивных видов растений на территории предприятия. Риск штрафа и изъятия земель при несоответствии назначению участка.", correct: true },
+      { text: "Борщевик опасен только для здоровья людей, экологическим нарушением не является.", correct: false },
+      { text: "Ликвидировать борщевик нужно только после получения предписания от инспектора.", correct: false }
+    ],
+    explanation: {
+      status: "ИИ-агент распознал очаги инвазивных видов растений. Региональные акты и требования о содержании земельных участков позволяют квалифицировать это как нарушение.",
+      risks: "Штраф за неисполнение требований по содержанию земельного участка. В отдельных регионах возможно изъятие земель, не используемых по целевому назначению. Риск растет при повторных фиксациях.",
+      actions: [
+        "Проведите химическую или механическую обработку территории",
+        "Составьте внутренний акт о ликвидации очагов инвазивных видов с фото до и после",
+        "Зафиксируйте результаты обработки на фото с геопривязкой",
+        "Включите мониторинг инвазивных видов в программу производственного экологического контроля"
+      ]
+    }
+  },
+  {
+    title: "Зона 3. Автотранспорт у кромки воды",
+    question: "Какой триггер нарушения зафиксировал БПЛА и к каким последствиям это приведет?",
+    options: [
+      { text: "Стоянка в водоохранной зоне разрешена, если отсутствует запрещающий знак.", correct: false },
+      { text: "Движение и стоянка транспортных средств вне дорог с твердым покрытием в водоохранной зоне. Нарушение специального режима, триггер для внеплановой проверки.", correct: true },
+      { text: "Нарушение фиксируется только если транспорт грузовой и превышает 3,5 тонны.", correct: false },
+      { text: "Нарушение считается доказанным только при факте сброса горюче-смазочных материалов в воду.", correct: false }
+    ],
+    explanation: {
+      status: "Зафиксировано нарушение специального режима осуществления хозяйственной деятельности в водоохранной зоне. Движение и стоянка вне дорог с твердым покрытием прямо указаны как признак, фиксируемый дистанционно.",
+      risks: "Штраф для юридических лиц. Повторное нарушение в течение года влечет увеличенный штраф. Факт сброса ГСМ не требуется — само размещение техники уже нарушение.",
+      actions: [
+        "Уберите транспортные средства с грунта у кромки воды",
+        "Оборудуйте площадку с твердым покрытием для стоянки спецтранспорта",
+        "Подготовьте схему движения транспорта с привязкой к дорогам с твердым покрытием",
+        "Соберите защитную папку: договоры с подрядчиками, схему ВОЗ, акты осмотра"
+      ]
+    }
+  },
+  {
+    title: "Зона 4. Радужная пленка у берега",
+    question: "Какой триггер нарушения зафиксировал БПЛА и к каким последствиям это приведет?",
+    options: [
+      { text: "Пленка не считается нарушением до получения протокола аккредитованной лаборатории.", correct: false },
+      { text: "Визуальный признак загрязнения водного объекта. Основание для внеплановой проверки и расчета вреда компонентам окружающей среды.", correct: true },
+      { text: "Штраф последует только если площадь пленки превышает 100 квадратных метров.", correct: false },
+      { text: "БПЛА не способен зафиксировать нефтяную пленку на воде из-за бликов.", correct: false }
+    ],
+    explanation: {
+      status: "Зафиксирован визуальный признак загрязнения водного объекта. ПП РФ № 946 относит разлив нефтепродуктов к признакам, которые ИИ-агент определяет дистанционно. Снимок загружается в ЕРКНМ и становится основанием для проверки.",
+      risks: "Колоссальные штрафы за вред водному объекту. Расчет вреда ведется по методике Минприроды и может многократно превышать административный штраф. Параллельно проверяют герметичность выпусков и работу очистных.",
+      actions: [
+        "Выставьте боновые заграждения вдоль береговой линии",
+        "Отберите параллельные пробы сточных вод в аккредитованной лаборатории",
+        "Проверьте герметичность выпусков и трубопроводов",
+        "Подготовьте защитную папку: акты отбора проб, протоколы анализов, схему выпусков"
+      ]
+    }
+  }
+];
+
+const state = { answered: [false,false,false,false], current: null };
+
+function updateProgress() {
+  const dots = document.querySelectorAll('.progress-dot');
+  dots.forEach((d, i) => {
+    d.classList.remove('done');
+    if (state.answered[i]) d.classList.add('done');
+  });
+  document.querySelectorAll('.zone').forEach(p => {
+    const i = +p.dataset.point;
+    if (state.answered[i]) p.classList.add('done');
+  });
+  
+  if (state.answered.every(a => a)) {
+    document.getElementById('summaryBtnContainer').classList.add('visible');
+  } else {
+    document.getElementById('summaryBtnContainer').classList.remove('visible');
+  }
+}
+
+function openModal(idx) {
+  if (state.answered[idx]) return;
+  state.current = idx;
+  const data = pointsData[idx];
+  const content = document.getElementById('modalContent');
+  
+  let html = `<div class="question-title">${data.title}</div>`;
+  html += `<div class="question-text">${data.question}</div>`;
+  html += `<div class="options">`;
+  data.options.forEach((opt, i) => {
+    html += `<div class="option" data-idx="${i}">${opt.text}</div>`;
+  });
+  html += `</div><div id="explBox"></div>`;
+  
+  content.innerHTML = html;
+  document.getElementById('modal').classList.add('active');
+  
+  content.querySelectorAll('.option').forEach(el => {
+    el.addEventListener('click', () => handleAnswer(idx, +el.dataset.idx));
+  });
+}
+
+function handleAnswer(qIdx, optIdx) {
+  if (state.answered[qIdx]) return;
+  const data = pointsData[qIdx];
+  const correct = data.options[optIdx].correct;
+  const opts = document.querySelectorAll('.option');
+  opts.forEach((el, i) => {
+    el.classList.add('disabled');
+    if (data.options[i].correct) el.classList.add('correct');
+    if (i === optIdx && !correct) el.classList.add('wrong');
+  });
+
+  const d = data.explanation;
+  const expl = document.getElementById('explBox');
+  expl.innerHTML = `
+    <div class="explanation">
+      <h3>Разбор ситуации</h3>
+      <p><b>Что видит алгоритм.</b> ${d.status}</p>
+      <p><b>Риски для предприятия.</b> ${d.risks}</p>
+      <p><b>Что сделать службе.</b></p>
+      <ul>${d.actions.map(a=>`<li>${a}</li>`).join('')}</ul>
+      <button class="btn" id="nextBtn">Закрыть</button>
+    </div>`;
+  
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    state.answered[qIdx] = true;
+    closeModal();
+    updateProgress();
+  });
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+function showSummary() {
+  const content = document.getElementById('modalContent');
+  content.innerHTML = `
+    <div class="final">
+      <h2>Итоговый разбор</h2>
+      <div class="zone-summary"><b>1. Задымление на полигоне.</b> Термическая аномалия — прямой триггер внеплановой проверки. Снимок уходит в ЕРКНМ. Действие: ежедневный осмотр, фотофиксация, регламент площадки, защитная папка.</div>
+      <div class="zone-summary"><b>2. Заросли борщевика.</b> Инвазивные виды — признак ненадлежащего содержания участка. Риск штрафа и изъятия земель. Действие: мониторинг в программе ПЭК, обработка, акт о ликвидации.</div>
+      <div class="zone-summary"><b>3. Автотранспорт у кромки воды.</b> Движение и стоянка вне дорог с твердым покрытием — нарушение специального режима. Факт сброса не требуется. Действие: твердое покрытие, схема движения, контроль подрядчиков.</div>
+      <div class="zone-summary"><b>4. Радужная пленка у берега.</b> Визуальное загрязнение — основание для проверки и расчета вреда, который превышает штраф. Действие: боновые заграждения, пробы в аккредитованной лаборатории, проверка выпусков.</div>
+      <p><b>Ключевой вывод.</b> С 1 октября 2026 года снимок с БПЛА — не штраф, а спусковой крючок для внеплановой проверки. Предприятие успевает подготовиться, если заранее видит уязвимые места.</p>
+      <p><b>Что внедрить в работу службы.</b></p>
+      <ul>
+        <li>Закажите собственную аэросъемку или проанализируйте спутниковые снимки высокого разрешения</li>
+        <li>Наложите на изображение границы участка, водоохранных зон и санитарно-защитной зоны</li>
+        <li>Сравните снимок с чек-листом признаков из приложения 2 к Положению № 1096</li>
+        <li>Введите регламент воздушного самообследования: кто, как часто, какими средствами проверяет территорию</li>
+        <li>Назначьте ответственного за воздушный мониторинг и включите его в программу ПЭК</li>
+        <li>Соберите защитную папку по каждой контрольной точке: акты, фото с геопривязкой, протоколы, договоры</li>
+      </ul>
+      <p>Регламент не защитит от штрафа напрямую, но докажет добросовестность компании в суде. Суды учитывают, принимало ли предприятие меры для соблюдения требований.</p>
+      <button class="btn" onclick="closeModal()">Закрыть</button>
+    </div>`;
+  document.getElementById('modal').classList.add('active');
+}
+
+function restart() {
+  state.answered = [false,false,false,false];
+  state.current = null;
+  updateProgress();
+}
+
+document.querySelectorAll('.zone').forEach(p => {
+  p.addEventListener('click', () => openModal(+p.dataset.point));
+});
+
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+document.getElementById('disclaimerBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  this.classList.toggle('active');
+});
+
+document.addEventListener('click', function() {
+  document.getElementById('disclaimerBtn').classList.remove('active');
+});
+
+document.getElementById('summaryBtn').addEventListener('click', showSummary);
+document.getElementById('restartBtn').addEventListener('click', restart);
+
+updateProgress();
+</script>
+</body>
+</html>
