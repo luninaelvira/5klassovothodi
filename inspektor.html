@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Стоит ли накрывать для инспектора стол?</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh; background: #eef2f5;
+    font-family: "Segoe UI", Arial, sans-serif;
+  }
+  .scene {
+    position: relative;
+    width: 700px; height: 430px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+    overflow: hidden;
+    display: flex;
+  }
+
+  /* ЛЕВАЯ ЧАСТЬ */
+  .left {
+    width: 300px;
+    padding: 24px 22px;
+    display: flex; flex-direction: column;
+    border-right: 1px solid #e3e8ec;
+    background: #f8fafb;
+  }
+  .question {
+    font-size: 19px; line-height: 1.35; font-weight: 600;
+    color: #1f2d3d;
+    margin-bottom: 24px;
+  }
+  .question::before {
+    content: "";
+    display: block; width: 42px; height: 4px;
+    background: #2f80ed; border-radius: 2px;
+    margin-bottom: 12px;
+  }
+  .buttons { display: flex; gap: 10px; margin-top: auto; }
+  .btn {
+    flex: 1; padding: 12px 0;
+    font-size: 16px; font-weight: 600;
+    border: 2px solid #2f80ed; border-radius: 8px;
+    background: #fff; color: #2f80ed;
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .btn:hover { background: #2f80ed; color: #fff; }
+  .btn.active { background: #2f80ed; color: #fff; box-shadow: 0 4px 10px rgba(47,128,237,.35); }
+
+  /* ПРАВАЯ ЧАСТЬ */
+  .right {
+    position: relative;
+    width: 400px;
+    padding: 20px;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center;
+    background: #fff;
+  }
+  .placeholder {
+    font-size: 15px; color: #9aa7b4; text-align: center;
+    line-height: 1.5;
+  }
+  .content { display: none; width: 100%; }
+  .content.show { display: flex; flex-direction: column; align-items: center; }
+  .content img {
+    max-width: 360px; max-height: 200px;
+    object-fit: contain; border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.12);
+    margin-bottom: 14px;
+  }
+  .comment {
+    font-size: 13.5px; line-height: 1.45;
+    color: #33414f; text-align: left;
+    background: #f1f6fc; border-left: 3px solid #2f80ed;
+    padding: 10px 12px; border-radius: 0 8px 8px 0;
+  }
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="left">
+    <div class="question">Стоит ли накрывать для инспектора стол?</div>
+    <div class="buttons">
+      <button class="btn" id="btnYes">Да</button>
+      <button class="btn" id="btnNo">Нет</button>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="placeholder" id="placeholder">Выберите ответ слева &rarr;</div>
+
+    <div class="content" id="contentYes">
+      <img src="inspektor2.jpg" alt="Инспектор">
+      <div class="comment">
+        Небольшой стол, где будет горячий чай, кофе, конфеты и печенья,
+        вполне сможет сделать атмосферу проверки менее напряженной и более
+        дружественной. Если проверка занимает продолжительное время, стоит
+        предложить инспектору пообедать в местной столовой или кафе.
+      </div>
+    </div>
+
+    <div class="content" id="contentNo">
+      <img src="inspektor.jpg" alt="Инспектор">
+      <div class="comment">
+        Небольшой стол, где будет горячий чай, кофе, конфеты и печенья,
+        вполне сможет сделать атмосферу проверки менее напряженной и более
+        дружественной. Если проверка занимает продолжительное время, стоит
+        предложить инспектору пообедать в местной столовой или кафе.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const btnYes = document.getElementById('btnYes');
+  const btnNo  = document.getElementById('btnNo');
+  const placeholder = document.getElementById('placeholder');
+  const contentYes = document.getElementById('contentYes');
+  const contentNo  = document.getElementById('contentNo');
+
+  // Функция выбора: можно вызывать повторно с любым ответом
+  function choose(answer) {
+    placeholder.style.display = 'none';
+
+    const showYes = answer === 'yes';
+    contentYes.classList.toggle('show', showYes);
+    contentNo.classList.toggle('show', !showYes);
+
+    btnYes.classList.toggle('active', showYes);
+    btnNo.classList.toggle('active', !showYes);
+  }
+
+  btnYes.addEventListener('click', () => choose('yes'));
+  btnNo.addEventListener('click', () => choose('no'));
+</script>
+</body>
+</html>
