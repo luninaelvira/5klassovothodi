@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Инспектор на пороге</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --accent: #2563eb;
+    --accent-dark: #1e40af;
+    --ok: #16a34a;
+    --err: #dc2626;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --text: #0f172a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    padding: 24px 12px 64px;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 22px;
+    box-shadow: 0 6px 24px rgba(15,23,42,.06);
+  }
+  .progress {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .dot {
+    flex: 1;
+    height: 6px;
+    border-radius: 99px;
+    background: var(--border);
+    transition: background .3s;
+  }
+  .dot.active { background: var(--accent); }
+  .dot.done { background: var(--ok); }
+  h1 { font-size: 1.5rem; margin: 0 0 6px; }
+  h2 { font-size: 1.2rem; margin: 0 0 10px; }
+  .sub { color: var(--muted); font-size: .95rem; margin: 0 0 18px; }
+  .scenario {
+    background: #f8fafc;
+    border-left: 4px solid var(--accent);
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: .97rem;
+  }
+  .option {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 11px 13px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 9px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    font-size: .95rem;
+  }
+  .option:hover { border-color: #c7d2fe; background: #f8faff; }
+  .option input { margin-top: 3px; flex-shrink: 0; }
+  .option.correct { border-color: var(--ok); background: #f0fdf4; }
+  .option.wrong { border-color: var(--err); background: #fef2f2; }
+  .option.disabled { pointer-events: none; opacity: .95; }
+  .mark { margin-left: auto; font-weight: 700; }
+  .mark.ok { color: var(--ok); }
+  .mark.err { color: var(--err); }
+  .btn {
+    display: inline-block;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--accent);
+    color: #fff;
+    transition: background .2s, opacity .2s;
+    margin-top: 14px;
+  }
+  .btn:hover { background: var(--accent-dark); }
+  .btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+  .btn.ghost {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+  .btn.ghost:hover { background: #eff6ff; }
+  .feedback {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: .94rem;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.good { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .feedback.bad { background: #fef2f2; border: 1px solid #fecaca; }
+  .feedback h3 { margin: 0 0 8px; font-size: 1rem; }
+  .feedback ul { margin: 6px 0 0 18px; padding: 0; }
+  .feedback li { margin-bottom: 4px; }
+  .hidden { display: none; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: .9rem; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); }
+  th { background: #f8fafc; font-weight: 600; }
+  .score-big { font-size: 2rem; font-weight: 800; color: var(--accent); }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: .8rem; font-weight: 600; }
+  .tag.ok { background: #dcfce7; color: #166534; }
+  .tag.err { background: #fee2e2; color: #991b1b; }
+  .bonus { margin-top: 20px; }
+  .bonus .btn { margin-top: 8px; }
+  @media (max-width: 520px) {
+    body { padding: 14px 8px 48px; }
+    .card { padding: 18px 14px; }
+    h1 { font-size: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="progress" id="progress"></div>
+  <div class="card" id="app"></div>
+</div>
+
+<script>
+/* ================= ДАННЫЕ ================= */
+const scenarios = [
+  {
+    title: "Ситуация 1. Предписание и сроки",
+    text: "Инспектор выдал предписание об устранении нарушения 3 марта. Сегодня 14 марта (прошло 7 рабочих дней). Компания не согласна с предписанием. Отметьте все корректные действия.",
+    options: [
+      { id: 1, label: "Подать жалобу в районный суд по месту нахождения надзорного органа, минуя досудебный этап.", correct: false, why: "Досудебный этап обязателен (ч. 2 ст. 39 Закона о госконтроле, Постановление № 663)." },
+      { id: 2, label: "Подать жалобу в досудебном порядке через руководство инспектора.", correct: true, why: "Досудебное обжалование — обязательный этап." },
+      { id: 3, label: "Подать жалобу не позднее 10 рабочих дней с момента получения предписания.", correct: true, why: "Предписание обжалуется в течение 10 рабочих дней с момента получения." },
+      { id: 4, label: "Подать жалобу в течение 30 календарных дней — этот срок действует для предписания.", correct: false, why: "30 календарных дней — для обжалования действий/бездействия и результатов проверки, но не для самого предписания." },
+      { id: 5, label: "Включить в жалобу ходатайство о приостановлении исполнения предписания.", correct: true, why: "Жалоба может включать ходатайство о приостановлении исполнения решения надзорного органа." },
+      { id: 6, label: "Подать жалобу онлайн через Госуслуги или сервис «Прием обращений» на сайте надзорного органа.", correct: true, why: "Онлайн-подача предусмотрена ч. 1 ст. 40, ст. 41 Закона о госконтроле." },
+      { id: 7, label: "Подписать онлайн-жалобу простой электронной подписью уполномоченного лица.", correct: true, why: "Простая ЭП разрешена на период с 01.10.2022 по 01.01.2030 (подп. «е» п. 5 Постановления № 1431)." },
+      { id: 8, label: "Направить жалобу, содержащую коммерческую тайну, в электронном виде.", correct: false, why: "Жалобы с гостайной/коммерческой тайной — только в бумажном виде." }
+    ],
+    feedbackGood: "Верно: 2, 3, 5, 6, 7.",
+    feedbackBad: "Неверно: 1 (досудебный этап обязателен), 4 (для предписания срок — 10 рабочих дней), 8 (тайна — только бумажно).",
+    explain: "Предписание обжалуется в течение 10 рабочих дней с момента получения; жалоба может включать ходатайство о приостановлении исполнения; онлайн-жалоба подписывается УКЭП, УНЭП или простой ЭП уполномоченного лица (до 01.01.2030)."
+  },
+  {
+    title: "Ситуация 2. Штраф и суд",
+    text: "Инспектор вынес постановление о штрафе. Компания прошла досудебное обжалование, решение госоргана получено. Теперь компания хочет идти в суд. Отметьте все корректные действия.",
+    options: [
+      { id: 1, label: "Подать иск в районный суд по месту нахождения надзорного органа.", correct: false, why: "Это для обжалования предписаний/действий, а не постановления о штрафе." },
+      { id: 2, label: "Подать жалобу на постановление в районный суд по месту рассмотрения дела.", correct: true, why: "П. 3 ч. 1 ст. 30.1 КоАП." },
+      { id: 3, label: "Подать жалобу в течение 10 суток со дня вручения копии постановления — без учёта досудебного этапа.", correct: false, why: "Срок отсчитывается с момента получения решения госоргана по досудебной жалобе." },
+      { id: 4, label: "Приложить к жалобе ходатайство о восстановлении срока в связи с досудебным урегулированием.", correct: true, why: "Ч. 2 ст. 30.3 КоАП." },
+      { id: 5, label: "Приложить копию переписки с надзорным органом для подтверждения досудебного этапа.", correct: true, why: "Нужно подтвердить прохождение досудебного урегулирования." },
+      { id: 6, label: "Оплатить госпошлину 2000 руб. за жалобу на постановление по делу об административном нарушении.", correct: false, why: "За жалобу на постановление по делу об административном нарушении госпошлина не платится (ч. 5 ст. 30.2 КоАП)." },
+      { id: 7, label: "Подать жалобу без ходатайства о восстановлении срока, если срок истёк.", correct: false, why: "Суд вернёт жалобу без рассмотрения (ч. 2 ст. 94 КАС)." }
+    ],
+    feedbackGood: "Верно: 2, 4, 5.",
+    feedbackBad: "Неверно: 1 (не тот суд/иск), 3 (срок с момента решения по досудебной жалобе), 6 (госпошлина не нужна), 7 (нужно ходатайство).",
+    explain: "Жалоба на постановление — в районный суд по месту рассмотрения дела; срок — 10 суток, но с учётом досудебного этапа отсчитывается с момента получения решения госоргана; нужно ходатайство о восстановлении срока и копия переписки."
+  },
+  {
+    title: "Ситуация 3. Нарушения инспектора — что реально оспорить",
+    text: "При проверке инспектор допустил ряд нарушений. Отметьте те, которые реально оспорить (являются основанием для отмены).",
+    options: [
+      { id: 1, label: "Провёл проверку без издания приказа о проведении проверки.", correct: true, why: "Грубое нарушение (ч. 2 ст. 20 Закона о защите прав ЮЛ и ИП, ч. 2 ст. 91 Закона о госконтроле)." },
+      { id: 2, label: "Допустил незначительные формальные нарушения во время проверки.", correct: false, why: "Суд не признает незначительные нарушения основанием для отмены предписания." },
+      { id: 3, label: "Нарушил установленную процедуру составления протокола.", correct: true, why: "Протокол нельзя рассматривать как доказательство (ч. 3 ст. 26.2 КоАП)." },
+      { id: 4, label: "Нарушил срок давности привлечения к ответственности (год с момента нарушения; для длящихся — с момента выявления).", correct: true, why: "Ч. 1 ст. 4.5 КоАП." },
+      { id: 5, label: "Не известил всех участвующих лиц о времени и месте рассмотрения дела.", correct: true, why: "П. 2 ч. 1 ст. 29.4 КоАП." },
+      { id: 6, label: "Привлёк к ответственности должностное лицо, в полномочия которого не входили соответствующие работы/контроль.", correct: true, why: "П. 2 ч. 1 ст. 24.5 КоАП." },
+      { id: 7, label: "Неправильно квалифицировал нарушение.", correct: true, why: "Суд признает постановление незаконным." },
+      { id: 8, label: "Не смог доказать вину организации или нарушение закона.", correct: true, why: "Доказывание вины — обязанность надзорного органа (ч. 2 ст. 2.1 КоАП)." },
+      { id: 9, label: "Выявил малозначительное нарушение (например, просрочка оплаты НВОС на несколько дней).", correct: true, why: "Ст. 2.9 КоАП — можно освободить от ответственности." }
+    ],
+    feedbackGood: "Верно: все, кроме второго.",
+    feedbackBad: "Неверно: 2 — незначительные формальные нарушения не основание для отмены.",
+    explain: "Реально оспорить: грубые нарушения правил проверки (без приказа), нарушение процедуры протокола, нарушение срока давности, недоказанность вины, неизвещение лиц, привлечение «не того» должностного лица, неправильная квалификация, малозначительность."
+  },
+  {
+    title: "Ситуация 4. Что просить в судебной жалобе",
+    text: "Компания подаёт судебную жалобу на предписание. Отметьте корректные пункты, которые стоит включить/учесть.",
+    options: [
+      { id: 1, label: "Попросить суд приостановить срок исполнения предписания.", correct: true, why: "Приостановить срок можно только на основании определения суда." },
+      { id: 2, label: "Полагаться на то, что сам факт оспаривания в суде автоматически приостанавливает срок исполнения предписания.", correct: false, why: "Сам факт оспаривания не приостанавливает срок." },
+      { id: 3, label: "Привести доказательства незаконности предписания/постановления/проверки в целом.", correct: true, why: "Задача — доказать незаконность." },
+      { id: 4, label: "Обжаловать только по формальным признакам.", correct: false, why: "По формальным признакам обжаловать не получится." },
+      { id: 5, label: "Подать отдельную жалобу на каждое постановление (на организацию и на должностных лиц, за каждое нарушение).", correct: true, why: "На каждое постановление — своя жалоба." },
+      { id: 6, label: "Если нет оснований оспорить постановление — включить просьбу о снижении штрафа до минимального уровня или замене на предупреждение.", correct: true, why: "Ст. 4.1, 4.2 КоАП." },
+      { id: 7, label: "Сослаться на неправомерность действий и решений инспектора и госоргана.", correct: true, why: "Можно сослаться в жалобе." }
+    ],
+    feedbackGood: "Верно: 1, 3, 5, 6, 7.",
+    feedbackBad: "Неверно: 2 (автоматического приостановления нет), 4 (по формальным признакам не выйдет).",
+    explain: "В жалобе просят приостановить срок исполнения предписания; приводят доказательства незаконности; на каждое постановление — своя жалоба; при отсутствии оснований для оспаривания можно просить снизить штраф до минимального или заменить на предупреждение; можно ссылаться на неправомерность действий и решений инспектора и госоргана."
+  }
+];
+
+const bonus = {
+  question: "Компания уплатила штраф, а суд признал постановление незаконным. Какие документы нужно приложить к заявлению на возврат денег и куда его подать?",
+  answer: "Заявление — в надзорный орган (п. 2 ст. 160.1 БК). Приложить: постановление о назначении штрафа; платёжное поручение с отметкой банка; решение суда с отметкой о вступлении в законную силу. Указать реквизиты счёта. Попросить надзорный орган представить платёжные поручения в орган, куда переведены средства (например, Федеральное казначейство)."
+};
+
+/* ================= ЛОГИКА ================= */
+const app = document.getElementById('app');
+const progress = document.getElementById('progress');
+let current = 0;
+let results = []; // {picked: Set, score, max}
+let answered = false;
+
+function renderProgress() {
+  progress.innerHTML = '';
+  const total = scenarios.length;
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    if (i < current) d.classList.add('done');
+    else if (i === current) d.classList.add('active');
+    progress.appendChild(d);
+  }
+}
+
+function renderStart() {
+  renderProgress();
+  app.innerHTML = `
+    <h1>Инспектор на пороге</h1>
+    <p class="sub">Вам предстоит пройти 4 ситуации. В каждой выберите все корректные ответные действия. За каждый верный выбор — плюс, за каждый неверный — минус. Будьте внимательны: тексты норм — в обратной связи.</p>
+    <button class="btn" id="startBtn">Начать</button>
+  `;
+  document.getElementById('startBtn').onclick = () => { current = 0; renderScenario(); };
+}
+
+function renderScenario() {
+  answered = false;
+  renderProgress();
+  const s = scenarios[current];
+  const picked = new Set();
+
+  app.innerHTML = `
+    <h2>${s.title}</h2>
+    <div class="scenario">${s.text}</div>
+    <div id="options"></div>
+    <button class="btn" id="nextBtn" disabled>Далее</button>
+    <div class="feedback" id="feedback"></div>
+  `;
+
+  const optionsEl = document.getElementById('options');
+  s.options.forEach(opt => {
+    const label = document.createElement('label');
+    label.className = 'option';
+    label.innerHTML = `
+      <input type="checkbox" data-id="${opt.id}">
+      <span>${opt.label}</span>
+      <span class="mark"></span>
+    `;
+    label.querySelector('input').addEventListener('change', (e) => {
+      if (e.target.checked) picked.add(opt.id);
+      else picked.delete(opt.id);
+      document.getElementById('nextBtn').disabled = picked.size === 0;
+    });
+    optionsEl.appendChild(label);
+  });
+
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.onclick = () => {
+    if (answered) { next(); return; }
+    // подсчёт
+    let correctPicked = 0, wrongPicked = 0;
+    const marks = {};
+    s.options.forEach(opt => {
+      const isPicked = picked.has(opt.id);
+      if (isPicked && opt.correct) { correctPicked++; marks[opt.id] = 'ok'; }
+      if (isPicked && !opt.correct) { wrongPicked++; marks[opt.id] = 'err'; }
+      if (!isPicked && opt.correct) { marks[opt.id] = 'missed'; }
+    });
+    const totalCorrect = s.options.filter(o => o.correct).length;
+    const maxScore = totalCorrect * 2; // 2 балла за каждый верный
+    let score = correctPicked * 2 - wrongPicked * 1;
+    if (score < 0) score = 0;
+    results[current] = { score, maxScore, correctPicked, wrongPicked, totalCorrect };
+
+    // визуальная разметка
+    optionsEl.querySelectorAll('.option').forEach(label => {
+      const input = label.querySelector('input');
+      const id = Number(input.dataset.id);
+      const opt = s.options.find(o => o.id === id);
+      label.classList.add('disabled');
+      input.disabled = true;
+      const mark = label.querySelector('.mark');
+      if (opt.correct) {
+        label.classList.add('correct');
+        mark.textContent = '✓';
+        mark.classList.add('ok');
+      }
+      if (marks[id] === 'err') {
+        label.classList.add('wrong');
+        mark.textContent = '✗';
+        mark.classList.add('err');
+      }
+      if (marks[id] === 'missed') {
+        mark.textContent = 'не выбрано';
+        mark.classList.add('ok');
+        mark.style.fontSize = '.8rem';
+        mark.style.fontWeight = '600';
+      }
+    });
+
+    const fb = document.getElementById('feedback');
+    const allCorrect = correctPicked === totalCorrect && wrongPicked === 0;
+    fb.className = 'feedback show ' + (allCorrect ? 'good' : 'bad');
+    fb.innerHTML = `
+      <h3>${allCorrect ? '✅ Отлично!' : 'Разбор'}</h3>
+      <div>${s.feedbackGood}</div>
+      <div style="margin-top:6px">${s.feedbackBad}</div>
+      <div style="margin-top:8px"><b>Пояснение:</b> ${s.explain}</div>
+      <div style="margin-top:8px">Баллы за ситуацию: <b>${score} / ${maxScore}</b></div>
+    `;
+    answered = true;
+    nextBtn.textContent = current < scenarios.length - 1 ? 'Следующая ситуация' : 'Завершить';
+  };
+}
+
+function next() {
+  current++;
+  if (current < scenarios.length) renderScenario();
+  else renderFinal();
+}
+
+function renderFinal() {
+  renderProgress();
+  const totalScore = results.reduce((a, r) => a + r.score, 0);
+  const totalMax = results.reduce((a, r) => a + r.maxScore, 0);
+  const rows = scenarios.map((s, i) => {
+    const r = results[i];
+    const stage = r.correctPicked === r.totalCorrect && r.wrongPicked === 0
+      ? '<span class="tag ok">полностью</span>'
+      : '<span class="tag err">с ошибками</span>';
+    const etalon = s.options.filter(o => o.correct).map(o => o.id).join(', ');
+    return `<tr><td>${i + 1}. ${s.title.replace(/^Ситуация \d+\.\s*/, '')}</td><td>${r.score} / ${r.maxScore}</td><td>${stage}</td><td>${etalon}</td></tr>`;
+  }).join('');
+
+  app.innerHTML = `
+    <h1>Результат</h1>
+    <p class="score-big">${totalScore} из ${totalMax}</p>
+    <table>
+      <thead><tr><th>Ситуация</th><th>Баллы</th><th>Статус</th><th>Эталон (номера)</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="bonus">
+      <h2>Бонус-вопрос</h2>
+      <div class="scenario">${bonus.question}</div>
+      <button class="btn ghost" id="showBonus">Показать эталон</button>
+      <div class="feedback" id="bonusFb"></div>
+    </div>
+    <button class="btn" id="restart">Пройти заново</button>
+  `;
+  document.getElementById('showBonus').onclick = () => {
+    const fb = document.getElementById('bonusFb');
+    fb.className = 'feedback show good';
+    fb.innerHTML = `<b>Эталон:</b> ${bonus.answer}`;
+    document.getElementById('showBonus').disabled = true;
+  };
+  document.getElementById('restart').onclick = () => {
+    current = 0; results = []; answered = false; renderStart();
+  };
+}
+
+/* старт */
+renderStart();
+</script>
+</body>
+</html>
